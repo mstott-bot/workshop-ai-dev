@@ -1,592 +1,1285 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workshop AI Rescue v3.0</title>
   <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0f1720;color:#17202a}.app-header{background:#09111a;color:white;padding:18px;border-bottom:1px solid #263747}.app-header h1{margin:0;font-size:28px}.app-header p{margin:4px 0 0;color:#c9d3dd}.container{max-width:1400px;margin:0 auto;padding:14px}.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}.tab{padding:13px;border:0;border-radius:12px;background:#233142;color:#dfe8f2;font-weight:bold}.tab.active{background:#0b6efd;color:white}.screen{display:none}.screen.active{display:block}.card,.hero{background:#ffffff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.25)}.hero{display:flex;justify-content:space-between;gap:14px;align-items:center;border:2px solid #0b6efd}h2{margin-top:0}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}label{display:block;font-weight:bold;margin-bottom:12px}input,select,textarea{width:100%;margin-top:6px;padding:12px;border:1px solid #c8d0d8;border-radius:10px;font-size:16px}textarea{min-height:90px}.primary,.secondary{width:100%;padding:14px;border:0;border-radius:12px;font-weight:bold;font-size:16px;margin-top:8px}.primary{background:#0b6efd;color:white}.secondary{background:#e7edf4;color:#101820}.button-row{display:flex;gap:10px}.job-list,.coach-list{display:grid;gap:10px}.job-card,.coach-card{border:1px solid #d8e0e8;border-left:6px solid #0b6efd;border-radius:14px;padding:12px;background:#fbfdff}.job-card h3,.coach-card h3{margin:0 0 6px}.job-card p,.coach-card p{margin:4px 0}.job-card button{margin-top:8px;margin-right:6px;padding:10px;border:0;border-radius:9px;background:#101820;color:white}.muted{color:#5f6b76}.hours-warning,.timer-box{background:#fff3cd;border:1px solid #ffe69c;padding:10px;border-radius:10px}.voice-section{border:1px solid #e0e6ed;border-radius:12px;padding:12px;margin-bottom:12px}pre{white-space:pre-wrap;background:#f8fafc;border:1px solid #d8e0e8;border-radius:10px;padding:12px}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}.stat{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.2)}.stat strong{display:block;font-size:24px}.health-score{font-size:36px;font-weight:bold;background:#f0f4f8;border-radius:16px;padding:18px;text-align:center;min-width:260px}.health-score span{font-size:14px;font-weight:normal}.good{border-left-color:#198754}.warn{border-left-color:#ffc107}.bad{border-left-color:#dc3545}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;background:white}th,td{border-bottom:1px solid #d8e0e8;padding:10px;text-align:left;white-space:nowrap}th{background:#101820;color:white}.board-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.board-column{background:#f8fafc;border-radius:12px;border:1px solid #d8e0e8;padding:10px}.board-column h3{margin-top:0}.board-job{background:white;border-radius:10px;padding:10px;margin-bottom:8px;border-left:5px solid #0b6efd;box-shadow:0 1px 4px rgba(0,0,0,.06)}.progress{height:10px;background:#e7edf4;border-radius:999px;overflow:hidden;margin-top:8px}.bar{height:100%;background:#0b6efd}.bar.good{background:#198754}.bar.warn{background:#ffc107}.bar.bad{background:#dc3545}.timeline{border-left:4px solid #0b6efd;margin-left:12px;padding-left:18px}.timeline-item{position:relative;background:#fbfdff;border:1px solid #d8e0e8;border-radius:14px;padding:12px;margin-bottom:10px}.timeline-item:before{content:"";position:absolute;left:-29px;top:16px;width:16px;height:16px;background:#0b6efd;border-radius:50%;box-shadow:0 0 0 4px #d9eaff}.timeline-item strong{display:block}.timeline-item small{color:#5f6b76}.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}.modal.hidden{display:none}.modal-card{background:white;border-radius:18px;padding:18px;max-width:850px;width:100%;max-height:85vh;overflow:auto}.modal-close{float:right;border:0;background:#101820;color:white;border-radius:50%;width:36px;height:36px;font-size:22px}@media(max-width:950px){.board-grid,.stats{grid-template-columns:1fr 1fr}.tabs{grid-template-columns:1fr 1fr}.hero{display:block}.health-score{margin-top:12px}}@media(max-width:700px){.tabs,.grid,.stats,.board-grid{grid-template-columns:1fr}.button-row{flex-direction:column}.app-header h1{font-size:22px}.health-score{font-size:28px;min-width:0}}
-.clockoff-panel{background:#eef6ff;border:1px solid #b8dcff;border-radius:14px;padding:12px;margin:12px 0}
-.clockoff-panel h3{margin:0 0 8px}
+    * {
+      box-sizing: border-box
+    }
 
-.report-preview{white-space:pre-wrap;background:#f8fafc;border:1px solid #d8e0e8;border-radius:10px;padding:10px;margin-top:8px;max-height:240px;overflow:auto}
-.badge-new{display:inline-block;background:#dc3545;color:white;border-radius:999px;padding:4px 9px;font-size:12px;font-weight:bold;margin-left:6px}
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0f1720;
+      color: #17202a
+    }
 
-/* Workshop AI v2.0 branding and layout */
-.app-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  background:linear-gradient(135deg,#07111d,#0b2340);
-  color:white;
-  padding:18px;
-  border-bottom:1px solid #263747;
-}
-.brand-lockup{display:flex;align-items:center;gap:14px}
-.logo-mark{width:66px;height:66px;border-radius:18px;background:linear-gradient(135deg,#0b6efd,#073b85);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 10px 24px rgba(11,110,253,.35);flex-shrink:0}
-.logo-mark .gear{font-size:44px;color:white}
-.logo-mark .wrench{position:absolute;font-size:24px;right:8px;bottom:7px;transform:rotate(-18deg)}
-.app-header h1{letter-spacing:.5px;margin:0;font-size:34px}
-.app-header h1 strong{color:#2d8cff}
-.tagline{text-transform:uppercase;letter-spacing:2.5px;color:#d4dde8!important;font-size:14px;margin-top:2px!important}
-.role-pill{background:#ffffff18;border:1px solid #ffffff33;border-radius:999px;padding:10px 14px;font-weight:bold;color:#fff;white-space:nowrap}
-.tabs{grid-template-columns:repeat(9,1fr)}
-.tech-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.tech-actions button{width:auto;margin-left:6px}
-@media(max-width:1200px){.tabs{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:700px){.app-header{align-items:flex-start;flex-direction:column}.tabs{grid-template-columns:1fr}.logo-mark{width:56px;height:56px}.logo-mark .gear{font-size:36px}.logo-mark .wrench{font-size:20px}.app-header h1{font-size:25px}.tagline{font-size:11px;letter-spacing:1.6px}}
+    .app-header {
+      background: #09111a;
+      color: white;
+      padding: 18px;
+      border-bottom: 1px solid #263747
+    }
 
-.job-info-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin:12px 0;
-}
-.job-info-grid div{
-  background:#f0f4f8;
-  border-radius:12px;
-  padding:10px;
-}
-.job-info-grid strong{
-  display:block;
-  font-size:12px;
-  color:#5f6b76;
-  text-transform:uppercase;
-  letter-spacing:.7px;
-}
-.job-info-grid span{
-  display:block;
-  font-size:18px;
-  font-weight:bold;
-  margin-top:4px;
-}
-.special-instructions{
-  background:#fff3cd;
-  border:1px solid #ffe69c;
-  border-radius:12px;
-  padding:12px;
-  margin:10px 0;
-}
-.special-instructions p{margin:6px 0 0}
-@media(max-width:700px){.job-info-grid{grid-template-columns:1fr}}
+    .app-header h1 {
+      margin: 0;
+      font-size: 28px
+    }
 
-.planner-bar{
-  height:12px;
-  background:#e7edf4;
-  border-radius:999px;
-  overflow:hidden;
-  margin-top:8px;
-}
-.planner-fill{
-  height:100%;
-  background:#198754;
-}
-.planner-fill.warn{background:#ffc107}
-.planner-fill.bad{background:#dc3545}
-.capacity-label{
-  display:inline-block;
-  border-radius:999px;
-  padding:4px 10px;
-  font-weight:bold;
-  margin-top:6px;
-}
-.capacity-good{background:#d1e7dd;color:#0f5132}
-.capacity-warn{background:#fff3cd;color:#664d03}
-.capacity-bad{background:#f8d7da;color:#842029}
+    .app-header p {
+      margin: 4px 0 0;
+      color: #c9d3dd
+    }
 
-.board-column.drag-over{outline:3px dashed #0b6efd;outline-offset:4px}
-.board-job{cursor:grab}
-.board-job:active{cursor:grabbing}
-.parts-status-pill{display:inline-block;border-radius:999px;padding:4px 10px;font-weight:bold;background:#e7edf4;margin-top:6px}
-.parts-request-card{border-left-color:#6f42c1}
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 14px
+    }
 
-.future-day-card{border-left-color:#20c997}
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 14px
+    }
 
-.part-grid{
-  display:grid;
-  grid-template-columns:2fr .7fr 1fr 1fr;
-  gap:8px;
-}
-.part-pill{
-  display:inline-block;
-  border-radius:999px;
-  padding:5px 10px;
-  font-weight:bold;
-  margin:4px 4px 4px 0;
-  background:#e7edf4;
-}
-.part-pill.requested{background:#fff3cd;color:#664d03}
-.part-pill.ordered{background:#cff4fc;color:#055160}
-.part-pill.delivered{background:#d1e7dd;color:#0f5132}
-.part-pill.fitted{background:#dbeafe;color:#1e40af}
-.parts-request-card{border-left-color:#6f42c1}
-.parts-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.parts-actions button{width:auto}
-@media(max-width:700px){.part-grid{grid-template-columns:1fr}}
+    .tab {
+      padding: 13px;
+      border: 0;
+      border-radius: 12px;
+      background: #233142;
+      color: #dfe8f2;
+      font-weight: bold
+    }
 
-</style>
+    .tab.active {
+      background: #0b6efd;
+      color: white
+    }
+
+    .screen {
+      display: none
+    }
+
+    .screen.active {
+      display: block
+    }
+
+    .card,
+    .hero {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .25)
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      border: 2px solid #0b6efd
+    }
+
+    h2 {
+      margin-top: 0
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 12px
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      margin-top: 6px;
+      padding: 12px;
+      border: 1px solid #c8d0d8;
+      border-radius: 10px;
+      font-size: 16px
+    }
+
+    textarea {
+      min-height: 90px
+    }
+
+    .primary,
+    .secondary {
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 8px
+    }
+
+    .primary {
+      background: #0b6efd;
+      color: white
+    }
+
+    .secondary {
+      background: #e7edf4;
+      color: #101820
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px
+    }
+
+    .job-list,
+    .coach-list {
+      display: grid;
+      gap: 10px
+    }
+
+    .job-card,
+    .coach-card {
+      border: 1px solid #d8e0e8;
+      border-left: 6px solid #0b6efd;
+      border-radius: 14px;
+      padding: 12px;
+      background: #fbfdff
+    }
+
+    .job-card h3,
+    .coach-card h3 {
+      margin: 0 0 6px
+    }
+
+    .job-card p,
+    .coach-card p {
+      margin: 4px 0
+    }
+
+    .job-card button {
+      margin-top: 8px;
+      margin-right: 6px;
+      padding: 10px;
+      border: 0;
+      border-radius: 9px;
+      background: #101820;
+      color: white
+    }
+
+    .muted {
+      color: #5f6b76
+    }
+
+    .hours-warning,
+    .timer-box {
+      background: #fff3cd;
+      border: 1px solid #ffe69c;
+      padding: 10px;
+      border-radius: 10px
+    }
+
+    .voice-section {
+      border: 1px solid #e0e6ed;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px
+    }
+
+    pre {
+      white-space: pre-wrap;
+      background: #f8fafc;
+      border: 1px solid #d8e0e8;
+      border-radius: 10px;
+      padding: 12px
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 14px
+    }
+
+    .stat {
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .2)
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 24px
+    }
+
+    .health-score {
+      font-size: 36px;
+      font-weight: bold;
+      background: #f0f4f8;
+      border-radius: 16px;
+      padding: 18px;
+      text-align: center;
+      min-width: 260px
+    }
+
+    .health-score span {
+      font-size: 14px;
+      font-weight: normal
+    }
+
+    .good {
+      border-left-color: #198754
+    }
+
+    .warn {
+      border-left-color: #ffc107
+    }
+
+    .bad {
+      border-left-color: #dc3545
+    }
+
+    .table-wrap {
+      overflow-x: auto
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #d8e0e8;
+      padding: 10px;
+      text-align: left;
+      white-space: nowrap
+    }
+
+    th {
+      background: #101820;
+      color: white
+    }
+
+    .board-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px
+    }
+
+    .board-column {
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #d8e0e8;
+      padding: 10px
+    }
+
+    .board-column h3 {
+      margin-top: 0
+    }
+
+    .board-job {
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-left: 5px solid #0b6efd;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .06)
+    }
+
+    .progress {
+      height: 10px;
+      background: #e7edf4;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px
+    }
+
+    .bar {
+      height: 100%;
+      background: #0b6efd
+    }
+
+    .bar.good {
+      background: #198754
+    }
+
+    .bar.warn {
+      background: #ffc107
+    }
+
+    .bar.bad {
+      background: #dc3545
+    }
+
+    .timeline {
+      border-left: 4px solid #0b6efd;
+      margin-left: 12px;
+      padding-left: 18px
+    }
+
+    .timeline-item {
+      position: relative;
+      background: #fbfdff;
+      border: 1px solid #d8e0e8;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px
+    }
+
+    .timeline-item:before {
+      content: "";
+      position: absolute;
+      left: -29px;
+      top: 16px;
+      width: 16px;
+      height: 16px;
+      background: #0b6efd;
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px #d9eaff
+    }
+
+    .timeline-item strong {
+      display: block
+    }
+
+    .timeline-item small {
+      color: #5f6b76
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50
+    }
+
+    .modal.hidden {
+      display: none
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: 18px;
+      padding: 18px;
+      max-width: 850px;
+      width: 100%;
+      max-height: 85vh;
+      overflow: auto
+    }
+
+    .modal-close {
+      float: right;
+      border: 0;
+      background: #101820;
+      color: white;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 22px
+    }
+
+    @media(max-width:950px) {
+
+      .board-grid,
+      .stats {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .tabs {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .hero {
+        display: block
+      }
+
+      .health-score {
+        margin-top: 12px
+      }
+    }
+
+    @media(max-width:700px) {
+
+      .tabs,
+      .grid,
+      .stats,
+      .board-grid {
+        grid-template-columns: 1fr
+      }
+
+      .button-row {
+        flex-direction: column
+      }
+
+      .app-header h1 {
+        font-size: 22px
+      }
+
+      .health-score {
+        font-size: 28px;
+        min-width: 0
+      }
+    }
+
+    .clockoff-panel {
+      background: #eef6ff;
+      border: 1px solid #b8dcff;
+      border-radius: 14px;
+      padding: 12px;
+      margin: 12px 0
+    }
+
+    .clockoff-panel h3 {
+      margin: 0 0 8px
+    }
+
+    .report-preview {
+      white-space: pre-wrap;
+      background: #f8fafc;
+      border: 1px solid #d8e0e8;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 8px;
+      max-height: 240px;
+      overflow: auto
+    }
+
+    .badge-new {
+      display: inline-block;
+      background: #dc3545;
+      color: white;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 6px
+    }
+
+    /* Workshop AI v2.0 branding and layout */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: linear-gradient(135deg, #07111d, #0b2340);
+      color: white;
+      padding: 18px;
+      border-bottom: 1px solid #263747;
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 14px
+    }
+
+    .logo-mark {
+      width: 66px;
+      height: 66px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #0b6efd, #073b85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 10px 24px rgba(11, 110, 253, .35);
+      flex-shrink: 0
+    }
+
+    .logo-mark .gear {
+      font-size: 44px;
+      color: white
+    }
+
+    .logo-mark .wrench {
+      position: absolute;
+      font-size: 24px;
+      right: 8px;
+      bottom: 7px;
+      transform: rotate(-18deg)
+    }
+
+    .app-header h1 {
+      letter-spacing: .5px;
+      margin: 0;
+      font-size: 34px
+    }
+
+    .app-header h1 strong {
+      color: #2d8cff
+    }
+
+    .tagline {
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: #d4dde8 !important;
+      font-size: 14px;
+      margin-top: 2px !important
+    }
+
+    .role-pill {
+      background: #ffffff18;
+      border: 1px solid #ffffff33;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: bold;
+      color: #fff;
+      white-space: nowrap
+    }
+
+    .tabs {
+      grid-template-columns: repeat(9, 1fr)
+    }
+
+    .tech-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px
+    }
+
+    .tech-actions button {
+      width: auto;
+      margin-left: 6px
+    }
+
+    @media(max-width:1200px) {
+      .tabs {
+        grid-template-columns: repeat(4, 1fr)
+      }
+    }
+
+    @media(max-width:700px) {
+      .app-header {
+        align-items: flex-start;
+        flex-direction: column
+      }
+
+      .tabs {
+        grid-template-columns: 1fr
+      }
+
+      .logo-mark {
+        width: 56px;
+        height: 56px
+      }
+
+      .logo-mark .gear {
+        font-size: 36px
+      }
+
+      .logo-mark .wrench {
+        font-size: 20px
+      }
+
+      .app-header h1 {
+        font-size: 25px
+      }
+
+      .tagline {
+        font-size: 11px;
+        letter-spacing: 1.6px
+      }
+    }
+
+    .job-info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .job-info-grid div {
+      background: #f0f4f8;
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .job-info-grid strong {
+      display: block;
+      font-size: 12px;
+      color: #5f6b76;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+    }
+
+    .job-info-grid span {
+      display: block;
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    .special-instructions {
+      background: #fff3cd;
+      border: 1px solid #ffe69c;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 10px 0;
+    }
+
+    .special-instructions p {
+      margin: 6px 0 0
+    }
+
+    @media(max-width:700px) {
+      .job-info-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .planner-bar {
+      height: 12px;
+      background: #e7edf4;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .planner-fill {
+      height: 100%;
+      background: #198754;
+    }
+
+    .planner-fill.warn {
+      background: #ffc107
+    }
+
+    .planner-fill.bad {
+      background: #dc3545
+    }
+
+    .capacity-label {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+
+    .capacity-good {
+      background: #d1e7dd;
+      color: #0f5132
+    }
+
+    .capacity-warn {
+      background: #fff3cd;
+      color: #664d03
+    }
+
+    .capacity-bad {
+      background: #f8d7da;
+      color: #842029
+    }
+
+    .board-column.drag-over {
+      outline: 3px dashed #0b6efd;
+      outline-offset: 4px
+    }
+
+    .board-job {
+      cursor: grab
+    }
+
+    .board-job:active {
+      cursor: grabbing
+    }
+
+    .parts-status-pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-weight: bold;
+      background: #e7edf4;
+      margin-top: 6px
+    }
+
+    .parts-request-card {
+      border-left-color: #6f42c1
+    }
+
+    .future-day-card {
+      border-left-color: #20c997
+    }
+
+    .part-grid {
+      display: grid;
+      grid-template-columns: 2fr .7fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .part-pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-weight: bold;
+      margin: 4px 4px 4px 0;
+      background: #e7edf4;
+    }
+
+    .part-pill.requested {
+      background: #fff3cd;
+      color: #664d03
+    }
+
+    .part-pill.ordered {
+      background: #cff4fc;
+      color: #055160
+    }
+
+    .part-pill.delivered {
+      background: #d1e7dd;
+      color: #0f5132
+    }
+
+    .part-pill.fitted {
+      background: #dbeafe;
+      color: #1e40af
+    }
+
+    .parts-request-card {
+      border-left-color: #6f42c1
+    }
+
+    .parts-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px
+    }
+
+    .parts-actions button {
+      width: auto
+    }
+
+    @media(max-width:700px) {
+      .part-grid {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
 </head>
+
 <body>
-<header class="app-header">
-  <div class="brand-lockup">
-    <div class="logo-mark" aria-hidden="true">
-      <span class="gear">⚙</span>
-      <span class="wrench">🔧</span>
-    </div>
-    <div>
-      <h1><span>WORKSHOP</span> <strong>AI</strong></h1>
-      <p class="tagline">Revolutionising workshops</p>
-      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Rescue build v3.0</p>
-    </div>
-  </div>
-  <div class="role-pill">Service Manager</div>
-</header>
-
-<main class="container">
-  <nav class="tabs">
-    <button class="tab active" data-screen="commandScreen">Command Centre</button>
-    <button class="tab" data-screen="managerScreen">Service Manager</button>
-    <button class="tab" data-screen="techScreen">Technician</button>
-    <button class="tab" data-screen="reportsScreen">Reports</button>
-    <button class="tab" data-screen="plannerScreen">Daily Planner</button>
-    <button class="tab" data-screen="partsScreen">Parts</button>
-    <button class="tab" data-screen="reportsInterfaceScreen">Reports Interface</button>
-    <button class="tab" data-screen="techniciansScreen">Technicians</button>
-    <button class="tab" data-screen="targetsScreen">Targets</button>
-  </nav>
-
-  <section id="commandScreen" class="screen active">
-    <div class="hero">
+  <header class="app-header">
+    <div class="brand-lockup">
+      <div class="logo-mark" aria-hidden="true">
+        <span class="gear">⚙</span>
+        <span class="wrench">🔧</span>
+      </div>
       <div>
-        <h2>Workshop AI Command Centre</h2>
-        <p>Owner view: workshop health, live activity, KPIs and technician performance.</p>
+        <h1><span>WORKSHOP</span> <strong>AI</strong></h1>
+        <p class="tagline">Revolutionising workshops</p>
+        <p id="todayDate"></p>
+        <p style="font-size:12px;color:#9fb3c8">Rescue build v3.0</p>
       </div>
-      <div id="healthScore" class="health-score"></div>
     </div>
+    <div class="role-pill">Service Manager</div>
+  </header>
 
-    <div id="ownerStats" class="stats"></div>
+  <main class="container">
+    <nav class="tabs">
+      <button class="tab active" data-screen="commandScreen">Command Centre</button>
+      <button class="tab" data-screen="managerScreen">Service Manager</button>
+      <button class="tab" data-screen="techScreen">Technician</button>
+      <button class="tab" data-screen="reportsScreen">Reports</button>
+      <button class="tab" data-screen="plannerScreen">Daily Planner</button>
+      <button class="tab" data-screen="partsScreen">Parts</button>
+      <button class="tab" data-screen="reportsInterfaceScreen">Reports Interface</button>
+      <button class="tab" data-screen="techniciansScreen">Technicians</button>
+      <button class="tab" data-screen="targetsScreen">Targets</button>
+    </nav>
 
-    <div class="card">
-      <h2>Today’s Live Activity</h2>
-      <div id="liveActivity" class="timeline"></div>
-    </div>
-
-    <div class="card">
-      <h2>AI Workshop Coach</h2>
-      <div id="ownerCoach" class="coach-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>End of Day Briefing</h2>
-      <pre id="endOfDayBriefing">No briefing yet.</pre>
-      <button id="copyBriefing" class="secondary">Copy Briefing</button>
-    </div>
-
-    <div class="card">
-      <h2>Morning Briefing / Action Required Today</h2>
-      <pre id="morningBriefing">No morning briefing yet.</pre>
-      <button id="copyMorningBriefing" class="secondary">Copy Morning Briefing</button>
-    </div>
-
-    <div class="card">
-      <h2>Live Workshop Board</h2>
-      <div id="ownerStatusBoard" class="board-grid"></div>
-    </div>
-
-    <div class="card">
-      <h2>Technician League Table</h2>
-      <div id="leagueTableOwner" class="table-wrap"></div>
-    </div>
-
-    <div class="card">
-      <h2>Downtime Today / This Week</h2>
-      <div id="ownerDowntimeReports" class="job-list"></div>
-    </div>
-  </section>
-
-  <section id="managerScreen" class="screen">
-    <div class="card">
-      <h2>Load New Job</h2>
-      <div class="grid">
-        <label>Vehicle Registration / Reg Number *<input id="reg" placeholder="AB19 XYZ"></label>
-        <label>Booking Date / Future Booking<input id="bookingDate" type="date"></label>
-        <label>Customer Name<input id="customer" placeholder="Customer name"></label>
-        <label>Telephone<input id="phone" placeholder="Telephone"></label>
-        <label>Make<input id="make" placeholder="Ford / Audi / VW"></label>
-        <label>Model<input id="model" placeholder="Fiesta / A4 / Golf"></label>
-        <label>Mileage<input id="mileage" type="number" placeholder="Mileage"></label>
-
-        <label>Job Type
-          <select id="jobType">
-            <option>Retail</option>
-            <option>Warranty</option>
-            <option>Internal</option>
-          </select>
-        </label>
-
-        <label>Technician
-          <select id="technician"></select>
-        </label>
-
-        <label>Labour Hours Allowed *<input id="hours" type="number" step="0.25" min="0" placeholder="2.5"></label>
-
-        <label>Priority
-          <select id="priority">
-            <option>🟢 Routine</option><option>🟠 Today</option><option>🔴 Urgent</option>
-          </select>
-        </label>
-
-        <label>MOT Add-on
-          <select id="mot">
-            <option>None</option><option>Full MOT</option><option>Retest</option><option>Pre-MOT Check</option>
-          </select>
-        </label>
-
-        <label id="authBox">Retail Authorisation
-          <select id="auth">
-            <option>Awaiting Customer Approval</option><option>Approved</option><option>Declined</option>
-          </select>
-        </label>
-      </div>
-
-      <label>Work Required
-        <textarea id="workRequired" placeholder="Example: Customer reports vibration under braking. Diagnose and advise."></textarea>
-      </label>
-
-      <label>Special Instructions — Service Manager Only
-        <textarea id="specialInstructions" placeholder="Example: Customer waiting, do not wash, locking wheel nut in boot, phone before repairs."></textarea>
-      </label>
-
-      <button id="assignJob" class="primary">Assign Job</button>
-    </div>
-
-    <div class="card">
-      <h2>Service Manager Daily Briefing</h2>
-      <p class="muted">Morning actions and end-of-day summary are available here for the Service Manager.</p>
-      <pre id="serviceManagerMorningBriefing">No morning briefing yet.</pre>
-      <button id="copyServiceMorningBriefing" class="secondary">Copy Morning Briefing</button>
-      <pre id="serviceManagerEndOfDayBriefing">No end-of-day briefing yet.</pre>
-      <button id="copyServiceEndBriefing" class="secondary">Copy End of Day Briefing</button>
-    </div>
-
-    <div class="card">
-      <h2>Future Bookings</h2>
-      <p class="muted">Jobs can be loaded for days ahead. Select a date below to view or plan upcoming work.</p>
-      <div class="grid">
-        <label>View Booking Date
-          <input id="futureBookingDate" type="date">
-        </label>
-        <label>Quick View
-          <select id="futureQuickView">
-            <option value="selected">Selected date</option>
-            <option value="tomorrow">Tomorrow</option>
-            <option value="7days">Next 7 days</option>
-          </select>
-        </label>
-      </div>
-      <div id="futureBookingsList" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>Service Manager Job Board</h2>
-      <div id="managerJobs" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>Completed Technician Write-Ups</h2>
-      <p class="muted">When a technician finishes and saves a job report, it automatically appears here for the Service Manager.</p>
-      <div id="completedReportsInbox" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>Parts Requests</h2>
-      <p class="muted">Technician parts requests appear here. Mark them ordered or delivered so technicians can see the update.</p>
-      <div id="servicePartsQueue" class="job-list"></div>
-    </div>
-  </section>
-
-  <section id="techScreen" class="screen">
-    <div class="card">
-      <h2>My Jobs</h2>
-      <label>Select Technician
-        <select id="techFilter"></select>
-      </label>
-      <div id="techJobs" class="job-list"></div>
-    </div>
-  </section>
-
-  <section id="activeJobScreen" class="screen">
-    <button id="backToJobs" class="secondary">← Back to Jobs</button>
-
-    <div class="card">
-      <h2 id="activeTitle">Active Job</h2>
-      <p id="activeDetails" class="muted"></p>
-      <div id="activeJobInfo" class="job-info-grid"></div>
-      <div id="activeSpecialInstructions" class="special-instructions hidden"></div>
-      <p class="hours-warning">Labour hours are set by the service manager only. Technician clocks start and finish time.</p>
-
-      <div class="timer-box">
-        <p><strong>Started:</strong> <span id="startedAt">Not started</span></p>
-        <p><strong>Finished:</strong> <span id="finishedAt">Not finished</span></p>
-        <p><strong>Actual Time:</strong> <span id="actualHours">0.00</span> hrs</p>
-      </div>
-
-      <div class="button-row">
-        <button id="startTimer" class="secondary">▶ Start Job Timer</button>
-        <button id="finishTimer" class="secondary">■ Finish Job Timer</button>
-      </div>
-
-      <div class="clockoff-panel">
-        <h3>Technician Clock Off</h3>
-        <p id="clockOffStatus" class="muted">Currently clocked on to job.</p>
-        <div class="button-row">
-          <button id="clockLunch" class="secondary">🍽 Clock Off Lunch</button>
-          <button id="clockIdle" class="secondary">⏸ Clock Off Idle</button>
-          <button id="clockCollecting" class="secondary">🚗 Clock Off Collecting Car</button>
+    <section id="commandScreen" class="screen active">
+      <div class="hero">
+        <div>
+          <h2>Workshop AI Command Centre</h2>
+          <p>Owner view: workshop health, live activity, KPIs and technician performance.</p>
         </div>
-        <button id="clockBackOn" class="primary">▶ Clock Back On To Job</button>
+        <div id="healthScore" class="health-score"></div>
       </div>
 
-      <label>Job Status
-        <select id="status">
-          <option>🔵 Waiting to Start</option><option>🟡 Diagnosis</option><option>🟠 Awaiting Parts</option>
-          <option>🟣 Awaiting Customer Approval</option><option>🟢 Repair Complete</option><option>✅ Ready for Collection</option>
-        </select>
-      </label>
-    </div>
+      <div id="ownerStats" class="stats"></div>
 
-    <div class="card">
-      <h2>Technician Report Sections</h2>
-      <div class="voice-section"><label>Job Description<textarea id="complaint"></textarea></label><button class="voiceBtn secondary" data-target="complaint">🎤 Voice Job Description</button></div>
-      <div class="voice-section"><label>Findings<textarea id="findings"></textarea></label><button class="voiceBtn secondary" data-target="findings">🎤 Voice Findings</button></div>
-      <div class="voice-section"><label>Repair Carried Out<textarea id="repair"></textarea></label><button class="voiceBtn secondary" data-target="repair">🎤 Voice Repair</button></div>
-      <div class="voice-section"><label>Parts Used / Required<textarea id="parts"></textarea></label><button class="voiceBtn secondary" data-target="parts">🎤 Voice Parts</button></div>
-      <div class="voice-section"><label>Advisories<textarea id="advisories"></textarea></label><button class="voiceBtn secondary" data-target="advisories">🎤 Voice Advisories</button></div>
-      <label>Photos<input id="photos" type="file" accept="image/*" multiple></label>
-      <button id="saveActiveJob" class="primary">Save Job & Generate Report</button>
-    </div>
+      <div class="card">
+        <h2>Today’s Live Activity</h2>
+        <div id="liveActivity" class="timeline"></div>
+      </div>
 
-    <div class="card">
-      <h2>Parts</h2>
-      <div class="grid">
-        <label>Part Description
-          <input id="partDescription" placeholder="Example: Front brake discs">
+      <div class="card">
+        <h2>AI Workshop Coach</h2>
+        <div id="ownerCoach" class="coach-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>End of Day Briefing</h2>
+        <pre id="endOfDayBriefing">No briefing yet.</pre>
+        <button id="copyBriefing" class="secondary">Copy Briefing</button>
+      </div>
+
+      <div class="card">
+        <h2>Morning Briefing / Action Required Today</h2>
+        <pre id="morningBriefing">No morning briefing yet.</pre>
+        <button id="copyMorningBriefing" class="secondary">Copy Morning Briefing</button>
+      </div>
+
+      <div class="card">
+        <h2>Live Workshop Board</h2>
+        <div id="ownerStatusBoard" class="board-grid"></div>
+      </div>
+
+      <div class="card">
+        <h2>Technician League Table</h2>
+        <div id="leagueTableOwner" class="table-wrap"></div>
+      </div>
+
+      <div class="card">
+        <h2>Downtime Today / This Week</h2>
+        <div id="ownerDowntimeReports" class="job-list"></div>
+      </div>
+    </section>
+
+    <section id="managerScreen" class="screen">
+      <div class="card">
+        <h2>Load New Job</h2>
+        <div class="grid">
+          <label>Vehicle Registration / Reg Number *<input id="reg" placeholder="AB19 XYZ"></label>
+          <label>Booking Date / Future Booking<input id="bookingDate" type="date"></label>
+          <label>Customer Name<input id="customer" placeholder="Customer name"></label>
+          <label>Telephone<input id="phone" placeholder="Telephone"></label>
+          <label>Make<input id="make" placeholder="Ford / Audi / VW"></label>
+          <label>Model<input id="model" placeholder="Fiesta / A4 / Golf"></label>
+          <label>Mileage<input id="mileage" type="number" placeholder="Mileage"></label>
+
+          <label>Job Type
+            <select id="jobType">
+              <option>Retail</option>
+              <option>Warranty</option>
+              <option>Internal</option>
+            </select>
+          </label>
+
+          <label>Technician
+            <select id="technician"></select>
+          </label>
+
+          <label>Labour Hours Allowed *<input id="hours" type="number" step="0.25" min="0" placeholder="2.5"></label>
+
+          <label>Priority
+            <select id="priority">
+              <option>🟢 Routine</option>
+              <option>🟠 Today</option>
+              <option>🔴 Urgent</option>
+            </select>
+          </label>
+
+          <label>MOT Add-on
+            <select id="mot">
+              <option>None</option>
+              <option>Full MOT</option>
+              <option>Retest</option>
+              <option>Pre-MOT Check</option>
+            </select>
+          </label>
+
+          <label id="authBox">Retail Authorisation
+            <select id="auth">
+              <option>Awaiting Customer Approval</option>
+              <option>Approved</option>
+              <option>Declined</option>
+            </select>
+          </label>
+        </div>
+
+        <label>Work Required
+          <textarea id="workRequired"
+            placeholder="Example: Customer reports vibration under braking. Diagnose and advise."></textarea>
         </label>
-        <label>Quantity
-          <input id="partQty" type="number" min="1" step="1" value="1">
+
+        <label>Special Instructions — Service Manager Only
+          <textarea id="specialInstructions"
+            placeholder="Example: Customer waiting, do not wash, locking wheel nut in boot, phone before repairs."></textarea>
         </label>
-        <label>Priority
-          <select id="partPriority">
-            <option>Urgent</option>
-            <option>Today</option>
-            <option>Tomorrow</option>
-            <option>Routine</option>
+
+        <button id="assignJob" class="primary">Assign Job</button>
+      </div>
+
+      <div class="card">
+        <h2>Service Manager Daily Briefing</h2>
+        <p class="muted">Morning actions and end-of-day summary are available here for the Service Manager.</p>
+        <pre id="serviceManagerMorningBriefing">No morning briefing yet.</pre>
+        <button id="copyServiceMorningBriefing" class="secondary">Copy Morning Briefing</button>
+        <pre id="serviceManagerEndOfDayBriefing">No end-of-day briefing yet.</pre>
+        <button id="copyServiceEndBriefing" class="secondary">Copy End of Day Briefing</button>
+      </div>
+
+      <div class="card">
+        <h2>Future Bookings</h2>
+        <p class="muted">Jobs can be loaded for days ahead. Select a date below to view or plan upcoming work.</p>
+        <div class="grid">
+          <label>View Booking Date
+            <input id="futureBookingDate" type="date">
+          </label>
+          <label>Quick View
+            <select id="futureQuickView">
+              <option value="selected">Selected date</option>
+              <option value="tomorrow">Tomorrow</option>
+              <option value="7days">Next 7 days</option>
+            </select>
+          </label>
+        </div>
+        <div id="futureBookingsList" class="job-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Service Manager Job Board</h2>
+        <div id="managerJobs" class="job-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Completed Technician Write-Ups</h2>
+        <p class="muted">When a technician finishes and saves a job report, it automatically appears here for the
+          Service Manager.</p>
+        <div id="completedReportsInbox" class="job-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Parts Requests</h2>
+        <p class="muted">Technician parts requests appear here. Mark them ordered or delivered so technicians can see
+          the update.</p>
+        <div id="servicePartsQueue" class="job-list"></div>
+      </div>
+    </section>
+
+    <section id="techScreen" class="screen">
+      <div class="card">
+        <h2>My Jobs</h2>
+        <label>Select Technician
+          <select id="techFilter"></select>
+        </label>
+        <div id="techJobs" class="job-list"></div>
+      </div>
+    </section>
+
+    <section id="activeJobScreen" class="screen">
+      <button id="backToJobs" class="secondary">← Back to Jobs</button>
+
+      <div class="card">
+        <h2 id="activeTitle">Active Job</h2>
+        <p id="activeDetails" class="muted"></p>
+        <div id="activeJobInfo" class="job-info-grid"></div>
+        <div id="activeSpecialInstructions" class="special-instructions hidden"></div>
+        <p class="hours-warning">Labour hours are set by the service manager only. Technician clocks start and finish
+          time.</p>
+
+        <div class="timer-box">
+          <p><strong>Started:</strong> <span id="startedAt">Not started</span></p>
+          <p><strong>Finished:</strong> <span id="finishedAt">Not finished</span></p>
+          <p><strong>Actual Time:</strong> <span id="actualHours">0.00</span> hrs</p>
+        </div>
+
+        <div class="button-row">
+          <button id="startTimer" class="secondary">▶ Start Job Timer</button>
+          <button id="finishTimer" class="secondary">■ Finish Job Timer</button>
+        </div>
+
+        <div class="clockoff-panel">
+          <h3>Technician Clock Off</h3>
+          <p id="clockOffStatus" class="muted">Currently clocked on to job.</p>
+          <div class="button-row">
+            <button id="clockLunch" class="secondary">🍽 Clock Off Lunch</button>
+            <button id="clockIdle" class="secondary">⏸ Clock Off Idle</button>
+            <button id="clockCollecting" class="secondary">🚗 Clock Off Collecting Car</button>
+          </div>
+          <button id="clockBackOn" class="primary">▶ Clock Back On To Job</button>
+        </div>
+
+        <label>Job Status
+          <select id="status">
+            <option>🔵 Waiting to Start</option>
+            <option>🟡 Diagnosis</option>
+            <option>🟠 Awaiting Parts</option>
+            <option>🟣 Awaiting Customer Approval</option>
+            <option>🟢 Repair Complete</option>
+            <option>✅ Ready for Collection</option>
           </select>
         </label>
-        <label>Supplier / Note
-          <input id="partSupplier" placeholder="Example: TPS / ECP / Dealer">
-        </label>
       </div>
-      <button id="submitPartsRequest" class="primary">Add Part Request</button>
-      <h3>Parts Status</h3>
-      <div id="technicianPartsStatus" class="job-list"></div>
-    </div>
 
-    <div class="card">
-      <h2>Job Comments / Updates</h2>
-      <label>Add Comment<textarea id="jobComment" placeholder="Example: Customer approved additional work."></textarea></label>
-      <button id="addComment" class="primary">Add Comment to Timeline</button>
-    </div>
-
-    <div class="card">
-      <h2>Job Timeline</h2>
-      <div id="jobTimeline" class="timeline"></div>
-    </div>
-
-    <div class="card">
-      <h2>Generated Report</h2>
-      <pre id="generatedReport">No report generated yet.</pre>
-      <button id="copyReport" class="secondary">Copy Report</button>
-    </div>
-  </section>
-
-  <section id="reportsScreen" class="screen">
-    <div class="card"><h2>Workshop KPI Scorecard</h2><div id="kpiScorecard" class="job-list"></div></div>
-    <div class="card"><h2>Technician League Table</h2><div id="leagueTable" class="table-wrap"></div></div>
-    <div class="card"><h2>Live Workshop Board</h2><div id="statusBoard" class="board-grid"></div></div>
-    <div class="card"><h2>Technician Workload</h2><div id="workload"></div></div>
-    <div class="card"><h2>Downtime Reports</h2><div id="downtimeReports" class="job-list"></div></div>
-  </section>
-
-
-
-  <section id="plannerScreen" class="screen">
-    <div class="card">
-      <h2>Daily Workshop Planner</h2>
-      <p class="muted">Shows today's booked jobs, hours allocated, technician capacity and workload balance.</p>
-      <div class="grid">
-        <label>Planner Date
-          <input id="plannerDate" type="date">
-        </label>
-        <label>Technician Daily Capacity Hours
-          <input id="dailyTechCapacity" type="number" step="0.25" value="8">
-        </label>
+      <div class="card">
+        <h2>Technician Report Sections</h2>
+        <div class="voice-section"><label>Job Description<textarea id="complaint"></textarea></label><button
+            class="voiceBtn secondary" data-target="complaint">🎤 Voice Job Description</button></div>
+        <div class="voice-section"><label>Findings<textarea id="findings"></textarea></label><button
+            class="voiceBtn secondary" data-target="findings">🎤 Voice Findings</button></div>
+        <div class="voice-section"><label>Repair Carried Out<textarea id="repair"></textarea></label><button
+            class="voiceBtn secondary" data-target="repair">🎤 Voice Repair</button></div>
+        <div class="voice-section"><label>Parts Used / Required<textarea id="parts"></textarea></label><button
+            class="voiceBtn secondary" data-target="parts">🎤 Voice Parts</button></div>
+        <div class="voice-section"><label>Advisories<textarea id="advisories"></textarea></label><button
+            class="voiceBtn secondary" data-target="advisories">🎤 Voice Advisories</button></div>
+        <label>Photos<input id="photos" type="file" accept="image/*" multiple></label>
+        <button id="saveActiveJob" class="primary">Save Job & Generate Report</button>
       </div>
-      <button id="savePlannerSettings" class="primary">Update Planner</button>
-    </div>
 
-    <div class="card">
-      <h2>Today's Workshop Summary</h2>
-      <div id="plannerSummary" class="stats"></div>
-    </div>
-
-    <div class="card">
-      <h2>Upcoming Workload</h2>
-      <div id="upcomingWorkload" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>Technician Capacity Planner</h2>
-      <div id="plannerTechnicians" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>AI Planner Suggestions</h2>
-      <div id="plannerSuggestions" class="coach-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>Jobs For Selected Day</h2>
-      <div id="plannerJobs" class="job-list"></div>
-    </div>
-  </section>
-
-
-  <section id="partsScreen" class="screen">
-    <div class="card">
-      <h2>Parts Management</h2>
-      <p class="muted">All technician parts requests across the workshop. Service Manager can update status so technicians can see what is happening.</p>
-      <div id="partsManagementStats" class="stats"></div>
-    </div>
-
-    <div class="card">
-      <h2>Outstanding Parts Queue</h2>
-      <div id="partsManagementQueue" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>Delivered / Completed Parts</h2>
-      <div id="partsDeliveredQueue" class="job-list"></div>
-    </div>
-  </section>
-
-  <section id="reportsInterfaceScreen" class="screen">
-    <div class="card">
-      <h2>Reports Interface</h2>
-      <p class="muted">A cleaner reporting area for owner and manager review.</p>
-      <div class="stats" id="reportsTopStats"></div>
-    </div>
-
-    <div class="card">
-      <h2>Workshop Performance Report</h2>
-      <div id="reportsPerformance" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>Downtime Report</h2>
-      <div id="reportsDowntime" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>End of Day Briefing</h2>
-      <pre id="reportsEndOfDayBriefing">No briefing yet.</pre>
-    </div>
-
-    <div class="card">
-      <h2>Morning Briefing / Action Required Today</h2>
-      <pre id="reportsMorningBriefing">No morning briefing yet.</pre>
-    </div>
-
-    <div class="card">
-      <h2>Completed Write-Ups</h2>
-      <div id="reportsCompletedWriteups" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>Technician League Table</h2>
-      <div id="reportsLeagueTable" class="table-wrap"></div>
-    </div>
-  </section>
-
-
-  <section id="techniciansScreen" class="screen">
-    <div class="card">
-      <h2>Technician Setup</h2>
-      <p class="muted">Add or remove technicians. These names are used throughout job allocation, technician screens, workload reports and league tables.</p>
-      <div class="grid">
-        <label>New Technician Name
-          <input id="newTechnicianName" placeholder="Example: Sarah">
-        </label>
-        <label>Role / Note
-          <input id="newTechnicianNote" placeholder="Example: MOT tester / Diagnostic tech">
-        </label>
+      <div class="card">
+        <h2>Parts</h2>
+        <div class="grid">
+          <label>Part Description
+            <input id="partDescription" placeholder="Example: Front brake discs">
+          </label>
+          <label>Quantity
+            <input id="partQty" type="number" min="1" step="1" value="1">
+          </label>
+          <label>Priority
+            <select id="partPriority">
+              <option>Urgent</option>
+              <option>Today</option>
+              <option>Tomorrow</option>
+              <option>Routine</option>
+            </select>
+          </label>
+          <label>Supplier / Note
+            <input id="partSupplier" placeholder="Example: TPS / ECP / Dealer">
+          </label>
+        </div>
+        <button id="submitPartsRequest" class="primary">Add Part Request</button>
+        <h3>Parts Status</h3>
+        <div id="technicianPartsStatus" class="job-list"></div>
       </div>
-      <button id="addTechnicianBtn" class="primary">Add Technician</button>
-    </div>
 
-    <div class="card">
-      <h2>Current Technicians</h2>
-      <div id="technicianSetupList" class="job-list"></div>
-    </div>
-  </section>
-
-  <section id="targetsScreen" class="screen">
-    <div class="card">
-      <h2>Monthly Targets</h2>
-      <div class="grid">
-        <label>Workshop Hours Available This Month<input id="targetAvailableHours" type="number" step="0.25"></label>
-        <label>Workshop Efficiency Target %<input id="targetEfficiency" type="number" step="1" placeholder="95"></label>
-        <label>Retail Hours Target<input id="targetRetailHours" type="number" step="0.25"></label>
-        <label>Internal Hours Target<input id="targetInternalHours" type="number" step="0.25"></label>
-        <label>Warranty Hours Target<input id="targetWarrantyHours" type="number" step="0.25"></label>
-        <label>Internal Cars Completed Target<input id="targetInternalCars" type="number" step="1"></label>
+      <div class="card">
+        <h2>Job Comments / Updates</h2>
+        <label>Add Comment<textarea id="jobComment"
+            placeholder="Example: Customer approved additional work."></textarea></label>
+        <button id="addComment" class="primary">Add Comment to Timeline</button>
       </div>
-      <button id="saveTargets" class="primary">Save Targets</button>
-    </div>
-  </section>
-</main>
 
-<div id="modal" class="modal hidden">
-  <div class="modal-card">
-    <button id="closeModal" class="modal-close">×</button>
-    <h2 id="modalTitle">Timeline</h2>
-    <div id="modalTimeline" class="timeline"></div>
+      <div class="card">
+        <h2>Job Timeline</h2>
+        <div id="jobTimeline" class="timeline"></div>
+      </div>
+
+      <div class="card">
+        <h2>Generated Report</h2>
+        <pre id="generatedReport">No report generated yet.</pre>
+        <button id="copyReport" class="secondary">Copy Report</button>
+      </div>
+    </section>
+
+    <section id="reportsScreen" class="screen">
+      <div class="card">
+        <h2>Workshop KPI Scorecard</h2>
+        <div id="kpiScorecard" class="job-list"></div>
+      </div>
+      <div class="card">
+        <h2>Technician League Table</h2>
+        <div id="leagueTable" class="table-wrap"></div>
+      </div>
+      <div class="card">
+        <h2>Live Workshop Board</h2>
+        <div id="statusBoard" class="board-grid"></div>
+      </div>
+      <div class="card">
+        <h2>Technician Workload</h2>
+        <div id="workload"></div>
+      </div>
+      <div class="card">
+        <h2>Downtime Reports</h2>
+        <div id="downtimeReports" class="job-list"></div>
+      </div>
+    </section>
+
+
+
+    <section id="plannerScreen" class="screen">
+      <div class="card">
+        <h2>Daily Workshop Planner</h2>
+        <p class="muted">Shows today's booked jobs, hours allocated, technician capacity and workload balance.</p>
+        <div class="grid">
+          <label>Planner Date
+            <input id="plannerDate" type="date">
+          </label>
+          <label>Technician Daily Capacity Hours
+            <input id="dailyTechCapacity" type="number" step="0.25" value="8">
+          </label>
+        </div>
+        <button id="savePlannerSettings" class="primary">Update Planner</button>
+      </div>
+
+      <div class="card">
+        <h2>Today's Workshop Summary</h2>
+        <div id="plannerSummary" class="stats"></div>
+      </div>
+
+      <div class="card">
+        <h2>Upcoming Workload</h2>
+        <div id="upcomingWorkload" class="job-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Technician Capacity Planner</h2>
+        <div id="plannerTechnicians" class="job-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>AI Planner Suggestions</h2>
+        <div id="plannerSuggestions" class="coach-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Jobs For Selected Day</h2>
+        <div id="plannerJobs" class="job-list"></div>
+      </div>
+    </section>
+
+
+    <section id="partsScreen" class="screen">
+      <div class="card">
+        <h2>Parts Management</h2>
+        <p class="muted">All technician parts requests across the workshop. Service Manager can update status so
+          technicians can see what is happening.</p>
+        <div id="partsManagementStats" class="stats"></div>
+      </div>
+
+      <div class="card">
+        <h2>Outstanding Parts Queue</h2>
+        <div id="partsManagementQueue" class="job-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Delivered / Completed Parts</h2>
+        <div id="partsDeliveredQueue" class="job-list"></div>
+      </div>
+    </section>
+
+    <section id="reportsInterfaceScreen" class="screen">
+      <div class="card">
+        <h2>Reports Interface</h2>
+        <p class="muted">A cleaner reporting area for owner and manager review.</p>
+        <div class="stats" id="reportsTopStats"></div>
+      </div>
+
+      <div class="card">
+        <h2>Workshop Performance Report</h2>
+        <div id="reportsPerformance" class="job-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Downtime Report</h2>
+        <div id="reportsDowntime" class="job-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>End of Day Briefing</h2>
+        <pre id="reportsEndOfDayBriefing">No briefing yet.</pre>
+      </div>
+
+      <div class="card">
+        <h2>Morning Briefing / Action Required Today</h2>
+        <pre id="reportsMorningBriefing">No morning briefing yet.</pre>
+      </div>
+
+      <div class="card">
+        <h2>Completed Write-Ups</h2>
+        <div id="reportsCompletedWriteups" class="job-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Technician League Table</h2>
+        <div id="reportsLeagueTable" class="table-wrap"></div>
+      </div>
+    </section>
+
+
+    <section id="techniciansScreen" class="screen">
+      <div class="card">
+        <h2>Technician Setup</h2>
+        <p class="muted">Add or remove technicians. These names are used throughout job allocation, technician screens,
+          workload reports and league tables.</p>
+        <div class="grid">
+          <label>New Technician Name
+            <input id="newTechnicianName" placeholder="Example: Sarah">
+          </label>
+          <label>Role / Note
+            <input id="newTechnicianNote" placeholder="Example: MOT tester / Diagnostic tech">
+          </label>
+        </div>
+        <button id="addTechnicianBtn" class="primary">Add Technician</button>
+      </div>
+
+      <div class="card">
+        <h2>Current Technicians</h2>
+        <div id="technicianSetupList" class="job-list"></div>
+      </div>
+    </section>
+
+    <section id="targetsScreen" class="screen">
+      <div class="card">
+        <h2>Monthly Targets</h2>
+        <div class="grid">
+          <label>Workshop Hours Available This Month<input id="targetAvailableHours" type="number" step="0.25"></label>
+          <label>Workshop Efficiency Target %<input id="targetEfficiency" type="number" step="1"
+              placeholder="95"></label>
+          <label>Retail Hours Target<input id="targetRetailHours" type="number" step="0.25"></label>
+          <label>Internal Hours Target<input id="targetInternalHours" type="number" step="0.25"></label>
+          <label>Warranty Hours Target<input id="targetWarrantyHours" type="number" step="0.25"></label>
+          <label>Internal Cars Completed Target<input id="targetInternalCars" type="number" step="1"></label>
+        </div>
+        <button id="saveTargets" class="primary">Save Targets</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <button id="closeModal" class="modal-close">×</button>
+      <h2 id="modalTitle">Timeline</h2>
+      <div id="modalTimeline" class="timeline"></div>
+    </div>
   </div>
-</div>
 
-<script>
-let jobs=JSON.parse(localStorage.getItem("workshopAIJobsV27")||localStorage.getItem("workshopAIJobsV26")||localStorage.getItem("workshopAIJobsV25")||localStorage.getItem("workshopAIJobsV24")||localStorage.getItem("workshopAIJobsV23")||localStorage.getItem("workshopAIJobsV22")||localStorage.getItem("workshopAIJobsV21")||localStorage.getItem("pcaJobsV11")||localStorage.getItem("pcaJobsV10")||localStorage.getItem("pcaJobsV09")||localStorage.getItem("pcaJobsV08")||localStorage.getItem("pcaJobsV07")||localStorage.getItem("pcaJobsV06")||"[]");let targets=JSON.parse(localStorage.getItem("pcaTargetsV11")||localStorage.getItem("pcaTargetsV10")||localStorage.getItem("pcaTargetsV09")||localStorage.getItem("pcaTargetsV08")||localStorage.getItem("pcaTargetsV07")||localStorage.getItem("pcaTargetsV06")||"{\"availableHours\":0,\"efficiency\":95,\"retailHours\":0,\"internalHours\":0,\"warrantyHours\":0,\"internalCars\":0}");let activeJobId=null;let activeVoiceTarget=null;let plannerSettings=JSON.parse(localStorage.getItem("workshopAIPlannerSettings")||"{\"capacity\":8}");let technicians=JSON.parse(localStorage.getItem("workshopAITechnicians")||'["Jake","Gordon","James","Jimmy","Ross","Other"]');
-function saveTechnicians(){localStorage.setItem("workshopAITechnicians",JSON.stringify(technicians))}
-function getTechs(){return technicians.length?technicians:["Other"]}function $(id){return document.getElementById(id)}function val(id){return $(id).value.trim()}function save(){localStorage.setItem("workshopAIJobsV27",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV26",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV25",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV24",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV23",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV22",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV21",JSON.stringify(jobs));localStorage.setItem("pcaJobsV11",JSON.stringify(jobs));localStorage.setItem("pcaJobsV10",JSON.stringify(jobs));localStorage.setItem("pcaJobsV09",JSON.stringify(jobs));localStorage.setItem("pcaJobsV08",JSON.stringify(jobs));localStorage.setItem("pcaJobsV07",JSON.stringify(jobs));localStorage.setItem("pcaJobsV06",JSON.stringify(jobs))}function saveTargetsStore(){localStorage.setItem("pcaTargetsV11",JSON.stringify(targets));localStorage.setItem("pcaTargetsV10",JSON.stringify(targets));localStorage.setItem("pcaTargetsV09",JSON.stringify(targets));localStorage.setItem("pcaTargetsV08",JSON.stringify(targets));localStorage.setItem("pcaTargetsV07",JSON.stringify(targets));localStorage.setItem("pcaTargetsV06",JSON.stringify(targets))}function todayISO(){return new Date().toISOString().split("T")[0]}function now(){return new Date()}function fmt(dt){return dt?new Date(dt).toLocaleString("en-GB"):"Not set"}function timeOnly(dt){return dt?new Date(dt).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}):""}function hoursBetween(a,b){if(!a||!b)return 0;return Math.max(0,(new Date(b)-new Date(a))/36e5)}function show(screen){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));$(screen).classList.add("active");document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelector(`[data-screen='${screen}']`)?.classList.add("active");render()}document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>show(t.dataset.screen)));$("todayDate").textContent=new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});$("bookingDate").value=todayISO();if($("plannerDate")) $("plannerDate").value=todayISO();if($("futureBookingDate")) $("futureBookingDate").value=todayISO();if($("dailyTechCapacity")) $("dailyTechCapacity").value=plannerSettings.capacity||8;$("reg").addEventListener("input",e=>e.target.value=e.target.value.toUpperCase());$("jobType").addEventListener("change",()=>{$("authBox").style.display=val("jobType")==="Retail"?"block":"none"});function addTimeline(job,title,detail,type="info"){job.timeline=job.timeline||[];job.timeline.push({time:now().toISOString(),title,detail,type})}function ensureTimeline(job){job.timeline=job.timeline||[];job.interruptions=job.interruptions||[];job.activeClockOff=job.activeClockOff||null;if(job.reportReady===undefined)job.reportReady=!!job.report;if(job.reportReviewed===undefined)job.reportReviewed=false;job.partsRequests=job.partsRequests||[];if(!job.timeline.length&&job.createdAt){job.timeline.push({time:job.createdAt,title:"🟢 Job created",detail:`Job ${job.jobNo||""} created and assigned to ${job.technician}.`,type:"created"})}return job.timeline}$("assignJob").addEventListener("click",()=>{const reg=val("reg").toUpperCase();const hours=Number(val("hours"));if(!reg){alert("Please enter registration");return}if(!hours||hours<=0){alert("Please enter labour hours allowed");return}const type=val("jobType");const jobNo=`PCA-${todayISO().replaceAll("-","")}-${String(jobs.length+1).padStart(3,"0")}`;const job={id:Date.now().toString(),jobNo,createdAt:now().toISOString(),bookingDate:val("bookingDate")||todayISO(),completedAt:null,reg,customer:val("customer"),phone:val("phone"),make:val("make"),model:val("model"),mileage:val("mileage"),type,technician:val("technician"),hours,originalHours:hours,hoursHistory:[`Created with ${hours} hrs`],priority:val("priority"),mot:val("mot"),auth:type==="Retail"?val("auth"):"Not required",workRequired:val("workRequired"),specialInstructions:val("specialInstructions"),status:"🔵 Waiting to Start",startedAt:null,finishedAt:null,actualHours:0,complaint:"",findings:"",repair:"",parts:"",advisories:"",photoCount:0,report:"",timeline:[],interruptions:[],activeClockOff:null,reportReady:false,reportReviewed:false,reportSentAt:null,partsRequests:[]};addTimeline(job,"🟢 Job created",`Job ${jobNo} created for ${reg}.`);addTimeline(job,"👨‍🔧 Technician assigned",`${job.technician} allocated ${hours} labour hours.`);jobs.push(job);save();clearForm();render();alert("Job assigned")});function clearForm(){["reg","customer","phone","make","model","mileage","hours","workRequired","specialInstructions"].forEach(id=>$(id).value="");$("bookingDate").value=todayISO();$("jobType").value="Retail";$("technician").value="Jake";$("priority").value="🟢 Routine";$("mot").value="None";$("auth").value="Awaiting Customer Approval";$("authBox").style.display="block"}function efficiency(allowed,actual){return actual>0?(allowed/actual)*100:null}function pct(n){return n===null?"Not clocked":n.toFixed(0)+"%"}function completed(j){return !!j.completedAt || (j.status||"").includes("Ready") || (j.status||"").includes("Complete")}function card(job,open=true,manager=false){ensureTimeline(job);const eff=efficiency(Number(job.hours||0),Number(job.actualHours||0));return `<div class="job-card"><h3>${job.jobNo||""} | ${job.reg} — ${job.technician}</h3><p><strong>${job.make||"Make"} ${job.model||""}</strong></p><p><strong>Customer:</strong> ${job.customer||"Not entered"} ${job.phone?" | "+job.phone:""}</p><p><strong>Type:</strong> ${job.type} | <strong>Allowed:</strong> ${job.hours} hrs | <strong>Actual:</strong> ${(job.actualHours||0).toFixed(2)} hrs | <strong>Efficiency:</strong> ${pct(eff)}</p><p><strong>MOT:</strong> ${job.mot} | <strong>Status:</strong> ${job.status}</p><p><strong>Timeline:</strong> ${job.timeline.length} events</p>${manager?`<button onclick="amendHours('${job.id}')">Amend Hours</button><button onclick="reassignTech('${job.id}')">Reassign Technician</button><button onclick="managerComment('${job.id}')">Manager Comment</button>`:""}<button onclick="showTimelineModal('${job.id}')">Timeline</button>${open?`<button onclick="openJob('${job.id}')">Start / Continue Job</button>`:""}</div>`}
-function populateTechnicianSelects(){
-  const techSelect=$("technician");
-  const filterSelect=$("techFilter");
-  if(techSelect){
-    const current=techSelect.value;
-    techSelect.innerHTML=getTechs().map(t=>`<option>${t}</option>`).join("");
-    if(getTechs().includes(current)) techSelect.value=current;
-  }
-  if(filterSelect){
-    const current=filterSelect.value;
-    filterSelect.innerHTML=getTechs().map(t=>`<option>${t}</option>`).join("") + "<option>All</option>";
-    if(getTechs().includes(current)||current==="All") filterSelect.value=current;
-  }
-}
-function renderTechnicianSetup(){
-  const el=$("technicianSetupList");
-  if(!el) return;
-  el.innerHTML=getTechs().map(t=>`
+  <script>
+    let jobs = JSON.parse(localStorage.getItem("workshopAIJobsV27") || localStorage.getItem("workshopAIJobsV26") || localStorage.getItem("workshopAIJobsV25") || localStorage.getItem("workshopAIJobsV24") || localStorage.getItem("workshopAIJobsV23") || localStorage.getItem("workshopAIJobsV22") || localStorage.getItem("workshopAIJobsV21") || localStorage.getItem("pcaJobsV11") || localStorage.getItem("pcaJobsV10") || localStorage.getItem("pcaJobsV09") || localStorage.getItem("pcaJobsV08") || localStorage.getItem("pcaJobsV07") || localStorage.getItem("pcaJobsV06") || "[]"); let targets = JSON.parse(localStorage.getItem("pcaTargetsV11") || localStorage.getItem("pcaTargetsV10") || localStorage.getItem("pcaTargetsV09") || localStorage.getItem("pcaTargetsV08") || localStorage.getItem("pcaTargetsV07") || localStorage.getItem("pcaTargetsV06") || "{\"availableHours\":0,\"efficiency\":95,\"retailHours\":0,\"internalHours\":0,\"warrantyHours\":0,\"internalCars\":0}"); let activeJobId = null; let activeVoiceTarget = null; let plannerSettings = JSON.parse(localStorage.getItem("workshopAIPlannerSettings") || "{\"capacity\":8}"); let technicians = JSON.parse(localStorage.getItem("workshopAITechnicians") || '["Jake","Gordon","James","Jimmy","Ross","Other"]');
+    function saveTechnicians() { localStorage.setItem("workshopAITechnicians", JSON.stringify(technicians)) }
+    function getTechs() { return technicians.length ? technicians : ["Other"] } function $(id) { return document.getElementById(id) } function val(id) { return $(id).value.trim() } function save() { localStorage.setItem("workshopAIJobsV27", JSON.stringify(jobs)); localStorage.setItem("workshopAIJobsV26", JSON.stringify(jobs)); localStorage.setItem("workshopAIJobsV25", JSON.stringify(jobs)); localStorage.setItem("workshopAIJobsV24", JSON.stringify(jobs)); localStorage.setItem("workshopAIJobsV23", JSON.stringify(jobs)); localStorage.setItem("workshopAIJobsV22", JSON.stringify(jobs)); localStorage.setItem("workshopAIJobsV21", JSON.stringify(jobs)); localStorage.setItem("pcaJobsV11", JSON.stringify(jobs)); localStorage.setItem("pcaJobsV10", JSON.stringify(jobs)); localStorage.setItem("pcaJobsV09", JSON.stringify(jobs)); localStorage.setItem("pcaJobsV08", JSON.stringify(jobs)); localStorage.setItem("pcaJobsV07", JSON.stringify(jobs)); localStorage.setItem("pcaJobsV06", JSON.stringify(jobs)) } function saveTargetsStore() { localStorage.setItem("pcaTargetsV11", JSON.stringify(targets)); localStorage.setItem("pcaTargetsV10", JSON.stringify(targets)); localStorage.setItem("pcaTargetsV09", JSON.stringify(targets)); localStorage.setItem("pcaTargetsV08", JSON.stringify(targets)); localStorage.setItem("pcaTargetsV07", JSON.stringify(targets)); localStorage.setItem("pcaTargetsV06", JSON.stringify(targets)) } function todayISO() { return new Date().toISOString().split("T")[0] } function now() { return new Date() } function fmt(dt) { return dt ? new Date(dt).toLocaleString("en-GB") : "Not set" } function timeOnly(dt) { return dt ? new Date(dt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "" } function hoursBetween(a, b) { if (!a || !b) return 0; return Math.max(0, (new Date(b) - new Date(a)) / 36e5) } function show(screen) { document.querySelectorAll(".screen").forEach(s => s.classList.remove("active")); $(screen).classList.add("active"); document.querySelectorAll(".tab").forEach(t => t.classList.remove("active")); document.querySelector(`[data-screen='${screen}']`)?.classList.add("active"); render() } document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => show(t.dataset.screen))); $("todayDate").textContent = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }); $("bookingDate").value = todayISO(); if ($("plannerDate")) $("plannerDate").value = todayISO(); if ($("futureBookingDate")) $("futureBookingDate").value = todayISO(); if ($("dailyTechCapacity")) $("dailyTechCapacity").value = plannerSettings.capacity || 8; $("reg").addEventListener("input", e => e.target.value = e.target.value.toUpperCase()); $("jobType").addEventListener("change", () => { $("authBox").style.display = val("jobType") === "Retail" ? "block" : "none" }); function addTimeline(job, title, detail, type = "info") { job.timeline = job.timeline || []; job.timeline.push({ time: now().toISOString(), title, detail, type }) } function ensureTimeline(job) { job.timeline = job.timeline || []; job.interruptions = job.interruptions || []; job.activeClockOff = job.activeClockOff || null; if (job.reportReady === undefined) job.reportReady = !!job.report; if (job.reportReviewed === undefined) job.reportReviewed = false; job.partsRequests = job.partsRequests || []; if (!job.timeline.length && job.createdAt) { job.timeline.push({ time: job.createdAt, title: "🟢 Job created", detail: `Job ${job.jobNo || ""} created and assigned to ${job.technician}.`, type: "created" }) } return job.timeline } $("assignJob").addEventListener("click", () => { const reg = val("reg").toUpperCase(); const hours = Number(val("hours")); if (!reg) { alert("Please enter registration"); return } if (!hours || hours <= 0) { alert("Please enter labour hours allowed"); return } const type = val("jobType"); const jobNo = `PCA-${todayISO().replaceAll("-", "")}-${String(jobs.length + 1).padStart(3, "0")}`; const job = { id: Date.now().toString(), jobNo, createdAt: now().toISOString(), bookingDate: val("bookingDate") || todayISO(), completedAt: null, reg, customer: val("customer"), phone: val("phone"), make: val("make"), model: val("model"), mileage: val("mileage"), type, technician: val("technician"), hours, originalHours: hours, hoursHistory: [`Created with ${hours} hrs`], priority: val("priority"), mot: val("mot"), auth: type === "Retail" ? val("auth") : "Not required", workRequired: val("workRequired"), specialInstructions: val("specialInstructions"), status: "🔵 Waiting to Start", startedAt: null, finishedAt: null, actualHours: 0, complaint: "", findings: "", repair: "", parts: "", advisories: "", photoCount: 0, report: "", timeline: [], interruptions: [], activeClockOff: null, reportReady: false, reportReviewed: false, reportSentAt: null, partsRequests: [] }; addTimeline(job, "🟢 Job created", `Job ${jobNo} created for ${reg}.`); addTimeline(job, "👨‍🔧 Technician assigned", `${job.technician} allocated ${hours} labour hours.`); jobs.push(job); save(); clearForm(); render(); alert("Job assigned") }); function clearForm() { ["reg", "customer", "phone", "make", "model", "mileage", "hours", "workRequired", "specialInstructions"].forEach(id => $(id).value = ""); $("bookingDate").value = todayISO(); $("jobType").value = "Retail"; $("technician").value = "Jake"; $("priority").value = "🟢 Routine"; $("mot").value = "None"; $("auth").value = "Awaiting Customer Approval"; $("authBox").style.display = "block" } function efficiency(allowed, actual) { return actual > 0 ? (allowed / actual) * 100 : null } function pct(n) { return n === null ? "Not clocked" : n.toFixed(0) + "%" } function completed(j) { return !!j.completedAt || (j.status || "").includes("Ready") || (j.status || "").includes("Complete") } function card(job, open = true, manager = false) { ensureTimeline(job); const eff = efficiency(Number(job.hours || 0), Number(job.actualHours || 0)); return `<div class="job-card"><h3>${job.jobNo || ""} | ${job.reg} — ${job.technician}</h3><p><strong>${job.make || "Make"} ${job.model || ""}</strong></p><p><strong>Customer:</strong> ${job.customer || "Not entered"} ${job.phone ? " | " + job.phone : ""}</p><p><strong>Type:</strong> ${job.type} | <strong>Allowed:</strong> ${job.hours} hrs | <strong>Actual:</strong> ${(job.actualHours || 0).toFixed(2)} hrs | <strong>Efficiency:</strong> ${pct(eff)}</p><p><strong>MOT:</strong> ${job.mot} | <strong>Status:</strong> ${job.status}</p><p><strong>Timeline:</strong> ${job.timeline.length} events</p>${manager ? `<button onclick="amendHours('${job.id}')">Amend Hours</button><button onclick="reassignTech('${job.id}')">Reassign Technician</button><button onclick="managerComment('${job.id}')">Manager Comment</button>` : ""}<button onclick="showTimelineModal('${job.id}')">Timeline</button>${open ? `<button onclick="openJob('${job.id}')">Start / Continue Job</button>` : ""}</div>` }
+    function populateTechnicianSelects() {
+      const techSelect = $("technician");
+      const filterSelect = $("techFilter");
+      if (techSelect) {
+        const current = techSelect.value;
+        techSelect.innerHTML = getTechs().map(t => `<option>${t}</option>`).join("");
+        if (getTechs().includes(current)) techSelect.value = current;
+      }
+      if (filterSelect) {
+        const current = filterSelect.value;
+        filterSelect.innerHTML = getTechs().map(t => `<option>${t}</option>`).join("") + "<option>All</option>";
+        if (getTechs().includes(current) || current === "All") filterSelect.value = current;
+      }
+    }
+    function renderTechnicianSetup() {
+      const el = $("technicianSetupList");
+      if (!el) return;
+      el.innerHTML = getTechs().map(t => `
     <div class="job-card">
       <div class="tech-row">
         <div>
@@ -600,331 +1293,336 @@ function renderTechnicianSetup(){
       </div>
     </div>
   `).join("");
-}
-function addTechnician(){
-  const name=val("newTechnicianName");
-  if(!name){alert("Enter technician name.");return}
-  if(getTechs().includes(name)){alert("Technician already exists.");return}
-  technicians.push(name);
-  saveTechnicians();
-  $("newTechnicianName").value="";
-  if($("newTechnicianNote")) $("newTechnicianNote").value="";
-  render();
-}
-function renameTechnician(oldName){
-  const newName=prompt(`Rename ${oldName} to:`);
-  if(!newName || newName===oldName) return;
-  if(getTechs().includes(newName)){alert("That technician name already exists.");return}
-  technicians=technicians.map(t=>t===oldName?newName:t);
-  jobs.forEach(j=>{if(j.technician===oldName){j.technician=newName;addTimeline(j,"👨‍🔧 Technician name updated",`${oldName} renamed to ${newName}.`)}})
-  saveTechnicians();save();render();
-}
-function removeTechnician(name){
-  const assigned=jobs.some(j=>j.technician===name && !completed(j));
-  if(assigned && !confirm(`${name} has open jobs. Remove anyway? Existing jobs will keep the name.`)) return;
-  technicians=technicians.filter(t=>t!==name);
-  if(!technicians.length) technicians=["Other"];
-  saveTechnicians();render();
-}
-if($("addTechnicianBtn")) $("addTechnicianBtn").addEventListener("click",addTechnician);
+    }
+    function addTechnician() {
+      const name = val("newTechnicianName");
+      if (!name) { alert("Enter technician name."); return }
+      if (getTechs().includes(name)) { alert("Technician already exists."); return }
+      technicians.push(name);
+      saveTechnicians();
+      $("newTechnicianName").value = "";
+      if ($("newTechnicianNote")) $("newTechnicianNote").value = "";
+      render();
+    }
+    function renameTechnician(oldName) {
+      const newName = prompt(`Rename ${oldName} to:`);
+      if (!newName || newName === oldName) return;
+      if (getTechs().includes(newName)) { alert("That technician name already exists."); return }
+      technicians = technicians.map(t => t === oldName ? newName : t);
+      jobs.forEach(j => { if (j.technician === oldName) { j.technician = newName; addTimeline(j, "👨‍🔧 Technician name updated", `${oldName} renamed to ${newName}.`) } })
+      saveTechnicians(); save(); render();
+    }
+    function removeTechnician(name) {
+      const assigned = jobs.some(j => j.technician === name && !completed(j));
+      if (assigned && !confirm(`${name} has open jobs. Remove anyway? Existing jobs will keep the name.`)) return;
+      technicians = technicians.filter(t => t !== name);
+      if (!technicians.length) technicians = ["Other"];
+      saveTechnicians(); render();
+    }
+    if ($("addTechnicianBtn")) $("addTechnicianBtn").addEventListener("click", addTechnician);
 
-function render(){populateTechnicianSelects();renderManager();renderCompletedReportsInbox();renderTech();renderDash();renderTechnicianSetup();renderReportsInterface();renderDailyPlanner();renderPartsQueues();renderPartsManagement();renderFutureBookings();renderEndOfDayBriefing();loadTargetsInputs()}function renderManager(){$("managerJobs").innerHTML=jobs.length?jobs.map(j=>card(j,true,true)).join(""):"No jobs loaded yet."}
-function renderCompletedReportsInbox(){
-  const el=$("completedReportsInbox");
-  if(!el) return;
-  const completedReports=jobs.filter(j=>j.report && (j.reportReady || completed(j))).sort((a,b)=>new Date(b.completedAt||b.finishedAt||b.createdAt)-new Date(a.completedAt||a.finishedAt||a.createdAt));
-  if(!completedReports.length){el.innerHTML="No completed write-ups yet.";return}
-  el.innerHTML=completedReports.map(j=>`
-    <div class="job-card ${j.reportReviewed?'good':'warn'}">
-      <h3>${j.jobNo||""} | ${j.reg} — ${j.technician} ${j.reportReviewed?'':'<span class="badge-new">NEW</span>'}</h3>
-      <p><strong>Vehicle:</strong> ${j.make||"Not entered"} ${j.model||""}</p>
-      <p><strong>Customer:</strong> ${j.customer||"Not entered"} ${j.phone?' | '+j.phone:''}</p>
-      <p><strong>Completed:</strong> ${fmt(j.completedAt||j.finishedAt)} | <strong>Hours:</strong> ${j.hours} allowed / ${(j.actualHours||0).toFixed(2)} actual</p>
+    function render() { populateTechnicianSelects(); renderManager(); renderCompletedReportsInbox(); renderTech(); renderDash(); renderTechnicianSetup(); renderReportsInterface(); renderDailyPlanner(); renderPartsQueues(); renderPartsManagement(); renderFutureBookings(); renderEndOfDayBriefing(); loadTargetsInputs() } function renderManager() { $("managerJobs").innerHTML = jobs.length ? jobs.map(j => card(j, true, true)).join("") : "No jobs loaded yet." }
+    function renderCompletedReportsInbox() {
+      const el = $("completedReportsInbox");
+      if (!el) return;
+      const completedReports = jobs.filter(j => j.report && (j.reportReady || completed(j))).sort((a, b) => new Date(b.completedAt || b.finishedAt || b.createdAt) - new Date(a.completedAt || a.finishedAt || a.createdAt));
+      if (!completedReports.length) { el.innerHTML = "No completed write-ups yet."; return }
+      el.innerHTML = completedReports.map(j => `
+    <div class="job-card ${j.reportReviewed ? 'good' : 'warn'}">
+      <h3>${j.jobNo || ""} | ${j.reg} — ${j.technician} ${j.reportReviewed ? '' : '<span class="badge-new">NEW</span>'}</h3>
+      <p><strong>Vehicle:</strong> ${j.make || "Not entered"} ${j.model || ""}</p>
+      <p><strong>Customer:</strong> ${j.customer || "Not entered"} ${j.phone ? ' | ' + j.phone : ''}</p>
+      <p><strong>Completed:</strong> ${fmt(j.completedAt || j.finishedAt)} | <strong>Hours:</strong> ${j.hours} allowed / ${(j.actualHours || 0).toFixed(2)} actual</p>
       <div class="report-preview">${j.report}</div>
       <button onclick="copyInboxReport('${j.id}')">Copy Report</button>
-      <button onclick="markReportReviewed('${j.id}')">${j.reportReviewed?'Reviewed':'Mark Reviewed'}</button>
+      <button onclick="markReportReviewed('${j.id}')">${j.reportReviewed ? 'Reviewed' : 'Mark Reviewed'}</button>
       <button onclick="showTimelineModal('${j.id}')">Timeline</button>
     </div>
   `).join("");
-}
-function copyInboxReport(id){
-  const j=jobs.find(x=>x.id===id);
-  if(!j||!j.report){alert("No report available.");return}
-  navigator.clipboard.writeText(j.report);
-  j.reportSentAt=now().toISOString();
-  addTimeline(j,"📋 Report copied by Service Manager","Completed technician write-up copied from Service Manager inbox.");
-  save();render();
-  alert("Report copied.");
-}
-function markReportReviewed(id){
-  const j=jobs.find(x=>x.id===id);
-  if(!j)return;
-  j.reportReviewed=true;
-  addTimeline(j,"✅ Report reviewed","Service Manager marked technician write-up as reviewed.");
-  save();render();
-}
+    }
+    function copyInboxReport(id) {
+      const j = jobs.find(x => x.id === id);
+      if (!j || !j.report) { alert("No report available."); return }
+      navigator.clipboard.writeText(j.report);
+      j.reportSentAt = now().toISOString();
+      addTimeline(j, "📋 Report copied by Service Manager", "Completed technician write-up copied from Service Manager inbox.");
+      save(); render();
+      alert("Report copied.");
+    }
+    function markReportReviewed(id) {
+      const j = jobs.find(x => x.id === id);
+      if (!j) return;
+      j.reportReviewed = true;
+      addTimeline(j, "✅ Report reviewed", "Service Manager marked technician write-up as reviewed.");
+      save(); render();
+    }
 
-function renderTech(){const f=val("techFilter");const list=f==="All"?jobs:jobs.filter(j=>j.technician===f);$("techJobs").innerHTML=list.length?list.map(j=>card(j,true,false)).join(""):"No jobs assigned."}function openJob(id){const j=jobs.find(x=>x.id===id);if(!j)return;ensureTimeline(j);activeJobId=id;$("activeTitle").textContent=`${j.jobNo||""} | ${j.reg} — ${j.technician}`;$("activeDetails").textContent=`${j.type} | ${j.make||""} ${j.model||""} | Hours allowed: ${j.hours} | MOT: ${j.mot}`;
-$("activeJobInfo").innerHTML=`
+    function renderTech() { const f = val("techFilter"); const list = f === "All" ? jobs : jobs.filter(j => j.technician === f); $("techJobs").innerHTML = list.length ? list.map(j => card(j, true, false)).join("") : "No jobs assigned." } function openJob(id) {
+      const j = jobs.find(x => x.id === id); if (!j) return; ensureTimeline(j); activeJobId = id; $("activeTitle").textContent = `${j.jobNo || ""} | ${j.reg} — ${j.technician}`; $("activeDetails").textContent = `${j.type} | ${j.make || ""} ${j.model || ""} | Hours allowed: ${j.hours} | MOT: ${j.mot}`;
+      $("activeJobInfo").innerHTML = `
   <div><strong>Registration</strong><span>${j.reg}</span></div>
-  <div><strong>Customer</strong><span>${j.customer||"Not entered"}</span></div>
-  <div><strong>Vehicle</strong><span>${j.make||"Not entered"} ${j.model||""}</span></div>
+  <div><strong>Customer</strong><span>${j.customer || "Not entered"}</span></div>
+  <div><strong>Vehicle</strong><span>${j.make || "Not entered"} ${j.model || ""}</span></div>
   <div><strong>Allocated Hours</strong><span>${j.hours} hrs</span></div>
-  <div><strong>Actual Time</strong><span>${(j.actualHours||0).toFixed(2)} hrs</span></div>
+  <div><strong>Actual Time</strong><span>${(j.actualHours || 0).toFixed(2)} hrs</span></div>
   <div><strong>Status</strong><span>${j.status}</span></div>
 `;
-if(j.specialInstructions){
-  $("activeSpecialInstructions").classList.remove("hidden");
-  $("activeSpecialInstructions").innerHTML=`<strong>Special Instructions</strong><p>${j.specialInstructions}</p>`;
-}else{
-  $("activeSpecialInstructions").classList.add("hidden");
-  $("activeSpecialInstructions").innerHTML="";
-}$("status").value=j.status;$("startedAt").textContent=fmt(j.startedAt);$("finishedAt").textContent=fmt(j.finishedAt);$("actualHours").textContent=(j.actualHours||0).toFixed(2);["complaint","findings","repair","parts","advisories"].forEach(id=>$(id).value=j[id]||"");$("generatedReport").textContent=j.report||"No report generated yet.";$("jobComment").value="";renderTimeline(j,$("jobTimeline"));updateClockOffStatus(j);show("activeJobScreen")}function renderTimeline(job,el){ensureTimeline(job);el.innerHTML=job.timeline.length?job.timeline.slice().reverse().map(item=>`<div class="timeline-item"><strong>${timeOnly(item.time)} — ${item.title}</strong><small>${fmt(item.time)}</small><p>${item.detail||""}</p></div>`).join(""):"No timeline events yet."}function showTimelineModal(id){const j=jobs.find(x=>x.id===id);if(!j)return;$("modalTitle").textContent=`Timeline — ${j.reg} ${j.jobNo||""}`;renderTimeline(j,$("modalTimeline"));$("modal").classList.remove("hidden")}$("closeModal").addEventListener("click",()=>$("modal").classList.add("hidden"));$("backToJobs").addEventListener("click",()=>show("techScreen"));$("startTimer").addEventListener("click",()=>{const j=jobs.find(x=>x.id===activeJobId);if(!j)return;if(j.startedAt){alert("Timer already started.");return}j.startedAt=now().toISOString();j.status="🟡 Diagnosis";addTimeline(j,"▶ Technician started work",`${j.technician} started job timer.`);save();openJob(j.id);render()});$("finishTimer").addEventListener("click",()=>{const j=jobs.find(x=>x.id===activeJobId);if(!j)return;if(!j.startedAt){alert("Start timer first.");return}if(j.activeClockOff){alert("Clock back on before finishing the job.");return}j.finishedAt=now().toISOString();j.actualHours=hoursBetween(j.startedAt,j.finishedAt);j.completedAt=j.finishedAt;j.status="✅ Ready for Collection";addTimeline(j,"✅ Job timer finished",`${j.technician} finished job. Actual time: ${j.actualHours.toFixed(2)} hrs.`);addTimeline(j,"✅ Ready for collection","Job marked ready for collection.");save();openJob(j.id);render()});
-function sectionLabel(id){
-  const labels={
-    complaint:"Job Description",
-    findings:"Findings",
-    repair:"Repair Carried Out",
-    parts:"Parts Used / Required",
-    advisories:"Advisories"
-  };
-  return labels[id] || id;
-}
+      if (j.specialInstructions) {
+        $("activeSpecialInstructions").classList.remove("hidden");
+        $("activeSpecialInstructions").innerHTML = `<strong>Special Instructions</strong><p>${j.specialInstructions}</p>`;
+      } else {
+        $("activeSpecialInstructions").classList.add("hidden");
+        $("activeSpecialInstructions").innerHTML = "";
+      } $("status").value = j.status; $("startedAt").textContent = fmt(j.startedAt); $("finishedAt").textContent = fmt(j.finishedAt); $("actualHours").textContent = (j.actualHours || 0).toFixed(2);["complaint", "findings", "repair", "parts", "advisories"].forEach(id => $(id).value = j[id] || ""); $("generatedReport").textContent = j.report || "No report generated yet."; $("jobComment").value = ""; renderTimeline(j, $("jobTimeline")); updateClockOffStatus(j); show("activeJobScreen")
+    } function renderTimeline(job, el) { ensureTimeline(job); el.innerHTML = job.timeline.length ? job.timeline.slice().reverse().map(item => `<div class="timeline-item"><strong>${timeOnly(item.time)} — ${item.title}</strong><small>${fmt(item.time)}</small><p>${item.detail || ""}</p></div>`).join("") : "No timeline events yet." } function showTimelineModal(id) { const j = jobs.find(x => x.id === id); if (!j) return; $("modalTitle").textContent = `Timeline — ${j.reg} ${j.jobNo || ""}`; renderTimeline(j, $("modalTimeline")); $("modal").classList.remove("hidden") } $("closeModal").addEventListener("click", () => $("modal").classList.add("hidden")); $("backToJobs").addEventListener("click", () => show("techScreen")); $("startTimer").addEventListener("click", () => { const j = jobs.find(x => x.id === activeJobId); if (!j) return; if (j.startedAt) { alert("Timer already started."); return } j.startedAt = now().toISOString(); j.status = "🟡 Diagnosis"; addTimeline(j, "▶ Technician started work", `${j.technician} started job timer.`); save(); openJob(j.id); render() }); $("finishTimer").addEventListener("click", () => { const j = jobs.find(x => x.id === activeJobId); if (!j) return; if (!j.startedAt) { alert("Start timer first."); return } if (j.activeClockOff) { alert("Clock back on before finishing the job."); return } j.finishedAt = now().toISOString(); j.actualHours = hoursBetween(j.startedAt, j.finishedAt); j.completedAt = j.finishedAt; j.status = "✅ Ready for Collection"; addTimeline(j, "✅ Job timer finished", `${j.technician} finished job. Actual time: ${j.actualHours.toFixed(2)} hrs.`); addTimeline(j, "✅ Ready for collection", "Job marked ready for collection."); save(); openJob(j.id); render() });
+    function sectionLabel(id) {
+      const labels = {
+        complaint: "Job Description",
+        findings: "Findings",
+        repair: "Repair Carried Out",
+        parts: "Parts Used / Required",
+        advisories: "Advisories"
+      };
+      return labels[id] || id;
+    }
 
-$("saveActiveJob").addEventListener("click",()=>{const j=jobs.find(x=>x.id===activeJobId);if(!j)return;const oldStatus=j.status;j.status=val("status");if(oldStatus!==j.status)addTimeline(j,"🔄 Status changed",`Status changed from ${oldStatus} to ${j.status}.`);if(j.status.includes("Ready")&&!j.completedAt){j.completedAt=now().toISOString();addTimeline(j,"✅ Job completed","Job completion time recorded.");}["complaint","findings","repair","parts","advisories"].forEach(id=>{if(val(id)&&val(id)!==j[id])addTimeline(j,`🎤 ${sectionLabel(id)} updated`,val(id).slice(0,160));j[id]=val(id)});j.photoCount=$("photos").files.length;if(j.photoCount>0)addTimeline(j,"📸 Photos added",`${j.photoCount} photo(s) selected for this job.`);j.report=makeReport(j);j.reportReady=true;j.reportReviewed=false;addTimeline(j,"📄 Technician write-up sent","Generated write-up sent automatically to Service Manager completed reports inbox.");$("generatedReport").textContent=j.report;save();renderTimeline(j,$("jobTimeline"));render();alert("Job saved and report sent to Service Manager")});$("addComment").addEventListener("click",()=>{const j=jobs.find(x=>x.id===activeJobId);if(!j)return;const text=val("jobComment");if(!text){alert("Enter a comment first.");return}addTimeline(j,"💬 Comment added",text);$("jobComment").value="";save();renderTimeline(j,$("jobTimeline"));render();});
-function updateClockOffStatus(j){
-  if(!$("clockOffStatus")) return;
-  if(j && j.activeClockOff){
-    $("clockOffStatus").textContent = `Currently clocked off for ${j.activeClockOff.reason} since ${timeOnly(j.activeClockOff.start)}.`;
-  } else {
-    $("clockOffStatus").textContent = "Currently clocked on to job.";
-  }
-}
-function clockOff(reason){
-  const j=jobs.find(x=>x.id===activeJobId);
-  if(!j) return;
-  if(!j.startedAt){alert("Start the job timer first.");return}
-  if(j.activeClockOff){alert("Already clocked off. Clock back on first.");return}
-  j.interruptions=j.interruptions||[];
-  j.activeClockOff={reason,start:now().toISOString()};
-  addTimeline(j,`⏸ Clocked off - ${reason}`,`${j.technician} clocked off for ${reason}.`);
-  save();updateClockOffStatus(j);render();
-}
-function clockBackOn(){
-  const j=jobs.find(x=>x.id===activeJobId);
-  if(!j) return;
-  if(!j.activeClockOff){alert("Technician is not currently clocked off.");return}
-  const end=now().toISOString();
-  const duration=hoursBetween(j.activeClockOff.start,end);
-  j.interruptions=j.interruptions||[];
-  j.interruptions.push({reason:j.activeClockOff.reason,start:j.activeClockOff.start,end,duration});
-  addTimeline(j,`▶ Clocked back on`,`${j.technician} returned from ${j.activeClockOff.reason}. Time: ${duration.toFixed(2)} hrs.`);
-  j.activeClockOff=null;
-  save();openJob(j.id);render();
-}
-$("clockLunch").addEventListener("click",()=>clockOff("Lunch"));
-$("clockIdle").addEventListener("click",()=>clockOff("Idle"));
-$("clockCollecting").addEventListener("click",()=>clockOff("Collecting Car"));
-$("clockBackOn").addEventListener("click",clockBackOn);
-function interruptionHours(job,reason){
-  return (job.interruptions||[]).filter(i=>i.reason===reason).reduce((s,i)=>s+Number(i.duration||0),0);
-}
-function totalInterruptionHours(job){
-  return (job.interruptions||[]).reduce((s,i)=>s+Number(i.duration||0),0);
-}
-function withinDays(dt,days){
-  if(!dt) return false;
-  const d=new Date(dt); const nowDate=new Date();
-  return (nowDate-d)/(1000*60*60*24) <= days;
-}
-function downtimeTotals(days){
-  const relevant=jobs.filter(j=>withinDays(j.createdAt,days)||withinDays(j.completedAt,days)||withinDays(j.bookingDate,days));
-  const totals={Lunch:0,Idle:0,"Collecting Car":0};
-  relevant.forEach(j=>(j.interruptions||[]).forEach(i=>{if(totals[i.reason]!==undefined) totals[i.reason]+=Number(i.duration||0)}));
-  return totals;
-}
-function renderDowntimeReports(){
-  const today=downtimeTotals(1);
-  const week=downtimeTotals(7);
-  const html = `
+    $("saveActiveJob").addEventListener("click", () => { const j = jobs.find(x => x.id === activeJobId); if (!j) return; const oldStatus = j.status; j.status = val("status"); if (oldStatus !== j.status) addTimeline(j, "🔄 Status changed", `Status changed from ${oldStatus} to ${j.status}.`); if (j.status.includes("Ready") && !j.completedAt) { j.completedAt = now().toISOString(); addTimeline(j, "✅ Job completed", "Job completion time recorded."); } ["complaint", "findings", "repair", "parts", "advisories"].forEach(id => { if (val(id) && val(id) !== j[id]) addTimeline(j, `🎤 ${sectionLabel(id)} updated`, val(id).slice(0, 160)); j[id] = val(id) }); j.photoCount = $("photos").files.length; if (j.photoCount > 0) addTimeline(j, "📸 Photos added", `${j.photoCount} photo(s) selected for this job.`); j.report = makeReport(j); j.reportReady = true; j.reportReviewed = false; addTimeline(j, "📄 Technician write-up sent", "Generated write-up sent automatically to Service Manager completed reports inbox."); $("generatedReport").textContent = j.report; save(); renderTimeline(j, $("jobTimeline")); render(); alert("Job saved and report sent to Service Manager") }); $("addComment").addEventListener("click", () => { const j = jobs.find(x => x.id === activeJobId); if (!j) return; const text = val("jobComment"); if (!text) { alert("Enter a comment first."); return } addTimeline(j, "💬 Comment added", text); $("jobComment").value = ""; save(); renderTimeline(j, $("jobTimeline")); render(); });
+    function updateClockOffStatus(j) {
+      if (!$("clockOffStatus")) return;
+      if (j && j.activeClockOff) {
+        $("clockOffStatus").textContent = `Currently clocked off for ${j.activeClockOff.reason} since ${timeOnly(j.activeClockOff.start)}.`;
+      } else {
+        $("clockOffStatus").textContent = "Currently clocked on to job.";
+      }
+    }
+    function clockOff(reason) {
+      const j = jobs.find(x => x.id === activeJobId);
+      if (!j) return;
+      if (!j.startedAt) { alert("Start the job timer first."); return }
+      if (j.activeClockOff) { alert("Already clocked off. Clock back on first."); return }
+      j.interruptions = j.interruptions || [];
+      j.activeClockOff = { reason, start: now().toISOString() };
+      addTimeline(j, `⏸ Clocked off - ${reason}`, `${j.technician} clocked off for ${reason}.`);
+      save(); updateClockOffStatus(j); render();
+    }
+    function clockBackOn() {
+      const j = jobs.find(x => x.id === activeJobId);
+      if (!j) return;
+      if (!j.activeClockOff) { alert("Technician is not currently clocked off."); return }
+      const end = now().toISOString();
+      const duration = hoursBetween(j.activeClockOff.start, end);
+      j.interruptions = j.interruptions || [];
+      j.interruptions.push({ reason: j.activeClockOff.reason, start: j.activeClockOff.start, end, duration });
+      addTimeline(j, `▶ Clocked back on`, `${j.technician} returned from ${j.activeClockOff.reason}. Time: ${duration.toFixed(2)} hrs.`);
+      j.activeClockOff = null;
+      save(); openJob(j.id); render();
+    }
+    $("clockLunch").addEventListener("click", () => clockOff("Lunch"));
+    $("clockIdle").addEventListener("click", () => clockOff("Idle"));
+    $("clockCollecting").addEventListener("click", () => clockOff("Collecting Car"));
+    $("clockBackOn").addEventListener("click", clockBackOn);
+    function interruptionHours(job, reason) {
+      return (job.interruptions || []).filter(i => i.reason === reason).reduce((s, i) => s + Number(i.duration || 0), 0);
+    }
+    function totalInterruptionHours(job) {
+      return (job.interruptions || []).reduce((s, i) => s + Number(i.duration || 0), 0);
+    }
+    function withinDays(dt, days) {
+      if (!dt) return false;
+      const d = new Date(dt); const nowDate = new Date();
+      return (nowDate - d) / (1000 * 60 * 60 * 24) <= days;
+    }
+    function downtimeTotals(days) {
+      const relevant = jobs.filter(j => withinDays(j.createdAt, days) || withinDays(j.completedAt, days) || withinDays(j.bookingDate, days));
+      const totals = { Lunch: 0, Idle: 0, "Collecting Car": 0 };
+      relevant.forEach(j => (j.interruptions || []).forEach(i => { if (totals[i.reason] !== undefined) totals[i.reason] += Number(i.duration || 0) }));
+      return totals;
+    }
+    function renderDowntimeReports() {
+      const today = downtimeTotals(1);
+      const week = downtimeTotals(7);
+      const html = `
     <div class="job-card"><h3>Today</h3><p>Lunch: ${today.Lunch.toFixed(2)} hrs</p><p>Idle: ${today.Idle.toFixed(2)} hrs</p><p>Collecting Cars: ${today["Collecting Car"].toFixed(2)} hrs</p></div>
     <div class="job-card"><h3>This Week</h3><p>Lunch: ${week.Lunch.toFixed(2)} hrs</p><p>Idle: ${week.Idle.toFixed(2)} hrs</p><p>Collecting Cars: ${week["Collecting Car"].toFixed(2)} hrs</p></div>
   `;
-  if($("downtimeReports")) $("downtimeReports").innerHTML=html;
-  if($("ownerDowntimeReports")) $("ownerDowntimeReports").innerHTML=html;
-}
+      if ($("downtimeReports")) $("downtimeReports").innerHTML = html;
+      if ($("ownerDowntimeReports")) $("ownerDowntimeReports").innerHTML = html;
+    }
 
-function makeReport(j){const eff=efficiency(Number(j.hours||0),Number(j.actualHours||0));return `PCA WORKSHOP AI REPORT\\n\\nJob Number: ${j.jobNo}\\nRegistration: ${j.reg}\\nVehicle: ${j.make||"Not entered"} ${j.model||""}\\nMileage: ${j.mileage||"Not entered"}\\nCustomer: ${j.customer||"Not entered"}\\nTelephone: ${j.phone||"Not entered"}\\n\\nCreated: ${fmt(j.createdAt)}\\nBooking Date: ${j.bookingDate}\\nCompleted: ${fmt(j.completedAt)}\\n\\nJob Type: ${j.type}\\nTechnician: ${j.technician}\\nLabour Hours Allowed: ${j.hours}\\nActual Hours Clocked: ${(j.actualHours||0).toFixed(2)}\\nEfficiency: ${pct(eff)}\\nMOT: ${j.mot}\\nPriority: ${j.priority}\\nStatus: ${j.status}\\nCustomer Authorisation: ${j.auth}\\nPhotos Added: ${j.photoCount}\\n\\nAI JOB SUMMARY\\n${jobSummary(j)}\\n\\nWORK REQUIRED\\n${j.workRequired||"Not entered"}\\n\\nJOB DESCRIPTION\\n${j.complaint||"Not entered"}\\n\\nTECHNICIAN FINDINGS\\n${j.findings||"Not entered"}\\n\\nREPAIR CARRIED OUT\\n${j.repair||"Not entered"}\\n\\nPARTS USED / REQUIRED\\n${j.parts||"Not entered"}\\n\\nADVISORIES\\n${j.advisories||"None entered"}\\n\\nDRAGON 2000 DESCRIPTION\\n${dragon(j)}\\n\\nTIMELINE EVENTS\\n${(j.timeline||[]).map(t=>`${timeOnly(t.time)} - ${t.title}: ${t.detail}`).join("\\n")}`}function jobSummary(j){let bits=[];if(j.findings)bits.push(j.findings);if(j.repair)bits.push(j.repair);if(j.advisories)bits.push("Advisories: "+j.advisories);return bits.length?bits.join(" "):"Job opened. Awaiting technician findings and repair summary."}function dragon(j){return (j.repair||j.findings||j.workRequired||"Job opened. Awaiting technician update.").slice(0,220)}function amendHours(id){const j=jobs.find(x=>x.id===id);if(!j)return;const newHours=Number(prompt(`Current hours: ${j.hours}\\nEnter new labour hours:`));if(!newHours||newHours<=0)return;addTimeline(j,"⏱ Labour hours amended",`Hours changed from ${j.hours} to ${newHours} by Service Manager.`);j.hours=newHours;if(j.report)j.report=makeReport(j);save();render()}function reassignTech(id){const j=jobs.find(x=>x.id===id);if(!j)return;const newTech=prompt(`Current technician: ${j.technician}\\nEnter new technician:`);if(!newTech)return;addTimeline(j,"👨‍🔧 Technician reassigned",`Changed from ${j.technician} to ${newTech} by Service Manager.`);j.technician=newTech;save();render()}function managerComment(id){const j=jobs.find(x=>x.id===id);if(!j)return;const text=prompt("Add manager comment to timeline:");if(!text)return;addTimeline(j,"💬 Manager comment",text);save();render()}function renderDash(){const totalAllowed=jobs.reduce((s,j)=>s+Number(j.hours||0),0);const totalActual=jobs.reduce((s,j)=>s+Number(j.actualHours||0),0);const workshopEff=efficiency(totalAllowed,totalActual);const utilisation=targets.availableHours>0?(totalAllowed/targets.availableHours)*100:null;const retail=sumType("Retail"),internal=sumType("Internal"),warranty=sumType("Warranty");const internalCompleted=jobs.filter(j=>j.type==="Internal"&&completed(j)).length;const waitingParts=jobs.filter(j=>j.status&&j.status.includes("Awaiting Parts")).length;const health=garageHealth({workshopEff,utilisation,retail,internal,warranty,internalCompleted,waitingParts});$("healthScore").innerHTML=`Garage Health: ${health.score}/100 ${health.score>=85?"🟢":health.score>=65?"🟠":"🔴"}<br><span>${health.message}</span>`;$("ownerStats").innerHTML=`<div class="stat"><strong>${jobs.length}</strong>Jobs</div><div class="stat"><strong>${totalAllowed.toFixed(1)}</strong>Allowed Hrs</div><div class="stat"><strong>${totalActual.toFixed(1)}</strong>Actual Hrs</div><div class="stat"><strong>${pct(workshopEff)}</strong>Efficiency</div><div class="stat"><strong>${pct(utilisation)}</strong>Utilisation</div>`;renderLiveActivity();renderCoach({workshopEff,utilisation,retail,internal,warranty,internalCompleted,waitingParts});renderLeague("leagueTable");renderLeague("leagueTableOwner");renderScorecard({workshopEff,utilisation,retail,internal,warranty,internalCompleted});renderStatusBoard("statusBoard");renderStatusBoard("ownerStatusBoard");renderWorkload();renderDowntimeReports()}function garageHealth(m){let score=100;if(m.workshopEff!==null&&m.workshopEff<(targets.efficiency||95))score-=15;if(m.utilisation!==null&&m.utilisation<85)score-=15;if(targets.retailHours&&m.retail<targets.retailHours)score-=15;if(targets.internalCars&&m.internalCompleted<targets.internalCars)score-=10;if(m.waitingParts>0)score-=5*Math.min(m.waitingParts,3);score=Math.max(0,Math.round(score));return {score,message:score>=85?"Workshop is performing strongly.":score>=65?"Workshop needs attention in some areas.":"Workshop requires urgent management focus."}}function allEvents(){let events=[];jobs.forEach(j=>{ensureTimeline(j).forEach(t=>events.push({...t,reg:j.reg,jobNo:j.jobNo,tech:j.technician}))});return events.sort((a,b)=>new Date(b.time)-new Date(a.time)).slice(0,25)}function renderLiveActivity(){$("liveActivity").innerHTML=allEvents().length?allEvents().map(e=>`<div class="timeline-item"><strong>${timeOnly(e.time)} — ${e.reg} — ${e.title}</strong><small>${fmt(e.time)} | ${e.tech}</small><p>${e.detail||""}</p></div>`).join(""):"No activity yet."}function sumType(type){return jobs.filter(j=>j.type===type&&completed(j)).reduce((s,j)=>s+Number(j.hours||0),0)}function kpiCard(label,target,actual,unit=""){const pctDone=target>0?(actual/target)*100:null;let cls="warn";if(pctDone===null)cls="warn";else if(pctDone>=100)cls="good";else if(pctDone<80)cls="bad";return `<div class="job-card ${cls}"><h3>${label}</h3><p><strong>${actual.toFixed?actual.toFixed(1):actual}${unit}</strong> / ${target||0}${unit} ${pctDone!==null?`(${pctDone.toFixed(0)}%)`:""}</p><div class="progress"><div class="bar ${cls}" style="width:${Math.min(100,pctDone||0)}%"></div></div></div>`}function renderScorecard(m){$("kpiScorecard").innerHTML=kpiCard("Workshop efficiency",targets.efficiency||95,m.workshopEff||0,"%")+kpiCard("Workshop utilisation",100,m.utilisation||0,"%")+kpiCard("Retail hours completed",targets.retailHours,m.retail," hrs")+kpiCard("Warranty hours completed",targets.warrantyHours,m.warranty," hrs")+kpiCard("Internal hours completed",targets.internalHours,m.internal," hrs")+kpiCard("Internal cars completed",targets.internalCars,m.internalCompleted,"")}function techMetrics(t){const list=jobs.filter(j=>j.technician===t);const allowed=list.reduce((s,j)=>s+Number(j.hours||0),0);const actual=list.reduce((s,j)=>s+Number(j.actualHours||0),0);return {tech:t,jobs:list.length,allowed,actual,eff:efficiency(allowed,actual),retail:list.filter(j=>j.type==="Retail").reduce((s,j)=>s+Number(j.hours||0),0),warranty:list.filter(j=>j.type==="Warranty").reduce((s,j)=>s+Number(j.hours||0),0),internal:list.filter(j=>j.type==="Internal").reduce((s,j)=>s+Number(j.hours||0),0)}}function renderLeague(id){const rows=getTechs().map(techMetrics).sort((a,b)=>(b.eff||0)-(a.eff||0));$(id).innerHTML=`<table><thead><tr><th>Rank</th><th>Technician</th><th>Efficiency</th><th>Hours Sold</th><th>Hours Clocked</th><th>Jobs</th><th>Retail</th><th>Warranty</th><th>Internal</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</td><td>${r.tech}</td><td>${pct(r.eff)}</td><td>${r.allowed.toFixed(1)}</td><td>${r.actual.toFixed(1)}</td><td>${r.jobs}</td><td>${r.retail.toFixed(1)}</td><td>${r.warranty.toFixed(1)}</td><td>${r.internal.toFixed(1)}</td></tr>`).join("")}</tbody></table>`}function renderCoach(m){let notes=[];if(m.workshopEff!==null&&m.workshopEff<(targets.efficiency||95))notes.push(["Improve workshop efficiency",`Workshop efficiency is ${m.workshopEff.toFixed(0)}%, below the ${targets.efficiency||95}% target. Review jobs where actual clocked time exceeded allocated hours.`,"bad"]);else notes.push(["Efficiency on target","Workshop efficiency is currently on or above target based on completed clocked work.","good"]);if(m.utilisation!==null&&m.utilisation<85)notes.push(["Increase workshop utilisation",`Allocated hours are ${m.utilisation.toFixed(0)}% of available capacity. Look for extra retail work or bring internal prep forward.`,"warn"]);if(targets.retailHours&&m.retail<targets.retailHours)notes.push(["Retail hours below target",`Retail completed hours are ${m.retail.toFixed(1)} against a target of ${targets.retailHours}. Prioritise authorised retail work today.`,"bad"]);if(targets.internalCars&&m.internalCompleted<targets.internalCars)notes.push(["Internal cars need attention",`Internal cars completed are ${m.internalCompleted} against a target of ${targets.internalCars}. Review sales prep bottlenecks.`,"warn"]);if(m.waitingParts>0)notes.push(["Parts delay risk",`${m.waitingParts} job(s) are awaiting parts. Review parts queue to reduce technician downtime.`,"warn"]);$("ownerCoach").innerHTML=notes.map(n=>`<div class="coach-card ${n[2]}"><h3>${n[0]}</h3><p>${n[1]}</p></div>`).join("")}function renderStatusBoard(id){const statuses=["🔵 Waiting to Start","🟡 Diagnosis","🟠 Awaiting Parts","🟣 Awaiting Customer Approval","🟢 Repair Complete","✅ Ready for Collection"];$(id).innerHTML=statuses.map(st=>{const list=jobs.filter(j=>j.status===st);return `<div class="board-column" data-status="${st}"><h3>${st}</h3>${list.length?list.map(j=>`<div class="board-job" draggable="true" data-job-id="${j.id}"><strong>${j.reg}</strong><br>${j.technician} | ${j.hours} hrs<br>${j.type} | ${j.mot}<br><button onclick="showTimelineModal('${j.id}')">Timeline</button></div>`).join(""):"<p class='muted'>No jobs</p>"}</div>`}).join("");setTimeout(enableDragDropBoard,0)}function renderWorkload(){$("workload").innerHTML=getTechs().map(t=>{const r=techMetrics(t);return `<div class="job-card"><h3>${t}</h3><p>${r.jobs} jobs | ${r.allowed.toFixed(1)} allowed hrs | ${r.actual.toFixed(1)} actual hrs | Efficiency: ${pct(r.eff)}</p></div>`}).join("")}
-function renderReportsInterface(){
-  if(!$("reportsTopStats")) return;
-  const totalAllowed=jobs.reduce((s,j)=>s+Number(j.hours||0),0);
-  const totalActual=jobs.reduce((s,j)=>s+Number(j.actualHours||0),0);
-  const workshopEff=efficiency(totalAllowed,totalActual);
-  const completedJobs=jobs.filter(j=>completed(j)).length;
-  $("reportsTopStats").innerHTML=`
+    function makeReport(j) { const eff = efficiency(Number(j.hours || 0), Number(j.actualHours || 0)); return `PCA WORKSHOP AI REPORT\\n\\nJob Number: ${j.jobNo}\\nRegistration: ${j.reg}\\nVehicle: ${j.make || "Not entered"} ${j.model || ""}\\nMileage: ${j.mileage || "Not entered"}\\nCustomer: ${j.customer || "Not entered"}\\nTelephone: ${j.phone || "Not entered"}\\n\\nCreated: ${fmt(j.createdAt)}\\nBooking Date: ${j.bookingDate}\\nCompleted: ${fmt(j.completedAt)}\\n\\nJob Type: ${j.type}\\nTechnician: ${j.technician}\\nLabour Hours Allowed: ${j.hours}\\nActual Hours Clocked: ${(j.actualHours || 0).toFixed(2)}\\nEfficiency: ${pct(eff)}\\nMOT: ${j.mot}\\nPriority: ${j.priority}\\nStatus: ${j.status}\\nCustomer Authorisation: ${j.auth}\\nPhotos Added: ${j.photoCount}\\n\\nAI JOB SUMMARY\\n${jobSummary(j)}\\n\\nWORK REQUIRED\\n${j.workRequired || "Not entered"}\\n\\nJOB DESCRIPTION\\n${j.complaint || "Not entered"}\\n\\nTECHNICIAN FINDINGS\\n${j.findings || "Not entered"}\\n\\nREPAIR CARRIED OUT\\n${j.repair || "Not entered"}\\n\\nPARTS USED / REQUIRED\\n${j.parts || "Not entered"}\\n\\nADVISORIES\\n${j.advisories || "None entered"}\\n\\nDRAGON 2000 DESCRIPTION\\n${dragon(j)}\\n\\nTIMELINE EVENTS\\n${(j.timeline || []).map(t => `${timeOnly(t.time)} - ${t.title}: ${t.detail}`).join("\\n")}` } function jobSummary(j) { let bits = []; if (j.findings) bits.push(j.findings); if (j.repair) bits.push(j.repair); if (j.advisories) bits.push("Advisories: " + j.advisories); return bits.length ? bits.join(" ") : "Job opened. Awaiting technician findings and repair summary." } function dragon(j) { return (j.repair || j.findings || j.workRequired || "Job opened. Awaiting technician update.").slice(0, 220) } function amendHours(id) { const j = jobs.find(x => x.id === id); if (!j) return; const newHours = Number(prompt(`Current hours: ${j.hours}\\nEnter new labour hours:`)); if (!newHours || newHours <= 0) return; addTimeline(j, "⏱ Labour hours amended", `Hours changed from ${j.hours} to ${newHours} by Service Manager.`); j.hours = newHours; if (j.report) j.report = makeReport(j); save(); render() } function reassignTech(id) { const j = jobs.find(x => x.id === id); if (!j) return; const newTech = prompt(`Current technician: ${j.technician}\\nEnter new technician:`); if (!newTech) return; addTimeline(j, "👨‍🔧 Technician reassigned", `Changed from ${j.technician} to ${newTech} by Service Manager.`); j.technician = newTech; save(); render() } function managerComment(id) { const j = jobs.find(x => x.id === id); if (!j) return; const text = prompt("Add manager comment to timeline:"); if (!text) return; addTimeline(j, "💬 Manager comment", text); save(); render() } function renderDash() { const totalAllowed = jobs.reduce((s, j) => s + Number(j.hours || 0), 0); const totalActual = jobs.reduce((s, j) => s + Number(j.actualHours || 0), 0); const workshopEff = efficiency(totalAllowed, totalActual); const utilisation = targets.availableHours > 0 ? (totalAllowed / targets.availableHours) * 100 : null; const retail = sumType("Retail"), internal = sumType("Internal"), warranty = sumType("Warranty"); const internalCompleted = jobs.filter(j => j.type === "Internal" && completed(j)).length; const waitingParts = jobs.filter(j => j.status && j.status.includes("Awaiting Parts")).length; const health = garageHealth({ workshopEff, utilisation, retail, internal, warranty, internalCompleted, waitingParts }); $("healthScore").innerHTML = `Garage Health: ${health.score}/100 ${health.score >= 85 ? "🟢" : health.score >= 65 ? "🟠" : "🔴"}<br><span>${health.message}</span>`; $("ownerStats").innerHTML = `<div class="stat"><strong>${jobs.length}</strong>Jobs</div><div class="stat"><strong>${totalAllowed.toFixed(1)}</strong>Allowed Hrs</div><div class="stat"><strong>${totalActual.toFixed(1)}</strong>Actual Hrs</div><div class="stat"><strong>${pct(workshopEff)}</strong>Efficiency</div><div class="stat"><strong>${pct(utilisation)}</strong>Utilisation</div><div class="stat ${waitingParts > 0 ? 'warning' : 'good'}">
+    <strong>${waitingParts}</strong>Parts Required
+</div>`;
+    renderLiveActivity(); renderCoach({ workshopEff, utilisation, retail, internal, warranty, internalCompleted, waitingParts }); renderLeague("leagueTable"); renderLeague("leagueTableOwner"); renderScorecard({ workshopEff, utilisation, retail, internal, warranty, internalCompleted }); renderStatusBoard("statusBoard"); renderStatusBoard("ownerStatusBoard"); renderWorkload(); renderDowntimeReports() } function garageHealth(m) { let score = 100; if (m.workshopEff !== null && m.workshopEff < (targets.efficiency || 95)) score -= 15; if (m.utilisation !== null && m.utilisation < 85) score -= 15; if (targets.retailHours && m.retail < targets.retailHours) score -= 15; if (targets.internalCars && m.internalCompleted < targets.internalCars) score -= 10; if (m.waitingParts > 0) score -= 5 * Math.min(m.waitingParts, 3); score = Math.max(0, Math.round(score)); return { score, message: score >= 85 ? "Workshop is performing strongly." : score >= 65 ? "Workshop needs attention in some areas." : "Workshop requires urgent management focus." } } function allEvents() { let events = []; jobs.forEach(j => { ensureTimeline(j).forEach(t => events.push({ ...t, reg: j.reg, jobNo: j.jobNo, tech: j.technician })) }); return events.sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 25) } function renderLiveActivity() { $("liveActivity").innerHTML = allEvents().length ? allEvents().map(e => `<div class="timeline-item"><strong>${timeOnly(e.time)} — ${e.reg} — ${e.title}</strong><small>${fmt(e.time)} | ${e.tech}</small><p>${e.detail || ""}</p></div>`).join("") : "No activity yet." } function sumType(type) { return jobs.filter(j => j.type === type && completed(j)).reduce((s, j) => s + Number(j.hours || 0), 0) } function kpiCard(label, target, actual, unit = "") { const pctDone = target > 0 ? (actual / target) * 100 : null; let cls = "warn"; if (pctDone === null) cls = "warn"; else if (pctDone >= 100) cls = "good"; else if (pctDone < 80) cls = "bad"; return `<div class="job-card ${cls}"><h3>${label}</h3><p><strong>${actual.toFixed ? actual.toFixed(1) : actual}${unit}</strong> / ${target || 0}${unit} ${pctDone !== null ? `(${pctDone.toFixed(0)}%)` : ""}</p><div class="progress"><div class="bar ${cls}" style="width:${Math.min(100, pctDone || 0)}%"></div></div></div>` } function renderScorecard(m) { $("kpiScorecard").innerHTML = kpiCard("Workshop efficiency", targets.efficiency || 95, m.workshopEff || 0, "%") + kpiCard("Workshop utilisation", 100, m.utilisation || 0, "%") + kpiCard("Retail hours completed", targets.retailHours, m.retail, " hrs") + kpiCard("Warranty hours completed", targets.warrantyHours, m.warranty, " hrs") + kpiCard("Internal hours completed", targets.internalHours, m.internal, " hrs") + kpiCard("Internal cars completed", targets.internalCars, m.internalCompleted, "") } function techMetrics(t) { const list = jobs.filter(j => j.technician === t); const allowed = list.reduce((s, j) => s + Number(j.hours || 0), 0); const actual = list.reduce((s, j) => s + Number(j.actualHours || 0), 0); return { tech: t, jobs: list.length, allowed, actual, eff: efficiency(allowed, actual), retail: list.filter(j => j.type === "Retail").reduce((s, j) => s + Number(j.hours || 0), 0), warranty: list.filter(j => j.type === "Warranty").reduce((s, j) => s + Number(j.hours || 0), 0), internal: list.filter(j => j.type === "Internal").reduce((s, j) => s + Number(j.hours || 0), 0) } } function renderLeague(id) { const rows = getTechs().map(techMetrics).sort((a, b) => (b.eff || 0) - (a.eff || 0)); $(id).innerHTML = `<table><thead><tr><th>Rank</th><th>Technician</th><th>Efficiency</th><th>Hours Sold</th><th>Hours Clocked</th><th>Jobs</th><th>Retail</th><th>Warranty</th><th>Internal</th></tr></thead><tbody>${rows.map((r, i) => `<tr><td>${i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}</td><td>${r.tech}</td><td>${pct(r.eff)}</td><td>${r.allowed.toFixed(1)}</td><td>${r.actual.toFixed(1)}</td><td>${r.jobs}</td><td>${r.retail.toFixed(1)}</td><td>${r.warranty.toFixed(1)}</td><td>${r.internal.toFixed(1)}</td></tr>`).join("")}</tbody></table>` } function renderCoach(m) { let notes = []; if (m.workshopEff !== null && m.workshopEff < (targets.efficiency || 95)) notes.push(["Improve workshop efficiency", `Workshop efficiency is ${m.workshopEff.toFixed(0)}%, below the ${targets.efficiency || 95}% target. Review jobs where actual clocked time exceeded allocated hours.`, "bad"]); else notes.push(["Efficiency on target", "Workshop efficiency is currently on or above target based on completed clocked work.", "good"]); if (m.utilisation !== null && m.utilisation < 85) notes.push(["Increase workshop utilisation", `Allocated hours are ${m.utilisation.toFixed(0)}% of available capacity. Look for extra retail work or bring internal prep forward.`, "warn"]); if (targets.retailHours && m.retail < targets.retailHours) notes.push(["Retail hours below target", `Retail completed hours are ${m.retail.toFixed(1)} against a target of ${targets.retailHours}. Prioritise authorised retail work today.`, "bad"]); if (targets.internalCars && m.internalCompleted < targets.internalCars) notes.push(["Internal cars need attention", `Internal cars completed are ${m.internalCompleted} against a target of ${targets.internalCars}. Review sales prep bottlenecks.`, "warn"]); if (m.waitingParts > 0) notes.push(["Parts delay risk", `${m.waitingParts} job(s) are awaiting parts. Review parts queue to reduce technician downtime.`, "warn"]); $("ownerCoach").innerHTML = notes.map(n => `<div class="coach-card ${n[2]}"><h3>${n[0]}</h3><p>${n[1]}</p></div>`).join("") } function renderStatusBoard(id) { const statuses = ["🔵 Waiting to Start", "🟡 Diagnosis", "🟠 Awaiting Parts", "🟣 Awaiting Customer Approval", "🟢 Repair Complete", "✅ Ready for Collection"]; $(id).innerHTML = statuses.map(st => { const list = jobs.filter(j => j.status === st); return `<div class="board-column" data-status="${st}"><h3>${st}</h3>${list.length ? list.map(j => `<div class="board-job" draggable="true" data-job-id="${j.id}"><strong>${j.reg}</strong><br>${j.technician} | ${j.hours} hrs<br>${j.type} | ${j.mot}<br><button onclick="showTimelineModal('${j.id}')">Timeline</button></div>`).join("") : "<p class='muted'>No jobs</p>"}</div>` }).join(""); setTimeout(enableDragDropBoard, 0) } function renderWorkload() { $("workload").innerHTML = getTechs().map(t => { const r = techMetrics(t); return `<div class="job-card"><h3>${t}</h3><p>${r.jobs} jobs | ${r.allowed.toFixed(1)} allowed hrs | ${r.actual.toFixed(1)} actual hrs | Efficiency: ${pct(r.eff)}</p></div>` }).join("") }
+    function renderReportsInterface() {
+      if (!$("reportsTopStats")) return;
+      const totalAllowed = jobs.reduce((s, j) => s + Number(j.hours || 0), 0);
+      const totalActual = jobs.reduce((s, j) => s + Number(j.actualHours || 0), 0);
+      const workshopEff = efficiency(totalAllowed, totalActual);
+      const completedJobs = jobs.filter(j => completed(j)).length;
+      $("reportsTopStats").innerHTML = `
     <div class="stat"><strong>${jobs.length}</strong>Total Jobs</div>
     <div class="stat"><strong>${completedJobs}</strong>Completed</div>
     <div class="stat"><strong>${totalAllowed.toFixed(1)}</strong>Allowed Hrs</div>
     <div class="stat"><strong>${totalActual.toFixed(1)}</strong>Actual Hrs</div>
     <div class="stat"><strong>${pct(workshopEff)}</strong>Efficiency</div>
   `;
-  $("reportsPerformance").innerHTML=
-    kpiCard("Retail hours completed",targets.retailHours,sumType("Retail")," hrs")+
-    kpiCard("Warranty hours completed",targets.warrantyHours,sumType("Warranty")," hrs")+
-    kpiCard("Internal hours completed",targets.internalHours,sumType("Internal")," hrs")+
-    kpiCard("Internal cars completed",targets.internalCars,jobs.filter(j=>j.type==="Internal"&&completed(j)).length,"");
-  const today=downtimeTotals ? downtimeTotals(1) : {Lunch:0,Idle:0,"Collecting Car":0};
-  const week=downtimeTotals ? downtimeTotals(7) : {Lunch:0,Idle:0,"Collecting Car":0};
-  $("reportsDowntime").innerHTML=`
+      $("reportsPerformance").innerHTML =
+        kpiCard("Retail hours completed", targets.retailHours, sumType("Retail"), " hrs") +
+        kpiCard("Warranty hours completed", targets.warrantyHours, sumType("Warranty"), " hrs") +
+        kpiCard("Internal hours completed", targets.internalHours, sumType("Internal"), " hrs") +
+        kpiCard("Internal cars completed", targets.internalCars, jobs.filter(j => j.type === "Internal" && completed(j)).length, "");
+      const today = downtimeTotals ? downtimeTotals(1) : { Lunch: 0, Idle: 0, "Collecting Car": 0 };
+      const week = downtimeTotals ? downtimeTotals(7) : { Lunch: 0, Idle: 0, "Collecting Car": 0 };
+      $("reportsDowntime").innerHTML = `
     <div class="job-card"><h3>Today</h3><p>Lunch: ${today.Lunch.toFixed(2)} hrs</p><p>Idle: ${today.Idle.toFixed(2)} hrs</p><p>Collecting Cars: ${today["Collecting Car"].toFixed(2)} hrs</p></div>
     <div class="job-card"><h3>This Week</h3><p>Lunch: ${week.Lunch.toFixed(2)} hrs</p><p>Idle: ${week.Idle.toFixed(2)} hrs</p><p>Collecting Cars: ${week["Collecting Car"].toFixed(2)} hrs</p></div>`;
-  const completedReports=jobs.filter(j=>j.report && (j.reportReady || completed(j))).sort((a,b)=>new Date(b.completedAt||b.finishedAt||b.createdAt)-new Date(a.completedAt||a.finishedAt||a.createdAt));
-  $("reportsCompletedWriteups").innerHTML=completedReports.length?completedReports.map(j=>`
-    <div class="job-card ${j.reportReviewed?'good':'warn'}">
-      <h3>${j.jobNo||""} | ${j.reg} — ${j.technician}</h3>
-      <p>${j.make||""} ${j.model||""} | ${j.type} | ${fmt(j.completedAt||j.finishedAt)}</p>
+      const completedReports = jobs.filter(j => j.report && (j.reportReady || completed(j))).sort((a, b) => new Date(b.completedAt || b.finishedAt || b.createdAt) - new Date(a.completedAt || a.finishedAt || a.createdAt));
+      $("reportsCompletedWriteups").innerHTML = completedReports.length ? completedReports.map(j => `
+    <div class="job-card ${j.reportReviewed ? 'good' : 'warn'}">
+      <h3>${j.jobNo || ""} | ${j.reg} — ${j.technician}</h3>
+      <p>${j.make || ""} ${j.model || ""} | ${j.type} | ${fmt(j.completedAt || j.finishedAt)}</p>
       <button onclick="copyInboxReport('${j.id}')">Copy Report</button>
       <button onclick="showTimelineModal('${j.id}')">Timeline</button>
-    </div>`).join(""):"No completed write-ups yet.";
-  renderLeague("reportsLeagueTable");
-}
+    </div>`).join("") : "No completed write-ups yet.";
+      renderLeague("reportsLeagueTable");
+    }
 
 
-function selectedPlannerDate(){
-  return $("plannerDate") && $("plannerDate").value ? $("plannerDate").value : todayISO();
-}
-function jobMatchesPlannerDay(j){
-  const d=selectedPlannerDate();
-  return (j.bookingDate||todayISO())===d;
-}
-function renderDailyPlanner(){
-  if(!$("plannerSummary")) return;
-  const dayJobs=jobs.filter(jobMatchesPlannerDay);
-  const capacity=Number($("dailyTechCapacity") ? $("dailyTechCapacity").value : plannerSettings.capacity)||8;
-  const retail=dayJobs.filter(j=>j.type==="Retail").length;
-  const warranty=dayJobs.filter(j=>j.type==="Warranty").length;
-  const internal=dayJobs.filter(j=>j.type==="Internal").length;
-  const mot=dayJobs.filter(j=>j.mot&&j.mot!=="None").length;
-  const totalHours=dayJobs.reduce((s,j)=>s+Number(j.hours||0),0);
-  $("plannerSummary").innerHTML=`
+    function selectedPlannerDate() {
+      return $("plannerDate") && $("plannerDate").value ? $("plannerDate").value : todayISO();
+    }
+    function jobMatchesPlannerDay(j) {
+      const d = selectedPlannerDate();
+      return (j.bookingDate || todayISO()) === d;
+    }
+    function renderDailyPlanner() {
+      if (!$("plannerSummary")) return;
+      const dayJobs = jobs.filter(jobMatchesPlannerDay);
+      const capacity = Number($("dailyTechCapacity") ? $("dailyTechCapacity").value : plannerSettings.capacity) || 8;
+      const retail = dayJobs.filter(j => j.type === "Retail").length;
+      const warranty = dayJobs.filter(j => j.type === "Warranty").length;
+      const internal = dayJobs.filter(j => j.type === "Internal").length;
+      const mot = dayJobs.filter(j => j.mot && j.mot !== "None").length;
+      const totalHours = dayJobs.reduce((s, j) => s + Number(j.hours || 0), 0);
+      $("plannerSummary").innerHTML = `
     <div class="stat"><strong>${dayJobs.length}</strong>Jobs Booked</div>
     <div class="stat"><strong>${retail}</strong>Retail</div>
     <div class="stat"><strong>${warranty}</strong>Warranty</div>
     <div class="stat"><strong>${internal}</strong>Internal</div>
     <div class="stat"><strong>${totalHours.toFixed(1)}</strong>Hours</div>
   `;
-  const techHtml=getTechs().map(t=>{
-    const list=dayJobs.filter(j=>j.technician===t);
-    const hrs=list.reduce((s,j)=>s+Number(j.hours||0),0);
-    const pctUsed=capacity>0?(hrs/capacity)*100:0;
-    let label="🟢 On Target", cls="capacity-good", fill="planner-fill";
-    if(pctUsed>110){label="🔴 Overloaded";cls="capacity-bad";fill="planner-fill bad"}
-    else if(pctUsed<70 && list.length>0){label="🟠 Capacity Available";cls="capacity-warn";fill="planner-fill warn"}
-    else if(list.length===0){label="⚪ No Jobs Allocated";cls="capacity-warn";fill="planner-fill warn"}
-    return `<div class="job-card">
+      const techHtml = getTechs().map(t => {
+        const list = dayJobs.filter(j => j.technician === t);
+        const hrs = list.reduce((s, j) => s + Number(j.hours || 0), 0);
+        const pctUsed = capacity > 0 ? (hrs / capacity) * 100 : 0;
+        let label = "🟢 On Target", cls = "capacity-good", fill = "planner-fill";
+        if (pctUsed > 110) { label = "🔴 Overloaded"; cls = "capacity-bad"; fill = "planner-fill bad" }
+        else if (pctUsed < 70 && list.length > 0) { label = "🟠 Capacity Available"; cls = "capacity-warn"; fill = "planner-fill warn" }
+        else if (list.length === 0) { label = "⚪ No Jobs Allocated"; cls = "capacity-warn"; fill = "planner-fill warn" }
+        return `<div class="job-card">
       <h3>${t}</h3>
       <p><strong>${hrs.toFixed(1)}</strong> hrs allocated / ${capacity.toFixed(1)} hrs capacity</p>
       <p>${list.length} job(s)</p>
       <span class="capacity-label ${cls}">${label}</span>
-      <div class="planner-bar"><div class="${fill}" style="width:${Math.min(100,pctUsed)}%"></div></div>
+      <div class="planner-bar"><div class="${fill}" style="width:${Math.min(100, pctUsed)}%"></div></div>
     </div>`;
-  }).join("");
-  $("plannerTechnicians").innerHTML=techHtml;
-  $("plannerJobs").innerHTML=dayJobs.length?dayJobs.map(j=>card(j,true,true)).join(""):"No jobs booked for this day.";
-  renderPlannerSuggestions(dayJobs,capacity);renderUpcomingWorkload();
-}
-function renderPlannerSuggestions(dayJobs,capacity){
-  if(!$("plannerSuggestions")) return;
-  let notes=[];
-  const byTech=getTechs().map(t=>{
-    const list=dayJobs.filter(j=>j.technician===t);
-    const hrs=list.reduce((s,j)=>s+Number(j.hours||0),0);
-    return {tech:t,hrs,jobs:list.length};
-  });
-  const overloaded=byTech.filter(t=>t.hrs>capacity*1.1);
-  const available=byTech.filter(t=>t.hrs<capacity*.7);
-  if(overloaded.length){
-    notes.push(["Rebalance overloaded technicians",`${overloaded.map(t=>`${t.tech} (${t.hrs.toFixed(1)} hrs)`).join(", ")} appear overloaded. Consider moving a routine/internal job to a technician with spare capacity.`,"bad"]);
-  }
-  if(available.length){
-    notes.push(["Spare workshop capacity",`${available.map(t=>`${t.tech} (${t.hrs.toFixed(1)} hrs)`).join(", ")} have available capacity. Consider adding retail work or bringing internal prep forward.`,"warn"]);
-  }
-  const waitingApproval=dayJobs.filter(j=>j.status&&j.status.includes("Approval")).length;
-  if(waitingApproval) notes.push(["Customer approval focus",`${waitingApproval} job(s) are waiting for customer approval. Prioritise customer calls to keep the workshop moving.`,"warn"]);
-  const waitingParts=dayJobs.filter(j=>j.status&&j.status.includes("Awaiting Parts")).length;
-  if(waitingParts) notes.push(["Parts bottleneck",`${waitingParts} job(s) are awaiting parts. Check ETA and update technicians.`,"warn"]);
-  if(!notes.length) notes.push(["Planner looks balanced","Today's workload appears balanced across technicians based on allocated hours.","good"]);
-  $("plannerSuggestions").innerHTML=notes.map(n=>`<div class="coach-card ${n[2]}"><h3>${n[0]}</h3><p>${n[1]}</p></div>`).join("");
-}
-if($("savePlannerSettings")) $("savePlannerSettings").addEventListener("click",()=>{
-  plannerSettings.capacity=Number(val("dailyTechCapacity"))||8;
-  localStorage.setItem("workshopAIPlannerSettings",JSON.stringify(plannerSettings));
-  renderDailyPlanner();
-});
-if($("plannerDate")) $("plannerDate").addEventListener("change",renderDailyPlanner);
+      }).join("");
+      $("plannerTechnicians").innerHTML = techHtml;
+      $("plannerJobs").innerHTML = dayJobs.length ? dayJobs.map(j => card(j, true, true)).join("") : "No jobs booked for this day.";
+      renderPlannerSuggestions(dayJobs, capacity); renderUpcomingWorkload();
+    }
+    function renderPlannerSuggestions(dayJobs, capacity) {
+      if (!$("plannerSuggestions")) return;
+      let notes = [];
+      const byTech = getTechs().map(t => {
+        const list = dayJobs.filter(j => j.technician === t);
+        const hrs = list.reduce((s, j) => s + Number(j.hours || 0), 0);
+        return { tech: t, hrs, jobs: list.length };
+      });
+      const overloaded = byTech.filter(t => t.hrs > capacity * 1.1);
+      const available = byTech.filter(t => t.hrs < capacity * .7);
+      if (overloaded.length) {
+        notes.push(["Rebalance overloaded technicians", `${overloaded.map(t => `${t.tech} (${t.hrs.toFixed(1)} hrs)`).join(", ")} appear overloaded. Consider moving a routine/internal job to a technician with spare capacity.`, "bad"]);
+      }
+      if (available.length) {
+        notes.push(["Spare workshop capacity", `${available.map(t => `${t.tech} (${t.hrs.toFixed(1)} hrs)`).join(", ")} have available capacity. Consider adding retail work or bringing internal prep forward.`, "warn"]);
+      }
+      const waitingApproval = dayJobs.filter(j => j.status && j.status.includes("Approval")).length;
+      if (waitingApproval) notes.push(["Customer approval focus", `${waitingApproval} job(s) are waiting for customer approval. Prioritise customer calls to keep the workshop moving.`, "warn"]);
+      const waitingParts = dayJobs.filter(j => j.status && j.status.includes("Awaiting Parts")).length;
+      if (waitingParts) notes.push(["Parts bottleneck", `${waitingParts} job(s) are awaiting parts. Check ETA and update technicians.`, "warn"]);
+      if (!notes.length) notes.push(["Planner looks balanced", "Today's workload appears balanced across technicians based on allocated hours.", "good"]);
+      $("plannerSuggestions").innerHTML = notes.map(n => `<div class="coach-card ${n[2]}"><h3>${n[0]}</h3><p>${n[1]}</p></div>`).join("");
+    }
+    if ($("savePlannerSettings")) $("savePlannerSettings").addEventListener("click", () => {
+      plannerSettings.capacity = Number(val("dailyTechCapacity")) || 8;
+      localStorage.setItem("workshopAIPlannerSettings", JSON.stringify(plannerSettings));
+      renderDailyPlanner();
+    });
+    if ($("plannerDate")) $("plannerDate").addEventListener("change", renderDailyPlanner);
 
 
-function submitPartsRequest(){
-  const j=jobs.find(x=>x.id===activeJobId);
-  if(!j) return;
-  const description=val("partDescription");
-  if(!description){alert("Enter the part description.");return}
-  const qty=Number(val("partQty"))||1;
-  const priority=val("partPriority")||"Today";
-  const supplier=val("partSupplier")||"";
-  j.partsRequests=j.partsRequests||[];
-  j.partsRequests.push({
-    id:Date.now().toString(),
-    description,
-    qty,
-    priority,
-    supplier,
-    text:`${qty} x ${description}${supplier? " ("+supplier+")":""}`,
-    status:"Requested",
-    requestedAt:now().toISOString(),
-    orderedAt:null,
-    deliveredAt:null,
-    fittedAt:null
-  });
-  j.status="🟠 Awaiting Parts";
-  addTimeline(j,"📦 Part requested",`${qty} x ${description}. Priority: ${priority}${supplier? ". Supplier/note: "+supplier:""}`);
-  $("partDescription").value="";
-  $("partQty").value=1;
-  $("partSupplier").value="";
-  save();renderTechnicianPartsStatus(j);render();alert("Part request sent to Service Manager.");
-}
-if($("submitPartsRequest")) $("submitPartsRequest").addEventListener("click",submitPartsRequest);
+    function submitPartsRequest() {
+      const j = jobs.find(x => x.id === activeJobId);
+      if (!j) return;
+      const description = val("partDescription");
+      if (!description) { alert("Enter the part description."); return }
+      const qty = Number(val("partQty")) || 1;
+      const priority = val("partPriority") || "Today";
+      const supplier = val("partSupplier") || "";
+      j.partsRequests = j.partsRequests || [];
+      j.partsRequests.push({
+        id: Date.now().toString(),
+        description,
+        qty,
+        priority,
+        supplier,
+        text: `${qty} x ${description}${supplier ? " (" + supplier + ")" : ""}`,
+        status: "Requested",
+        requestedAt: now().toISOString(),
+        orderedAt: null,
+        deliveredAt: null,
+        fittedAt: null
+      });
+      j.status = "🟠 Awaiting Parts";
+      addTimeline(j, "📦 Part requested", `${qty} x ${description}. Priority: ${priority}${supplier ? ". Supplier/note: " + supplier : ""}`);
+      $("partDescription").value = "";
+      $("partQty").value = 1;
+      $("partSupplier").value = "";
+      save(); renderTechnicianPartsStatus(j); render(); alert("Part request sent to Service Manager.");
+    }
+    if ($("submitPartsRequest")) $("submitPartsRequest").addEventListener("click", submitPartsRequest);
 
-function renderTechnicianPartsStatus(job){
-  const el=$("technicianPartsStatus");
-  if(!el) return;
-  const list=job.partsRequests||[];
-  el.innerHTML=list.length?list.map(p=>`
+    function renderTechnicianPartsStatus(job) {
+      const el = $("technicianPartsStatus");
+      if (!el) return;
+      const list = job.partsRequests || [];
+      el.innerHTML = list.length ? list.map(p => `
     <div class="job-card parts-request-card">
-      <h3>${p.qty||1} x ${p.description||p.text}</h3>
-      <p><strong>Priority:</strong> ${p.priority||"Today"} ${p.supplier? " | <strong>Supplier:</strong> "+p.supplier:""}</p>
+      <h3>${p.qty || 1} x ${p.description || p.text}</h3>
+      <p><strong>Priority:</strong> ${p.priority || "Today"} ${p.supplier ? " | <strong>Supplier:</strong> " + p.supplier : ""}</p>
       <p>Requested: ${fmt(p.requestedAt)}</p>
-      <span class="part-pill ${(p.status||"requested").toLowerCase().replaceAll(" ","-")}">${p.status}</span>
-    </div>`).join(""):"No parts requested for this job.";
-}
-function allPartsRequests(){
-  let rows=[];
-  jobs.forEach(j=>(j.partsRequests||[]).forEach(p=>rows.push({job:j,part:p})));
-  return rows.sort((a,b)=>new Date(b.part.requestedAt)-new Date(a.part.requestedAt));
-}
-function renderPartsQueues(){
-  const el=$("servicePartsQueue");
-  if(!el) return;
-  const rows=allPartsRequests().filter(r=>r.part.status!=="Fitted");
-  if(!rows.length){el.innerHTML="No outstanding parts requested yet.";return}
-  el.innerHTML=rows.map(({job,part})=>partsCard(job,part)).join("");
-}
-function partsCard(job,part){
-  return `<div class="job-card parts-request-card">
+      <span class="part-pill ${(p.status || "requested").toLowerCase().replaceAll(" ", "-")}">${p.status}</span>
+    </div>`).join("") : "No parts requested for this job.";
+    }
+    function allPartsRequests() {
+      let rows = [];
+      jobs.forEach(j => (j.partsRequests || []).forEach(p => rows.push({ job: j, part: p })));
+      return rows.sort((a, b) => new Date(b.part.requestedAt) - new Date(a.part.requestedAt));
+    }
+    function renderPartsQueues() {
+      const el = $("servicePartsQueue");
+      if (!el) return;
+      const rows = allPartsRequests().filter(r => r.part.status !== "Fitted");
+      if (!rows.length) { el.innerHTML = "No outstanding parts requested yet."; return }
+      el.innerHTML = rows.map(({ job, part }) => partsCard(job, part)).join("");
+    }
+    function partsCard(job, part) {
+      return `<div class="job-card parts-request-card">
     <h3>${job.reg} — ${job.technician}</h3>
-    <p><strong>Part:</strong> ${part.qty||1} x ${part.description||part.text}</p>
-    <p><strong>Priority:</strong> ${part.priority||"Today"} ${part.supplier? " | <strong>Supplier:</strong> "+part.supplier:""}</p>
-    <p><strong>Status:</strong> <span class="part-pill ${(part.status||"requested").toLowerCase().replaceAll(" ","-")}">${part.status}</span></p>
+    <p><strong>Part:</strong> ${part.qty || 1} x ${part.description || part.text}</p>
+    <p><strong>Priority:</strong> ${part.priority || "Today"} ${part.supplier ? " | <strong>Supplier:</strong> " + part.supplier : ""}</p>
+    <p><strong>Status:</strong> <span class="part-pill ${(part.status || "requested").toLowerCase().replaceAll(" ", "-")}">${part.status}</span></p>
     <p><strong>Requested:</strong> ${fmt(part.requestedAt)}</p>
     <div class="parts-actions">
       <button onclick="markPartOrdered('${job.id}','${part.id}')">Mark Ordered</button>
@@ -933,104 +1631,104 @@ function partsCard(job,part){
       <button onclick="showTimelineModal('${job.id}')">Timeline</button>
     </div>
   </div>`;
-}
-function markPartOrdered(jobId,partId){
-  const j=jobs.find(x=>x.id===jobId); if(!j) return;
-  const p=(j.partsRequests||[]).find(x=>x.id===partId); if(!p) return;
-  p.status="Ordered"; p.orderedAt=now().toISOString();
-  addTimeline(j,"📦 Parts ordered",`${p.description||p.text} marked ordered by Service Manager.`);
-  save();render();
-}
-function markPartDelivered(jobId,partId){
-  const j=jobs.find(x=>x.id===jobId); if(!j) return;
-  const p=(j.partsRequests||[]).find(x=>x.id===partId); if(!p) return;
-  p.status="Delivered"; p.deliveredAt=now().toISOString();
-  addTimeline(j,"✅ Parts delivered",`${p.description||p.text} marked delivered by Service Manager.`);
-  if((j.partsRequests||[]).every(x=>x.status==="Delivered") && j.status.includes("Awaiting Parts")) j.status="🟡 Diagnosis";
-  save();render();
-}
+    }
+    function markPartOrdered(jobId, partId) {
+      const j = jobs.find(x => x.id === jobId); if (!j) return;
+      const p = (j.partsRequests || []).find(x => x.id === partId); if (!p) return;
+      p.status = "Ordered"; p.orderedAt = now().toISOString();
+      addTimeline(j, "📦 Parts ordered", `${p.description || p.text} marked ordered by Service Manager.`);
+      save(); render();
+    }
+    function markPartDelivered(jobId, partId) {
+      const j = jobs.find(x => x.id === jobId); if (!j) return;
+      const p = (j.partsRequests || []).find(x => x.id === partId); if (!p) return;
+      p.status = "Delivered"; p.deliveredAt = now().toISOString();
+      addTimeline(j, "✅ Parts delivered", `${p.description || p.text} marked delivered by Service Manager.`);
+      if ((j.partsRequests || []).every(x => x.status === "Delivered") && j.status.includes("Awaiting Parts")) j.status = "🟡 Diagnosis";
+      save(); render();
+    }
 
 
-function markPartFitted(jobId,partId){
-  const j=jobs.find(x=>x.id===jobId); if(!j) return;
-  const p=(j.partsRequests||[]).find(x=>x.id===partId); if(!p) return;
-  p.status="Fitted"; p.fittedAt=now().toISOString();
-  addTimeline(j,"🔧 Part fitted",`${p.description||p.text} marked fitted.`);
-  save();render();
-}
-function renderPartsManagement(){
-  const stats=$("partsManagementStats");
-  const queue=$("partsManagementQueue");
-  const delivered=$("partsDeliveredQueue");
-  if(!stats||!queue||!delivered) return;
-  const rows=allPartsRequests();
-  const requested=rows.filter(r=>r.part.status==="Requested").length;
-  const ordered=rows.filter(r=>r.part.status==="Ordered").length;
-  const deliveredCount=rows.filter(r=>r.part.status==="Delivered").length;
-  const fitted=rows.filter(r=>r.part.status==="Fitted").length;
-  stats.innerHTML=`
+    function markPartFitted(jobId, partId) {
+      const j = jobs.find(x => x.id === jobId); if (!j) return;
+      const p = (j.partsRequests || []).find(x => x.id === partId); if (!p) return;
+      p.status = "Fitted"; p.fittedAt = now().toISOString();
+      addTimeline(j, "🔧 Part fitted", `${p.description || p.text} marked fitted.`);
+      save(); render();
+    }
+    function renderPartsManagement() {
+      const stats = $("partsManagementStats");
+      const queue = $("partsManagementQueue");
+      const delivered = $("partsDeliveredQueue");
+      if (!stats || !queue || !delivered) return;
+      const rows = allPartsRequests();
+      const requested = rows.filter(r => r.part.status === "Requested").length;
+      const ordered = rows.filter(r => r.part.status === "Ordered").length;
+      const deliveredCount = rows.filter(r => r.part.status === "Delivered").length;
+      const fitted = rows.filter(r => r.part.status === "Fitted").length;
+      stats.innerHTML = `
     <div class="stat"><strong>${rows.length}</strong>Total</div>
     <div class="stat"><strong>${requested}</strong>Requested</div>
     <div class="stat"><strong>${ordered}</strong>Ordered</div>
     <div class="stat"><strong>${deliveredCount}</strong>Delivered</div>
     <div class="stat"><strong>${fitted}</strong>Fitted</div>`;
-  const outstanding=rows.filter(r=>r.part.status!=="Fitted");
-  queue.innerHTML=outstanding.length?outstanding.map(({job,part})=>partsCard(job,part)).join(""):"No outstanding parts.";
-  const completedRows=rows.filter(r=>r.part.status==="Fitted");
-  delivered.innerHTML=completedRows.length?completedRows.map(({job,part})=>partsCard(job,part)).join(""):"No fitted parts yet.";
-}
+      const outstanding = rows.filter(r => r.part.status !== "Fitted");
+      queue.innerHTML = outstanding.length ? outstanding.map(({ job, part }) => partsCard(job, part)).join("") : "No outstanding parts.";
+      const completedRows = rows.filter(r => r.part.status === "Fitted");
+      delivered.innerHTML = completedRows.length ? completedRows.map(({ job, part }) => partsCard(job, part)).join("") : "No fitted parts yet.";
+    }
 
-function moveJobToStatus(jobId,newStatus){
-  const j=jobs.find(x=>x.id===jobId); if(!j) return;
-  const old=j.status;
-  if(old===newStatus) return;
-  j.status=newStatus;
-  addTimeline(j,"🧲 Job moved on workshop board",`Status changed from ${old} to ${newStatus} by drag and drop.`);
-  if(newStatus.includes("Ready")&&!j.completedAt) j.completedAt=now().toISOString();
-  save();render();
-}
-function enableDragDropBoard(){
-  document.querySelectorAll(".board-job").forEach(el=>{
-    el.draggable=true;
-    el.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",el.dataset.jobId)});
-  });
-  document.querySelectorAll(".board-column").forEach(col=>{
-    col.addEventListener("dragover",e=>{e.preventDefault();col.classList.add("drag-over")});
-    col.addEventListener("dragleave",()=>col.classList.remove("drag-over"));
-    col.addEventListener("drop",e=>{
-      e.preventDefault();col.classList.remove("drag-over");
-      const jobId=e.dataTransfer.getData("text/plain");
-      const status=col.dataset.status;
-      if(jobId&&status) moveJobToStatus(jobId,status);
-    });
-  });
-}
-function renderEndOfDayBriefing(){
-  const briefing=buildEndOfDayBriefing();
-  const morning=buildMorningBriefing();
-  if($("endOfDayBriefing")) $("endOfDayBriefing").textContent=briefing;
-  if($("reportsEndOfDayBriefing")) $("reportsEndOfDayBriefing").textContent=briefing;
-  if($("serviceManagerEndOfDayBriefing")) $("serviceManagerEndOfDayBriefing").textContent=briefing;
-  if($("morningBriefing")) $("morningBriefing").textContent=morning;
-  if($("reportsMorningBriefing")) $("reportsMorningBriefing").textContent=morning;
-  if($("serviceManagerMorningBriefing")) $("serviceManagerMorningBriefing").textContent=morning;
-}
-function buildEndOfDayBriefing(){
-  const total=jobs.length;
-  const complete=jobs.filter(j=>completed(j)).length;
-  const totalAllowed=jobs.reduce((s,j)=>s+Number(j.hours||0),0);
-  const totalActual=jobs.reduce((s,j)=>s+Number(j.actualHours||0),0);
-  const eff=efficiency(totalAllowed,totalActual);
-  const ready=jobs.filter(j=>j.status&&j.status.includes("Ready")).length;
-  const waitingParts=jobs.filter(j=>j.status&&j.status.includes("Awaiting Parts")).length;
-  const waitingApproval=jobs.filter(j=>j.status&&j.status.includes("Approval")).length;
-  const today=downtimeTotals ? downtimeTotals(1) : {Lunch:0,Idle:0,"Collecting Car":0};
-  const best=getTechs().map(techMetrics).sort((a,b)=>(b.eff||0)-(a.eff||0))[0];
-  let recommendation="Keep the workflow moving and review any jobs waiting for parts or approval.";
-  if(waitingParts>0) recommendation="Parts delays are affecting the workshop. Review ordered parts and ETA first.";
-  else if(waitingApproval>0) recommendation="Customer approvals are holding jobs. Prioritise approval calls.";
-  else if(eff!==null && eff<(targets.efficiency||95)) recommendation="Workshop efficiency is below target. Review jobs that exceeded allocated labour.";
-  return `WORKSHOP AI END OF DAY BRIEFING
+    function moveJobToStatus(jobId, newStatus) {
+      const j = jobs.find(x => x.id === jobId); if (!j) return;
+      const old = j.status;
+      if (old === newStatus) return;
+      j.status = newStatus;
+      addTimeline(j, "🧲 Job moved on workshop board", `Status changed from ${old} to ${newStatus} by drag and drop.`);
+      if (newStatus.includes("Ready") && !j.completedAt) j.completedAt = now().toISOString();
+      save(); render();
+    }
+    function enableDragDropBoard() {
+      document.querySelectorAll(".board-job").forEach(el => {
+        el.draggable = true;
+        el.addEventListener("dragstart", e => { e.dataTransfer.setData("text/plain", el.dataset.jobId) });
+      });
+      document.querySelectorAll(".board-column").forEach(col => {
+        col.addEventListener("dragover", e => { e.preventDefault(); col.classList.add("drag-over") });
+        col.addEventListener("dragleave", () => col.classList.remove("drag-over"));
+        col.addEventListener("drop", e => {
+          e.preventDefault(); col.classList.remove("drag-over");
+          const jobId = e.dataTransfer.getData("text/plain");
+          const status = col.dataset.status;
+          if (jobId && status) moveJobToStatus(jobId, status);
+        });
+      });
+    }
+    function renderEndOfDayBriefing() {
+      const briefing = buildEndOfDayBriefing();
+      const morning = buildMorningBriefing();
+      if ($("endOfDayBriefing")) $("endOfDayBriefing").textContent = briefing;
+      if ($("reportsEndOfDayBriefing")) $("reportsEndOfDayBriefing").textContent = briefing;
+      if ($("serviceManagerEndOfDayBriefing")) $("serviceManagerEndOfDayBriefing").textContent = briefing;
+      if ($("morningBriefing")) $("morningBriefing").textContent = morning;
+      if ($("reportsMorningBriefing")) $("reportsMorningBriefing").textContent = morning;
+      if ($("serviceManagerMorningBriefing")) $("serviceManagerMorningBriefing").textContent = morning;
+    }
+    function buildEndOfDayBriefing() {
+      const total = jobs.length;
+      const complete = jobs.filter(j => completed(j)).length;
+      const totalAllowed = jobs.reduce((s, j) => s + Number(j.hours || 0), 0);
+      const totalActual = jobs.reduce((s, j) => s + Number(j.actualHours || 0), 0);
+      const eff = efficiency(totalAllowed, totalActual);
+      const ready = jobs.filter(j => j.status && j.status.includes("Ready")).length;
+      const waitingParts = jobs.filter(j => j.status && j.status.includes("Awaiting Parts")).length;
+      const waitingApproval = jobs.filter(j => j.status && j.status.includes("Approval")).length;
+      const today = downtimeTotals ? downtimeTotals(1) : { Lunch: 0, Idle: 0, "Collecting Car": 0 };
+      const best = getTechs().map(techMetrics).sort((a, b) => (b.eff || 0) - (a.eff || 0))[0];
+      let recommendation = "Keep the workflow moving and review any jobs waiting for parts or approval.";
+      if (waitingParts > 0) recommendation = "Parts delays are affecting the workshop. Review ordered parts and ETA first.";
+      else if (waitingApproval > 0) recommendation = "Customer approvals are holding jobs. Prioritise approval calls.";
+      else if (eff !== null && eff < (targets.efficiency || 95)) recommendation = "Workshop efficiency is below target. Review jobs that exceeded allocated labour.";
+      return `WORKSHOP AI END OF DAY BRIEFING
 
 Jobs loaded: ${total}
 Jobs completed / ready: ${complete}
@@ -1057,30 +1755,30 @@ ${best ? best.tech + " — " + pct(best.eff) : "Not enough data"}
 
 AI recommendation:
 ${recommendation}`;
-}
+    }
 
-function buildMorningBriefing(){
-  const openJobs=jobs.filter(j=>!completed(j));
-  const waitingParts=jobs.filter(j=>j.status&&j.status.includes("Awaiting Parts"));
-  const waitingApproval=jobs.filter(j=>j.status&&j.status.includes("Approval"));
-  const ready=jobs.filter(j=>j.status&&j.status.includes("Ready"));
-  const todayJobs=jobs.filter(j=>(j.bookingDate||todayISO())===todayISO());
-  const totalTodayHours=todayJobs.reduce((s,j)=>s+Number(j.hours||0),0);
-  const techLoads=getTechs().map(t=>{
-    const list=todayJobs.filter(j=>j.technician===t);
-    const hrs=list.reduce((s,j)=>s+Number(j.hours||0),0);
-    return {tech:t,hrs,jobs:list.length};
-  }).sort((a,b)=>a.hrs-b.hrs);
-  const spare=techLoads.filter(t=>t.hrs<5);
-  const overloaded=techLoads.filter(t=>t.hrs>8.5);
-  let actions=[];
-  if(waitingApproval.length) actions.push(`Call customers first: ${waitingApproval.length} job(s) are waiting for approval.`);
-  if(waitingParts.length) actions.push(`Check parts ETAs: ${waitingParts.length} job(s) are waiting for parts.`);
-  if(ready.length) actions.push(`Contact customers: ${ready.length} vehicle(s) are ready for collection.`);
-  if(overloaded.length) actions.push(`Rebalance work: ${overloaded.map(t=>`${t.tech} has ${t.hrs.toFixed(1)} hrs`).join(", ")}.`);
-  if(spare.length) actions.push(`Use spare capacity: ${spare.map(t=>`${t.tech} has ${t.hrs.toFixed(1)} hrs`).join(", ")}.`);
-  if(!actions.length) actions.push("No urgent actions. Workshop looks balanced for today.");
-  return `WORKSHOP AI MORNING BRIEFING
+    function buildMorningBriefing() {
+      const openJobs = jobs.filter(j => !completed(j));
+      const waitingParts = jobs.filter(j => j.status && j.status.includes("Awaiting Parts"));
+      const waitingApproval = jobs.filter(j => j.status && j.status.includes("Approval"));
+      const ready = jobs.filter(j => j.status && j.status.includes("Ready"));
+      const todayJobs = jobs.filter(j => (j.bookingDate || todayISO()) === todayISO());
+      const totalTodayHours = todayJobs.reduce((s, j) => s + Number(j.hours || 0), 0);
+      const techLoads = getTechs().map(t => {
+        const list = todayJobs.filter(j => j.technician === t);
+        const hrs = list.reduce((s, j) => s + Number(j.hours || 0), 0);
+        return { tech: t, hrs, jobs: list.length };
+      }).sort((a, b) => a.hrs - b.hrs);
+      const spare = techLoads.filter(t => t.hrs < 5);
+      const overloaded = techLoads.filter(t => t.hrs > 8.5);
+      let actions = [];
+      if (waitingApproval.length) actions.push(`Call customers first: ${waitingApproval.length} job(s) are waiting for approval.`);
+      if (waitingParts.length) actions.push(`Check parts ETAs: ${waitingParts.length} job(s) are waiting for parts.`);
+      if (ready.length) actions.push(`Contact customers: ${ready.length} vehicle(s) are ready for collection.`);
+      if (overloaded.length) actions.push(`Rebalance work: ${overloaded.map(t => `${t.tech} has ${t.hrs.toFixed(1)} hrs`).join(", ")}.`);
+      if (spare.length) actions.push(`Use spare capacity: ${spare.map(t => `${t.tech} has ${t.hrs.toFixed(1)} hrs`).join(", ")}.`);
+      if (!actions.length) actions.push("No urgent actions. Workshop looks balanced for today.");
+      return `WORKSHOP AI MORNING BRIEFING
 
 Today’s jobs booked: ${todayJobs.length}\nTomorrow’s jobs booked: ${jobsForDate(addDaysISO(1)).length}
 Today’s allocated hours: ${totalTodayHours.toFixed(1)}
@@ -1090,70 +1788,71 @@ Waiting for customer approval: ${waitingApproval.length}
 Ready for collection: ${ready.length}
 
 Technician load today:
-${techLoads.map(t=>`${t.tech}: ${t.hrs.toFixed(1)} hrs / ${t.jobs} job(s)`).join("\n")}
+${techLoads.map(t => `${t.tech}: ${t.hrs.toFixed(1)} hrs / ${t.jobs} job(s)`).join("\n")}
 
 ACTION REQUIRED TODAY
-${actions.map(a=>"• "+a).join("\n")}
+${actions.map(a => "• " + a).join("\n")}
 
 SERVICE MANAGER PRIORITY
 Start with approvals, parts ETAs and ready-for-collection calls before allocating more work.`;
-}
-
-if($("copyBriefing")) $("copyBriefing").addEventListener("click",()=>{navigator.clipboard.writeText(buildEndOfDayBriefing());alert("Briefing copied.")});
-
-if($("copyMorningBriefing")) $("copyMorningBriefing").addEventListener("click",()=>{navigator.clipboard.writeText(buildMorningBriefing());alert("Morning briefing copied.")});
-if($("copyServiceMorningBriefing")) $("copyServiceMorningBriefing").addEventListener("click",()=>{navigator.clipboard.writeText(buildMorningBriefing());alert("Morning briefing copied.")});
-if($("copyServiceEndBriefing")) $("copyServiceEndBriefing").addEventListener("click",()=>{navigator.clipboard.writeText(buildEndOfDayBriefing());alert("End of day briefing copied.")});
-
-
-
-function addDaysISO(days){
-  const d=new Date();
-  d.setDate(d.getDate()+days);
-  return d.toISOString().split("T")[0];
-}
-function dateLabel(iso){
-  return new Date(iso+"T00:00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
-}
-function jobsForDate(iso){
-  return jobs.filter(j=>(j.bookingDate||todayISO())===iso);
-}
-function renderFutureBookings(){
-  const el=$("futureBookingsList");
-  if(!el) return;
-  const mode=$("futureQuickView") ? $("futureQuickView").value : "selected";
-  let html="";
-  if(mode==="7days"){
-    for(let i=0;i<7;i++){
-      const d=addDaysISO(i);
-      const list=jobsForDate(d);
-      const hrs=list.reduce((s,j)=>s+Number(j.hours||0),0);
-      html += `<div class="job-card future-day-card"><h3>${dateLabel(d)}</h3><p><strong>${list.length}</strong> job(s) | <strong>${hrs.toFixed(1)}</strong> hrs allocated</p>${list.length?list.map(j=>`<p>${j.reg} — ${j.technician} — ${j.hours} hrs — ${j.type}</p>`).join(""):"<p>No jobs booked.</p>"}</div>`;
     }
-  } else {
-    const d=mode==="tomorrow" ? addDaysISO(1) : (($("futureBookingDate")&&$("futureBookingDate").value)||todayISO());
-    const list=jobsForDate(d);
-    html = list.length ? list.map(j=>card(j,true,true)).join("") : `<div class="job-card future-day-card"><h3>${dateLabel(d)}</h3><p>No jobs booked for this date.</p></div>`;
-  }
-  el.innerHTML=html;
-}
-if($("futureBookingDate")) $("futureBookingDate").addEventListener("change",renderFutureBookings);
-if($("futureQuickView")) $("futureQuickView").addEventListener("change",renderFutureBookings);
 
-function renderUpcomingWorkload(){
-  const el=$("upcomingWorkload");
-  if(!el) return;
-  let html="";
-  for(let i=0;i<7;i++){
-    const d=addDaysISO(i);
-    const list=jobsForDate(d);
-    const hrs=list.reduce((s,j)=>s+Number(j.hours||0),0);
-    html += `<div class="job-card future-day-card"><h3>${dateLabel(d)}</h3><p>${list.length} job(s) | ${hrs.toFixed(1)} allocated hours</p></div>`;
-  }
-  el.innerHTML=html;
-}
+    if ($("copyBriefing")) $("copyBriefing").addEventListener("click", () => { navigator.clipboard.writeText(buildEndOfDayBriefing()); alert("Briefing copied.") });
 
-function loadTargetsInputs(){if(document.activeElement&&document.activeElement.closest("#targetsScreen"))return;$("targetAvailableHours").value=targets.availableHours||"";$("targetEfficiency").value=targets.efficiency||95;$("targetRetailHours").value=targets.retailHours||"";$("targetInternalHours").value=targets.internalHours||"";$("targetWarrantyHours").value=targets.warrantyHours||"";$("targetInternalCars").value=targets.internalCars||""}$("saveTargets").addEventListener("click",()=>{targets={availableHours:Number(val("targetAvailableHours")),efficiency:Number(val("targetEfficiency"))||95,retailHours:Number(val("targetRetailHours")),internalHours:Number(val("targetInternalHours")),warrantyHours:Number(val("targetWarrantyHours")),internalCars:Number(val("targetInternalCars"))};saveTargetsStore();render();alert("Targets saved")});$("copyReport").addEventListener("click",()=>{navigator.clipboard.writeText($("generatedReport").textContent);alert("Report copied")});let recognition;if("webkitSpeechRecognition"in window){recognition=new webkitSpeechRecognition();recognition.continuous=false;recognition.interimResults=false;recognition.lang="en-GB";recognition.onresult=e=>{const text=e.results[0][0].transcript;if(activeVoiceTarget){const box=$(activeVoiceTarget);box.value=(box.value+" "+text).trim()}}}document.querySelectorAll(".voiceBtn").forEach(btn=>btn.addEventListener("click",()=>{activeVoiceTarget=btn.dataset.target;if(!recognition){alert("Voice recognition is not supported in this browser.");return}recognition.start()}));$("techFilter").addEventListener("change",renderTech);render();
-</script>
+    if ($("copyMorningBriefing")) $("copyMorningBriefing").addEventListener("click", () => { navigator.clipboard.writeText(buildMorningBriefing()); alert("Morning briefing copied.") });
+    if ($("copyServiceMorningBriefing")) $("copyServiceMorningBriefing").addEventListener("click", () => { navigator.clipboard.writeText(buildMorningBriefing()); alert("Morning briefing copied.") });
+    if ($("copyServiceEndBriefing")) $("copyServiceEndBriefing").addEventListener("click", () => { navigator.clipboard.writeText(buildEndOfDayBriefing()); alert("End of day briefing copied.") });
+
+
+
+    function addDaysISO(days) {
+      const d = new Date();
+      d.setDate(d.getDate() + days);
+      return d.toISOString().split("T")[0];
+    }
+    function dateLabel(iso) {
+      return new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+    }
+    function jobsForDate(iso) {
+      return jobs.filter(j => (j.bookingDate || todayISO()) === iso);
+    }
+    function renderFutureBookings() {
+      const el = $("futureBookingsList");
+      if (!el) return;
+      const mode = $("futureQuickView") ? $("futureQuickView").value : "selected";
+      let html = "";
+      if (mode === "7days") {
+        for (let i = 0; i < 7; i++) {
+          const d = addDaysISO(i);
+          const list = jobsForDate(d);
+          const hrs = list.reduce((s, j) => s + Number(j.hours || 0), 0);
+          html += `<div class="job-card future-day-card"><h3>${dateLabel(d)}</h3><p><strong>${list.length}</strong> job(s) | <strong>${hrs.toFixed(1)}</strong> hrs allocated</p>${list.length ? list.map(j => `<p>${j.reg} — ${j.technician} — ${j.hours} hrs — ${j.type}</p>`).join("") : "<p>No jobs booked.</p>"}</div>`;
+        }
+      } else {
+        const d = mode === "tomorrow" ? addDaysISO(1) : (($("futureBookingDate") && $("futureBookingDate").value) || todayISO());
+        const list = jobsForDate(d);
+        html = list.length ? list.map(j => card(j, true, true)).join("") : `<div class="job-card future-day-card"><h3>${dateLabel(d)}</h3><p>No jobs booked for this date.</p></div>`;
+      }
+      el.innerHTML = html;
+    }
+    if ($("futureBookingDate")) $("futureBookingDate").addEventListener("change", renderFutureBookings);
+    if ($("futureQuickView")) $("futureQuickView").addEventListener("change", renderFutureBookings);
+
+    function renderUpcomingWorkload() {
+      const el = $("upcomingWorkload");
+      if (!el) return;
+      let html = "";
+      for (let i = 0; i < 7; i++) {
+        const d = addDaysISO(i);
+        const list = jobsForDate(d);
+        const hrs = list.reduce((s, j) => s + Number(j.hours || 0), 0);
+        html += `<div class="job-card future-day-card"><h3>${dateLabel(d)}</h3><p>${list.length} job(s) | ${hrs.toFixed(1)} allocated hours</p></div>`;
+      }
+      el.innerHTML = html;
+    }
+
+    function loadTargetsInputs() { if (document.activeElement && document.activeElement.closest("#targetsScreen")) return; $("targetAvailableHours").value = targets.availableHours || ""; $("targetEfficiency").value = targets.efficiency || 95; $("targetRetailHours").value = targets.retailHours || ""; $("targetInternalHours").value = targets.internalHours || ""; $("targetWarrantyHours").value = targets.warrantyHours || ""; $("targetInternalCars").value = targets.internalCars || "" } $("saveTargets").addEventListener("click", () => { targets = { availableHours: Number(val("targetAvailableHours")), efficiency: Number(val("targetEfficiency")) || 95, retailHours: Number(val("targetRetailHours")), internalHours: Number(val("targetInternalHours")), warrantyHours: Number(val("targetWarrantyHours")), internalCars: Number(val("targetInternalCars")) }; saveTargetsStore(); render(); alert("Targets saved") }); $("copyReport").addEventListener("click", () => { navigator.clipboard.writeText($("generatedReport").textContent); alert("Report copied") }); let recognition; if ("webkitSpeechRecognition" in window) { recognition = new webkitSpeechRecognition(); recognition.continuous = false; recognition.interimResults = false; recognition.lang = "en-GB"; recognition.onresult = e => { const text = e.results[0][0].transcript; if (activeVoiceTarget) { const box = $(activeVoiceTarget); box.value = (box.value + " " + text).trim() } } } document.querySelectorAll(".voiceBtn").forEach(btn => btn.addEventListener("click", () => { activeVoiceTarget = btn.dataset.target; if (!recognition) { alert("Voice recognition is not supported in this browser."); return } recognition.start() })); $("techFilter").addEventListener("change", renderTech); render();
+  </script>
 </body>
+
 </html>
