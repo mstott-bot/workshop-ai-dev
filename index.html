@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workshop AI Rescue v3.0</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="app-header">
+  <div class="brand-lockup">
+    <div class="logo-mark" aria-hidden="true">
+      <span class="gear">⚙</span>
+      <span class="wrench">🔧</span>
+    </div>
+    <div>
+      <h1><span>WORKSHOP</span> <strong>AI</strong></h1>
+      <p class="tagline">Revolutionising workshops</p>
+      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Rescue build v3.0</p>
+    </div>
+  </div>
+  <div class="role-pill">Service Manager</div>
+</header>
+
+<main class="container">
+  <nav class="tabs">
+    <button class="tab active" data-screen="commandScreen">Command Centre</button>
+    <button class="tab" data-screen="managerScreen">Service Manager</button>
+    <button class="tab" data-screen="techScreen">Technician</button>
+    <button class="tab" data-screen="reportsScreen">Reports</button>
+    <button class="tab" data-screen="plannerScreen">Daily Planner</button>
+    <button class="tab" data-screen="partsScreen">Parts</button>
+    <button class="tab" data-screen="reportsInterfaceScreen">Reports Interface</button>
+    <button class="tab" data-screen="techniciansScreen">Technicians</button>
+    <button class="tab" data-screen="targetsScreen">Targets</button>
+    <button class="tab" data-screen="vehicleIntelligenceScreen">Vehicle Intelligence</button>
+  </nav>
+
+  <section id="commandScreen" class="screen active">
+    <div class="hero">
+      <div>
+        <h2>Workshop AI Command Centre</h2>
+        <p>Owner view: workshop health, live activity, KPIs and technician performance.</p>
+      </div>
+      <div id="healthScore" class="health-score"></div>
+    </div>
+
+    <div id="ownerStats" class="stats"></div>
+
+
+    <div class="card coach-command-card">
+      <h2>Workshop Coach</h2>
+      <p class="muted">Your live decision briefing. It ranks the most important actions by impact using Garage Health, capacity, technician activity, downtime and job status.</p>
+      <div id="workshopCoachMission" class="coach-list"></div>
+      <div id="workshopCoachTabs" class="coach-tabs">
+        <button class="gh-tab active" onclick="setWorkshopCoachMode('morning')">🌅 Morning</button>
+        <button class="gh-tab" onclick="setWorkshopCoachMode('live')">⚡ Live</button>
+        <button class="gh-tab" onclick="setWorkshopCoachMode('end')">🌙 End of Day</button>
+      </div>
+      <div id="workshopCoachPanel" class="coach-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Workshop Capacity Intelligence</h2>
+      <p class="muted">Shows how many technician hours are available, how much work is sold and whether the workshop can take more work today.</p>
+      <div id="workshopCapacitySummary" class="stats"></div>
+      <div id="workshopCapacityTechs" class="job-list"></div>
+      <div id="workshopCapacityCoach" class="coach-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Garage Health Breakdown</h2>
+      <p class="muted">Click a KPI to understand what it means, why it is at the current value and what would improve it.</p>
+      <div id="garageHealthBreakdown" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Today’s Priority</h2>
+      <div id="dailyPriorityBanner" class="coach-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Today’s Live Activity</h2>
+      <div id="liveActivity" class="timeline"></div>
+    </div>
+
+    <div class="card">
+      <h2>AI Workshop Coach</h2>
+      <div id="ownerCoach" class="coach-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>End of Day Briefing</h2>
+      <pre id="endOfDayBriefing">No briefing yet.</pre>
+      <button id="copyBriefing" class="secondary">Copy Briefing</button>
+    </div>
+
+    <div class="card">
+      <h2>Morning Briefing / Action Required Today</h2>
+      <pre id="morningBriefing">No morning briefing yet.</pre>
+      <button id="copyMorningBriefing" class="secondary">Copy Morning Briefing</button>
+    </div>
+
+    <div class="card">
+      <h2>Live Workshop Board</h2>
+      <div id="ownerStatusBoard" class="board-grid"></div>
+    </div>
+
+    <div class="card">
+      <h2>Technician League Table</h2>
+      <div id="leagueTableOwner" class="table-wrap"></div>
+    </div>
+
+    <div class="card">
+      <h2>Downtime Today / This Week</h2>
+      <div id="ownerDowntimeReports" class="job-list"></div>
+    </div>
+  </section>
+
+  <section id="managerScreen" class="screen">
+    <div id="servicePartsAlert" class="card service-parts-alert clear"></div>
+
+    <div class="card">
+      <h2>Load New Job</h2>
+      <div class="grid">
+        <label>Vehicle Registration / Reg Number *<input id="reg" placeholder="AB19 XYZ"></label>
+        <label>Booking Date / Future Booking<input id="bookingDate" type="date"></label>
+        <label>Customer Name<input id="customer" placeholder="Customer name"></label>
+        <label>Telephone<input id="phone" placeholder="Telephone"></label>
+        <label>Make<input id="make" placeholder="Ford / Audi / VW"></label>
+        <label>Model<input id="model" placeholder="Fiesta / A4 / Golf"></label>
+        <label>Mileage<input id="mileage" type="number" placeholder="Mileage"></label>
+
+        <label>Job Type
+          <select id="jobType">
+            <option>Retail</option>
+            <option>Warranty</option>
+            <option>Internal</option>
+          </select>
+        </label>
+
+        <label>Technician
+          <select id="technician"></select>
+        </label>
+
+        <label>Labour Hours Allowed *<input id="hours" type="number" step="0.25" min="0" placeholder="2.5"></label>
+
+        <label>Priority
+          <select id="priority">
+            <option>🟢 Routine</option><option>🟠 Today</option><option>🔴 Urgent</option>
+          </select>
+        </label>
+
+        <label>MOT Add-on
+          <select id="mot">
+            <option>None</option><option>Full MOT</option><option>Retest</option><option>Pre-MOT Check</option>
+          </select>
+        </label>
+
+        <label id="authBox">Retail Authorisation
+          <select id="auth">
+            <option>Awaiting Customer Approval</option><option>Approved</option><option>Declined</option>
+          </select>
+        </label>
+      </div>
+
+      <label>Work Required
+        <textarea id="workRequired" placeholder="Example: Customer reports vibration under braking. Diagnose and advise."></textarea>
+      </label>
+
+      <label>Special Instructions — Service Manager Only
+        <textarea id="specialInstructions" placeholder="Example: Customer waiting, do not wash, locking wheel nut in boot, phone before repairs."></textarea>
+      </label>
+
+      <button id="assignJob" class="primary">Assign Job</button>
+    </div>
+
+    <div class="card">
+      <h2>Service Manager Daily Briefing</h2>
+      <p class="muted">Morning actions and end-of-day summary are available here for the Service Manager.</p>
+      <pre id="serviceManagerMorningBriefing">No morning briefing yet.</pre>
+      <button id="copyServiceMorningBriefing" class="secondary">Copy Morning Briefing</button>
+      <pre id="serviceManagerEndOfDayBriefing">No end-of-day briefing yet.</pre>
+      <button id="copyServiceEndBriefing" class="secondary">Copy End of Day Briefing</button>
+    </div>
+
+    <div class="card">
+      <h2>Future Bookings</h2>
+      <p class="muted">Jobs can be loaded for days ahead. Select a date below to view or plan upcoming work.</p>
+      <div class="grid">
+        <label>View Booking Date
+          <input id="futureBookingDate" type="date">
+        </label>
+        <label>Quick View
+          <select id="futureQuickView">
+            <option value="selected">Selected date</option>
+            <option value="tomorrow">Tomorrow</option>
+            <option value="7days">Next 7 days</option>
+          </select>
+        </label>
+      </div>
+      <div id="futureBookingsList" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Service Manager Job Board</h2>
+      <div id="managerJobs" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Completed Technician Write-Ups</h2>
+      <p class="muted">When a technician finishes and saves a job report, it automatically appears here for the Service Manager.</p>
+      <div id="completedReportsInbox" class="job-list"></div>
+    </div>
+
+  </section>
+
+  <section id="techScreen" class="screen">
+    <div id="technicianPartsAlert" class="card service-parts-alert clear"></div>
+
+    <div class="card">
+      <h2>My Jobs</h2>
+      <label>Select Technician
+        <select id="techFilter"></select>
+      </label>
+      <div id="techJobs" class="job-list"></div>
+    </div>
+  </section>
+
+  <section id="activeJobScreen" class="screen">
+    <button id="backToJobs" class="secondary">← Back to Jobs</button>
+
+    <div class="card">
+      <h2 id="activeTitle">Active Job</h2>
+      <p id="activeDetails" class="muted"></p>
+      <div id="activeJobInfo" class="job-info-grid"></div>
+      <div id="activeSpecialInstructions" class="special-instructions hidden"></div>
+      <p class="hours-warning">Labour hours are set by the service manager only. Technician clocks start and finish time.</p>
+
+      <div class="timer-box">
+        <p><strong>Started:</strong> <span id="startedAt">Not started</span></p>
+        <p><strong>Finished:</strong> <span id="finishedAt">Not finished</span></p>
+        <p><strong>Actual Time:</strong> <span id="actualHours">0.00</span> hrs</p>
+      </div>
+
+      <div class="button-row">
+        <button id="startTimer" class="secondary">▶ Start Job Timer</button>
+        <button id="finishTimer" class="secondary">■ Finish Job Timer</button>
+      </div>
+
+      <div class="clockoff-panel">
+        <h3>Technician Clock Off</h3>
+        <p id="clockOffStatus" class="muted">Currently clocked on to job.</p>
+        <div class="button-row activity-buttons">
+          <button id="clockLunch" class="secondary">🍽 Lunch</button>
+          <button id="clockBreak" class="secondary">☕ Break</button>
+          <button id="clockCollecting" class="secondary">🚗 Collecting Vehicle</button>
+          <button id="clockDelivering" class="secondary">🚙 Delivering Vehicle</button>
+          <button id="clockHelping" class="secondary">🤝 Helping Technician</button>
+          <button id="clockWaitingParts" class="secondary">📦 Waiting Parts</button>
+          <button id="clockWaitingAuth" class="secondary">📞 Waiting Authorisation</button>
+          <button id="clockAdditionalWork" class="secondary">🔧 Additional Work Found</button>
+          <button id="clockRoadTest" class="secondary">🧪 Road Test</button>
+          <button id="clockQualityCheck" class="secondary">✅ Quality Check</button>
+          <button id="clockCleaning" class="secondary">🧹 Cleaning Vehicle</button>
+          <button id="clockPaperwork" class="secondary">📝 Paperwork</button>
+          <button id="clockTraining" class="secondary">🎓 Training</button>
+          <button id="clockMaintenance" class="secondary">🔩 Workshop Maintenance</button>
+          <button id="clockEquipment" class="secondary">⚠️ Equipment Issue</button>
+          <button id="clockOther" class="secondary">❓ Other</button>
+        </div>
+        <button id="clockBackOn" class="primary">▶ Clock Back On To Job</button>
+      </div>
+
+      <label>Job Status
+        <select id="status">
+          <option>🔵 Waiting to Start</option><option>🟡 Diagnosis</option><option>🟠 Awaiting Parts</option>
+          <option>🟣 Awaiting Customer Approval</option><option>🤝 Helping Technician</option><option>🔧 Additional Work Found</option>
+          <option>🧪 Road Test</option><option>✅ Quality Check</option><option>🧹 Cleaning Vehicle</option><option>🎓 Training</option>
+          <option>⚠️ Equipment Issue</option><option>🟢 Repair Complete</option><option>✅ Ready for Collection</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="card">
+      <h2>Technician Report Sections</h2>
+      <div class="voice-section"><label>Job Description<textarea id="complaint"></textarea></label><button class="voiceBtn secondary" data-target="complaint">🎤 Voice Job Description</button></div>
+      <div class="voice-section"><label>Findings<textarea id="findings"></textarea></label><button class="voiceBtn secondary" data-target="findings">🎤 Voice Findings</button></div>
+      <div class="voice-section"><label>Repair Carried Out<textarea id="repair"></textarea></label><button class="voiceBtn secondary" data-target="repair">🎤 Voice Repair</button></div>
+      <div class="voice-section"><label>Parts Used / Required<textarea id="parts"></textarea></label><button class="voiceBtn secondary" data-target="parts">🎤 Voice Parts</button></div>
+      <div class="voice-section"><label>Advisories<textarea id="advisories"></textarea></label><button class="voiceBtn secondary" data-target="advisories">🎤 Voice Advisories</button></div>
+      <label>Photos<input id="photos" type="file" accept="image/*" multiple></label>
+      <button id="saveActiveJob" class="primary">Save Job & Generate Report</button>
+    </div>
+
+    <div class="card">
+      <h2>Parts</h2>
+      <div class="grid">
+        <label>Part Description
+          <input id="partDescription" placeholder="Example: Front brake discs">
+        </label>
+        <label>Quantity
+          <input id="partQty" type="number" min="1" step="1" value="1">
+        </label>
+        <label>Priority
+          <select id="partPriority">
+            <option>Urgent</option>
+            <option>Today</option>
+            <option>Tomorrow</option>
+            <option>Routine</option>
+          </select>
+        </label>
+        <label>Supplier / Note
+          <input id="partSupplier" placeholder="Example: TPS / ECP / Dealer">
+        </label>
+      </div>
+      <button id="submitPartsRequest" class="primary">Add Part Request</button>
+      <h3>Parts Status</h3>
+      <div id="technicianPartsStatus" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Job Comments / Updates</h2>
+      <label>Add Comment<textarea id="jobComment" placeholder="Example: Customer approved additional work."></textarea></label>
+      <button id="addComment" class="primary">Add Comment to Timeline</button>
+    </div>
+
+    <div class="card">
+      <h2>Job Timeline</h2>
+      <div id="jobTimeline" class="timeline"></div>
+    </div>
+
+    <div class="card">
+      <h2>Generated Report</h2>
+      <pre id="generatedReport">No report generated yet.</pre>
+      <button id="copyReport" class="secondary">Copy Report</button>
+    </div>
+  </section>
+
+  <section id="reportsScreen" class="screen">
+    <div class="card"><h2>Workshop KPI Scorecard</h2><div id="kpiScorecard" class="job-list"></div></div>
+    <div class="card"><h2>Technician League Table</h2><div id="leagueTable" class="table-wrap"></div></div>
+    <div class="card"><h2>Live Workshop Board</h2><div id="statusBoard" class="board-grid"></div></div>
+    <div class="card"><h2>Technician Workload</h2><div id="workload"></div></div>
+    <div class="card"><h2>Downtime Reports</h2><div id="downtimeReports" class="job-list"></div></div>
+  </section>
+
+
+
+  <section id="plannerScreen" class="screen">
+    <div class="card">
+      <h2>Daily Workshop Planner</h2>
+      <p class="muted">Shows today's booked jobs, hours allocated, technician capacity and workload balance.</p>
+      <div class="grid">
+        <label>Planner Date
+          <input id="plannerDate" type="date">
+        </label>
+        <label>Technician Daily Capacity Hours
+          <input id="dailyTechCapacity" type="number" step="0.25" value="8">
+        </label>
+      </div>
+      <button id="savePlannerSettings" class="primary">Update Planner</button>
+    </div>
+
+    <div class="card">
+      <h2>Today's Workshop Summary</h2>
+      <div id="plannerSummary" class="stats"></div>
+    </div>
+
+    <div class="card">
+      <h2>Upcoming Workload</h2>
+      <div id="upcomingWorkload" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Technician Capacity Planner</h2>
+      <div id="plannerTechnicians" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>AI Planner Suggestions</h2>
+      <div id="plannerSuggestions" class="coach-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Jobs For Selected Day</h2>
+      <div id="plannerJobs" class="job-list"></div>
+    </div>
+  </section>
+
+
+  <section id="partsScreen" class="screen">
+    <div class="card">
+      <h2>Parts Management</h2>
+      <p class="muted">All technician parts requests across the workshop. Service Manager can update status so technicians can see what is happening.</p>
+      <div id="partsManagementStats" class="stats"></div>
+    </div>
+
+    <div class="card">
+      <h2>Outstanding Parts Queue</h2>
+      <div id="partsManagementQueue" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Delivered / Completed Parts</h2>
+      <div id="partsDeliveredQueue" class="job-list"></div>
+    </div>
+  </section>
+
+  <section id="reportsInterfaceScreen" class="screen">
+    <div class="card">
+      <h2>Reports Interface</h2>
+      <p class="muted">A cleaner reporting area for owner and manager review.</p>
+      <div class="stats" id="reportsTopStats"></div>
+    </div>
+
+    <div class="card">
+      <h2>Workshop Performance Report</h2>
+      <div id="reportsPerformance" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Downtime Report</h2>
+      <div id="reportsDowntime" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>End of Day Briefing</h2>
+      <pre id="reportsEndOfDayBriefing">No briefing yet.</pre>
+    </div>
+
+    <div class="card">
+      <h2>Morning Briefing / Action Required Today</h2>
+      <pre id="reportsMorningBriefing">No morning briefing yet.</pre>
+    </div>
+
+    <div class="card">
+      <h2>Completed Write-Ups</h2>
+      <div id="reportsCompletedWriteups" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Technician League Table</h2>
+      <div id="reportsLeagueTable" class="table-wrap"></div>
+    </div>
+  </section>
+
+
+  <section id="techniciansScreen" class="screen">
+    <div class="card">
+      <h2>Technician Setup</h2>
+      <p class="muted">Add or remove technicians. These names are used throughout job allocation, technician screens, workload reports and league tables.</p>
+      <div class="grid">
+        <label>New Technician Name
+          <input id="newTechnicianName" placeholder="Example: Sarah">
+        </label>
+        <label>Role / Note
+          <input id="newTechnicianNote" placeholder="Example: MOT tester / Diagnostic tech">
+        </label>
+      </div>
+      <button id="addTechnicianBtn" class="primary">Add Technician</button>
+    </div>
+
+    <div class="card">
+      <h2>Current Technicians</h2>
+      <div id="technicianSetupList" class="job-list"></div>
+    </div>
+  </section>
+
+  <section id="targetsScreen" class="screen">
+    <div class="card">
+      <h2>Monthly Targets</h2>
+      <div class="grid">
+        <label>Workshop Hours Available This Month<input id="targetAvailableHours" type="number" step="0.25"></label>
+        <label>Workshop Efficiency Target %<input id="targetEfficiency" type="number" step="1" placeholder="95"></label>
+        <label>Retail Hours Target<input id="targetRetailHours" type="number" step="0.25"></label>
+        <label>Internal Hours Target<input id="targetInternalHours" type="number" step="0.25"></label>
+        <label>Warranty Hours Target<input id="targetWarrantyHours" type="number" step="0.25"></label>
+        <label>Internal Cars Completed Target<input id="targetInternalCars" type="number" step="1"></label>
+      </div>
+      <button id="saveTargets" class="primary">Save Targets</button>
+    </div>
+  </section>
+
+
+  <section id="vehicleIntelligenceScreen" class="screen">
+    <div class="card">
+      <h2>Vehicle Intelligence</h2>
+      <p class="muted">Search any registration, customer, telephone number, technician, job number, repair, advisory or part. Completed jobs stay in history with the full timeline.</p>
+      <div class="grid">
+        <label>Search Vehicle / Customer / Job
+          <input id="vehicleHistorySearch" placeholder="Example: AB19 XYZ, Smith, brake discs, Jake">
+        </label>
+        <label>Quick Filter
+          <select id="vehicleHistoryQuickFilter">
+            <option value="all">All matching jobs</option>
+            <option value="completed">Completed / ready jobs</option>
+            <option value="open">Open / active jobs</option>
+            <option value="parts">Awaiting parts</option>
+            <option value="approval">Awaiting customer approval</option>
+          </select>
+        </label>
+      </div>
+      <button id="vehicleHistorySearchBtn" class="primary">Search Vehicle Intelligence</button>
+    </div>
+
+    <div class="card">
+      <h2>Vehicle Intelligence Summary</h2>
+      <div id="vehicleIntelligenceStats" class="stats"></div>
+    </div>
+
+    <div class="card">
+      <h2>Vehicle / Job History</h2>
+      <div id="vehicleIntelligenceResults" class="job-list"></div>
+    </div>
+  </section>
+
+</main>
+
+<div id="modal" class="modal hidden">
+  <div class="modal-card">
+    <button id="closeModal" class="modal-close">×</button>
+    <h2 id="modalTitle">Timeline</h2>
+    <div id="modalTimeline" class="timeline"></div>
+  </div>
+</div>
+<script src="script.js"></script>
+<script src="coach-fix.js"></script>
+<script src="garage-health-fix.js"></script>
+<script src="vehicle-intelligence-fix.js"></script>
+</body>
+</html>

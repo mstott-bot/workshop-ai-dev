@@ -1,0 +1,215 @@
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0f1720;color:#17202a}.app-header{background:#09111a;color:white;padding:18px;border-bottom:1px solid #263747}.app-header h1{margin:0;font-size:28px}.app-header p{margin:4px 0 0;color:#c9d3dd}.container{max-width:1400px;margin:0 auto;padding:14px}.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}.tab{padding:13px;border:0;border-radius:12px;background:#233142;color:#dfe8f2;font-weight:bold}.tab.active{background:#0b6efd;color:white}.screen{display:none}.screen.active{display:block}.card,.hero{background:#ffffff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.25)}.hero{display:flex;justify-content:space-between;gap:14px;align-items:center;border:2px solid #0b6efd}h2{margin-top:0}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}label{display:block;font-weight:bold;margin-bottom:12px}input,select,textarea{width:100%;margin-top:6px;padding:12px;border:1px solid #c8d0d8;border-radius:10px;font-size:16px}textarea{min-height:90px}.primary,.secondary{width:100%;padding:14px;border:0;border-radius:12px;font-weight:bold;font-size:16px;margin-top:8px}.primary{background:#0b6efd;color:white}.secondary{background:#e7edf4;color:#101820}.button-row{display:flex;gap:10px}.job-list,.coach-list{display:grid;gap:10px}.job-card,.coach-card{border:1px solid #d8e0e8;border-left:6px solid #0b6efd;border-radius:14px;padding:12px;background:#fbfdff}.job-card h3,.coach-card h3{margin:0 0 6px}.job-card p,.coach-card p{margin:4px 0}.job-card button{margin-top:8px;margin-right:6px;padding:10px;border:0;border-radius:9px;background:#101820;color:white}.muted{color:#5f6b76}.hours-warning,.timer-box{background:#fff3cd;border:1px solid #ffe69c;padding:10px;border-radius:10px}.voice-section{border:1px solid #e0e6ed;border-radius:12px;padding:12px;margin-bottom:12px}pre{white-space:pre-wrap;background:#f8fafc;border:1px solid #d8e0e8;border-radius:10px;padding:12px}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}.stat{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.2)}.stat strong{display:block;font-size:24px}.health-score{font-size:36px;font-weight:bold;background:#f0f4f8;border-radius:16px;padding:18px;text-align:center;min-width:260px}.health-score span{font-size:14px;font-weight:normal}.good{border-left-color:#198754}.warn{border-left-color:#ffc107}.bad{border-left-color:#dc3545}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;background:white}th,td{border-bottom:1px solid #d8e0e8;padding:10px;text-align:left;white-space:nowrap}th{background:#101820;color:white}.board-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.board-column{background:#f8fafc;border-radius:12px;border:1px solid #d8e0e8;padding:10px}.board-column h3{margin-top:0}.board-job{background:white;border-radius:10px;padding:10px;margin-bottom:8px;border-left:5px solid #0b6efd;box-shadow:0 1px 4px rgba(0,0,0,.06)}.progress{height:10px;background:#e7edf4;border-radius:999px;overflow:hidden;margin-top:8px}.bar{height:100%;background:#0b6efd}.bar.good{background:#198754}.bar.warn{background:#ffc107}.bar.bad{background:#dc3545}.timeline{border-left:4px solid #0b6efd;margin-left:12px;padding-left:18px}.timeline-item{position:relative;background:#fbfdff;border:1px solid #d8e0e8;border-radius:14px;padding:12px;margin-bottom:10px}.timeline-item:before{content:"";position:absolute;left:-29px;top:16px;width:16px;height:16px;background:#0b6efd;border-radius:50%;box-shadow:0 0 0 4px #d9eaff}.timeline-item strong{display:block}.timeline-item small{color:#5f6b76}.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}.modal.hidden{display:none}.modal-card{background:white;border-radius:18px;padding:18px;max-width:850px;width:100%;max-height:85vh;overflow:auto}.modal-close{float:right;border:0;background:#101820;color:white;border-radius:50%;width:36px;height:36px;font-size:22px}@media(max-width:950px){.board-grid,.stats{grid-template-columns:1fr 1fr}.tabs{grid-template-columns:1fr 1fr}.hero{display:block}.health-score{margin-top:12px}}@media(max-width:700px){.tabs,.grid,.stats,.board-grid{grid-template-columns:1fr}.button-row{flex-direction:column}.app-header h1{font-size:22px}.health-score{font-size:28px;min-width:0}}
+.clockoff-panel{background:#eef6ff;border:1px solid #b8dcff;border-radius:14px;padding:12px;margin:12px 0}
+.clockoff-panel h3{margin:0 0 8px}
+
+.report-preview{white-space:pre-wrap;background:#f8fafc;border:1px solid #d8e0e8;border-radius:10px;padding:10px;margin-top:8px;max-height:240px;overflow:auto}
+.badge-new{display:inline-block;background:#dc3545;color:white;border-radius:999px;padding:4px 9px;font-size:12px;font-weight:bold;margin-left:6px}
+
+/* Workshop AI v2.0 branding and layout */
+.app-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  background:linear-gradient(135deg,#07111d,#0b2340);
+  color:white;
+  padding:18px;
+  border-bottom:1px solid #263747;
+}
+.brand-lockup{display:flex;align-items:center;gap:14px}
+.logo-mark{width:66px;height:66px;border-radius:18px;background:linear-gradient(135deg,#0b6efd,#073b85);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 10px 24px rgba(11,110,253,.35);flex-shrink:0}
+.logo-mark .gear{font-size:44px;color:white}
+.logo-mark .wrench{position:absolute;font-size:24px;right:8px;bottom:7px;transform:rotate(-18deg)}
+.app-header h1{letter-spacing:.5px;margin:0;font-size:34px}
+.app-header h1 strong{color:#2d8cff}
+.tagline{text-transform:uppercase;letter-spacing:2.5px;color:#d4dde8!important;font-size:14px;margin-top:2px!important}
+.role-pill{background:#ffffff18;border:1px solid #ffffff33;border-radius:999px;padding:10px 14px;font-weight:bold;color:#fff;white-space:nowrap}
+.tabs{grid-template-columns:repeat(9,1fr)}
+.tech-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tech-actions button{width:auto;margin-left:6px}
+@media(max-width:1200px){.tabs{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:700px){.app-header{align-items:flex-start;flex-direction:column}.tabs{grid-template-columns:1fr}.logo-mark{width:56px;height:56px}.logo-mark .gear{font-size:36px}.logo-mark .wrench{font-size:20px}.app-header h1{font-size:25px}.tagline{font-size:11px;letter-spacing:1.6px}}
+
+.job-info-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin:12px 0;
+}
+.job-info-grid div{
+  background:#f0f4f8;
+  border-radius:12px;
+  padding:10px;
+}
+.job-info-grid strong{
+  display:block;
+  font-size:12px;
+  color:#5f6b76;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+}
+.job-info-grid span{
+  display:block;
+  font-size:18px;
+  font-weight:bold;
+  margin-top:4px;
+}
+.special-instructions{
+  background:#fff3cd;
+  border:1px solid #ffe69c;
+  border-radius:12px;
+  padding:12px;
+  margin:10px 0;
+}
+.special-instructions p{margin:6px 0 0}
+@media(max-width:700px){.job-info-grid{grid-template-columns:1fr}}
+
+.planner-bar{
+  height:12px;
+  background:#e7edf4;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:8px;
+}
+.planner-fill{
+  height:100%;
+  background:#198754;
+}
+.planner-fill.warn{background:#ffc107}
+.planner-fill.bad{background:#dc3545}
+.capacity-label{
+  display:inline-block;
+  border-radius:999px;
+  padding:4px 10px;
+  font-weight:bold;
+  margin-top:6px;
+}
+.capacity-good{background:#d1e7dd;color:#0f5132}
+.capacity-warn{background:#fff3cd;color:#664d03}
+.capacity-bad{background:#f8d7da;color:#842029}
+
+.board-column.drag-over{outline:3px dashed #0b6efd;outline-offset:4px}
+.board-job{cursor:grab}
+.board-job:active{cursor:grabbing}
+.parts-status-pill{display:inline-block;border-radius:999px;padding:4px 10px;font-weight:bold;background:#e7edf4;margin-top:6px}
+.parts-request-card{border-left-color:#6f42c1}
+
+.future-day-card{border-left-color:#20c997}
+
+.part-grid{
+  display:grid;
+  grid-template-columns:2fr .7fr 1fr 1fr;
+  gap:8px;
+}
+.part-pill{
+  display:inline-block;
+  border-radius:999px;
+  padding:5px 10px;
+  font-weight:bold;
+  margin:4px 4px 4px 0;
+  background:#e7edf4;
+}
+.part-pill.requested{background:#fff3cd;color:#664d03}
+.part-pill.ordered{background:#cff4fc;color:#055160}
+.part-pill.delivered{background:#d1e7dd;color:#0f5132}
+.part-pill.fitted{background:#dbeafe;color:#1e40af}
+.parts-request-card{border-left-color:#6f42c1}
+.parts-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.parts-actions button{width:auto}
+@media(max-width:700px){.part-grid{grid-template-columns:1fr}}
+
+/* Workshop AI v4: Parts Required alert panel */
+.service-parts-alert{border-left:6px solid #dc3545;background:#fff5f5}
+.service-parts-alert.clear{border-left-color:#198754;background:#f3fff8}
+.parts-alert-count{display:inline-block;background:#dc3545;color:white;border-radius:999px;padding:4px 10px;font-weight:bold;margin-left:8px}
+.parts-alert-list{display:grid;gap:8px;margin-top:10px}
+.parts-alert-item{background:white;border:1px solid #f1b0b7;border-radius:12px;padding:10px}
+.parts-alert-item strong{display:block}
+
+/* Workshop AI OS v4.1 Sprint 3 — Garage Health Drill-down */
+.gh-tabs{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.gh-tab{border:0;border-radius:999px;padding:10px 14px;background:#e7edf4;color:#101820;font-weight:bold;cursor:pointer}
+.gh-tab.active{background:#0b6efd;color:#fff}
+.gh-modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.gh-impact{font-size:18px;font-weight:bold}
+.gh-potential{background:#f0f4f8;border-radius:14px;padding:14px;margin-top:10px;border-left:6px solid #0b6efd}
+.gh-action{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.gh-action strong:last-child{font-size:20px}
+.health-score{cursor:pointer;transition:transform .15s ease, box-shadow .15s ease}
+.health-score:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(11,110,253,.22)}
+@media(max-width:700px){.gh-modal-grid{grid-template-columns:1fr}.gh-action{display:block}}
+
+
+/* WAI-020 Technician Activity Tracking */
+.activity-buttons{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+}
+.activity-buttons button{
+  width:100%;
+}
+.activity-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:12px;
+}
+.activity-pill{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  margin:2px 4px 2px 0;
+}
+
+/* Workshop AI OS v5.0 — WAI-100.1 Workshop Coach Mission Control */
+.coach-command-card{border-left:6px solid #0b6efd;background:linear-gradient(180deg,#ffffff,#f8fbff)}
+.coach-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.coach-mission-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:10px 0}
+.coach-score{font-size:34px;font-weight:900;line-height:1}
+.coach-one-thing{border-left:6px solid #6f42c1;background:#f7f2ff;border-radius:14px;padding:14px;margin:12px 0}
+.coach-one-thing h3{margin-top:0}
+.coach-priority-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.coach-priority-row strong:last-child{white-space:nowrap;font-size:18px}
+.coach-win-list{display:grid;gap:8px}
+.coach-win{background:#f3fff8;border:1px solid #b7e4c7;border-radius:12px;padding:10px}
+@media(max-width:700px){.coach-priority-row{display:block}}
+
+
+/* Workshop AI OS v5.3 — Vehicle Intelligence */
+.vehicle-intelligence-card{border-left-color:#20c997}
+.vehicle-intelligence-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:10px 0}
+.vehicle-intelligence-meta div{background:#f0f4f8;border-radius:12px;padding:9px}
+.vehicle-intelligence-meta strong{display:block;font-size:12px;color:#5f6b76;text-transform:uppercase;letter-spacing:.6px}
+.vehicle-intelligence-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.vehicle-intelligence-actions button{width:auto}
+.history-badge{display:inline-block;border-radius:999px;padding:4px 9px;font-weight:bold;margin-left:6px;background:#e7edf4;color:#101820;font-size:12px}
+.history-badge.open{background:#fff3cd;color:#664d03}
+.history-badge.complete{background:#d1e7dd;color:#0f5132}
+.history-badge.parts{background:#f8d7da;color:#842029}
+.history-report-preview{white-space:pre-wrap;max-height:170px;overflow:auto;background:#f8fafc;border:1px solid #d8e0e8;border-radius:10px;padding:10px;margin-top:8px}
+
+
+/* Workshop AI OS v5.5 — Technician received parts workflow */
+.part-pill.received{background:#d1e7dd;color:#0f5132}
+.part-pill.partial-delivery{background:#fff3cd;color:#664d03}
+.part-pill.incorrect-parts{background:#f8d7da;color:#842029}
+.parts-request-card.bad{border-left-color:#dc3545}
+
+/* Workshop AI OS v5.7 — Action Centre 2.0 */
+.action-centre-v2{border-left:6px solid #198754;background:#f8fff9}
+.action-centre-v2:not(.clear){border-left-color:#0b6efd;background:#ffffff}
+.action-tiles .stat.good{border-left:6px solid #198754;background:#f3fff8;color:#0f5132}
+.action-tiles .stat.bad{border-left:6px solid #dc3545;background:#fff5f5;color:#842029}
+.action-centre-sections{gap:8px}
+.action-section{border-radius:12px;padding:12px;border:1px solid #d8e0e8;background:#fff}
+.action-section.good{border-color:#badbcc;background:#f3fff8;color:#0f5132}
+.action-section.bad{border-color:#f1b0b7;background:#fff5f5;color:#842029}
+.action-section-none{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.action-section-none span{font-weight:bold}
+.action-section .parts-alert-count{margin-left:8px}
+.action-section.good .parts-alert-count{background:#198754}
+.action-section.bad .parts-alert-count{background:#dc3545}
+.action-section .board-job{background:#fff;color:#17202a}
+.action-section.good .board-job{border-left-color:#198754}
+.action-section.bad .board-job{border-left-color:#dc3545}
