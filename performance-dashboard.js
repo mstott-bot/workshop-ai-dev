@@ -40,7 +40,7 @@
 
     const jobs = getJobs();
     const today = todayISO();
-    const todayJobs = jobs.filter(j => (j.bookingDate || "").slice(0, 10) === today);
+    const todayJobs = (typeof window.getLiveWorkshopJobs === "function" ? window.getLiveWorkshopJobs() : (typeof getLiveWorkshopJobs === "function" ? getLiveWorkshopJobs() : jobs.filter(j => (j.bookingDate || today) === today)));
 
     const labourHours = todayJobs.reduce((s, j) => s + Number(j.hours || 0), 0);
     const actualHours = todayJobs.reduce((s, j) => s + Number(j.actualHours || 0), 0);
