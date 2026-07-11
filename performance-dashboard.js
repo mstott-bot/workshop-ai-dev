@@ -45,9 +45,20 @@
     const labourHours = todayJobs.reduce((s, j) => s + Number(j.hours || 0), 0);
     const actualHours = todayJobs.reduce((s, j) => s + Number(j.actualHours || 0), 0);
     const completedJobs = todayJobs.filter(j => (j.status || "").includes("Complete") || (j.status || "").includes("Ready")).length;
-const carryOvers = jobs.filter(j =>
-  (j.status || "").includes("Carry")
-).length;
+const carryOvers = jobs.filter(j => {
+    const bookingDate = String(j.bookingDate || "").slice(0, 10);
+    const status = String(j.status || "");
+
+    const finished =
+        status.includes("Complete") ||
+        status.includes("Ready") ||
+        status.includes("Collected") ||
+        status.includes("Closed");
+
+    return bookingDate &&
+           bookingDate < today &&
+           !finished;
+}).length;
     const partsWaiting = jobs.filter(j => (j.status || "").includes("Parts")).length;
 
     const labourRate = 70;
