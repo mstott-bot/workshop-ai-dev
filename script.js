@@ -14,7 +14,7 @@ function backfillJobRateSnapshots(){let changed=false;jobs.forEach(j=>{if(!(Numb
 window.getWorkshopTargets=()=>targets;
 window.appliedJobRate=appliedJobRate;
 window.jobLabourValue=jobLabourValue;
-window.jobsForMonth=jobsForMonth;function now(){return new Date()}function fmt(dt){return dt?new Date(dt).toLocaleString("en-GB"):"Not set"}function timeOnly(dt){return dt?new Date(dt).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}):""}function hoursBetween(a,b){if(!a||!b)return 0;return Math.max(0,(new Date(b)-new Date(a))/36e5)}function show(screen){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));$(screen).classList.add("active");document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelector(`[data-screen='${screen}']`)?.classList.add("active");render()}document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>show(t.dataset.screen)));$("todayDate").textContent=new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});$("bookingDate").value=todayISO();if($("plannerDate")) $("plannerDate").value=todayISO();if($("futureBookingDate")) $("futureBookingDate").value=todayISO();if($("dailyTechCapacity")) $("dailyTechCapacity").value=plannerSettings.capacity||8;$("reg").addEventListener("input",e=>e.target.value=e.target.value.toUpperCase());$("jobType").addEventListener("change",()=>{$("authBox").style.display=val("jobType")==="Retail"?"block":"none"});function addTimeline(job,title,detail,type="info"){job.timeline=job.timeline||[];job.timeline.push({time:now().toISOString(),title,detail,type})}function ensureTimeline(job){job.timeline=job.timeline||[];job.interruptions=job.interruptions||[];job.activeClockOff=job.activeClockOff||null;if(job.reportReady===undefined)job.reportReady=!!job.report;if(job.reportReviewed===undefined)job.reportReviewed=false;job.partsRequests=job.partsRequests||[];if(!job.timeline.length&&job.createdAt){job.timeline.push({time:job.createdAt,title:"🟢 Job created",detail:`Job ${job.jobNo||""} created and assigned to ${job.technician}.`,type:"created"})}return job.timeline}$("assignJob").addEventListener("click",()=>{const reg=val("reg").toUpperCase();const hours=Number(val("hours"));if(!reg){alert("Please enter registration");return}if(!hours||hours<=0){alert("Please enter labour hours allowed");return}const type=val("jobType");const jobNo=`PCA-${todayISO().replaceAll("-","")}-${String(jobs.length+1).padStart(3,"0")}`;const job={id:Date.now().toString(),jobNo,createdAt:now().toISOString(),bookingDate:val("bookingDate")||todayISO(),completedAt:null,reg,customer:val("customer"),phone:val("phone"),make:val("make"),model:val("model"),mileage:val("mileage"),type,labourRateSnapshot:defaultRateForType(type),labourRateEffectiveDate:targets.rateEffectiveDate||todayISO(),labourRateSource:"default at job creation",technician:val("technician"),hours,originalHours:hours,hoursHistory:[`Created with ${hours} hrs`],priority:val("priority"),mot:val("mot"),auth:type==="Retail"?val("auth"):"Not required",workRequired:val("workRequired"),specialInstructions:val("specialInstructions"),status:"🔵 Waiting to Start",startedAt:null,finishedAt:null,actualHours:0,complaint:"",findings:"",repair:"",parts:"",advisories:"",photoCount:0,report:"",timeline:[],interruptions:[],activeClockOff:null,reportReady:false,reportReviewed:false,reportSentAt:null,partsRequests:[]};addTimeline(job,"🟢 Job created",`Job ${jobNo} created for ${reg}.`);addTimeline(job,"👨‍🔧 Technician assigned",`${job.technician} allocated ${hours} labour hours.`);jobs.push(job);save();clearForm();render();alert("Job assigned")});function clearForm(){["reg","customer","phone","make","model","mileage","hours","workRequired","specialInstructions"].forEach(id=>$(id).value="");$("bookingDate").value=todayISO();$("jobType").value="Retail";$("technician").value="Jake";$("priority").value="🟢 Routine";$("mot").value="None";$("auth").value="Awaiting Customer Approval";$("authBox").style.display="block"}function efficiency(allowed,actual){return actual>0?(allowed/actual)*100:null}function pct(n){return n===null?"Not clocked":n.toFixed(0)+"%"}function completed(j){return !!j.completedAt || (j.status||"").includes("Ready") || (j.status||"").includes("Collected") || (j.status||"").includes("Closed")}function card(job,open=true,manager=false){ensureTimeline(job);const eff=efficiency(Number(job.hours||0),Number(job.actualHours||0));return `<div class="job-card"><h3>${job.jobNo||""} | ${job.reg} — ${job.technician}</h3><p><strong>${job.make||"Make"} ${job.model||""}</strong></p><p><strong>Customer:</strong> ${job.customer||"Not entered"} ${job.phone?" | "+job.phone:""}</p><p><strong>Type:</strong> ${job.type} | <strong>Allowed:</strong> ${job.hours} hrs | <strong>Actual:</strong> ${(job.actualHours||0).toFixed(2)} hrs | <strong>Efficiency:</strong> ${pct(eff)}</p><p><strong>MOT:</strong> ${job.mot} | <strong>Status:</strong> ${job.status}</p><p><strong>Timeline:</strong> ${job.timeline.length} events</p>${manager?`<button onclick="amendHours('${job.id}')">Amend Hours</button><button onclick="reassignTech('${job.id}')">Reassign Technician</button><button onclick="managerComment('${job.id}')">Manager Comment</button>`:""}<button onclick="showTimelineModal('${job.id}')">Timeline</button>${open?`<button onclick="openJob('${job.id}')">Start / Continue Job</button>`:""}</div>`}
+window.jobsForMonth=jobsForMonth;function now(){return new Date()}function fmt(dt){return dt?new Date(dt).toLocaleString("en-GB"):"Not set"}function timeOnly(dt){return dt?new Date(dt).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}):""}function hoursBetween(a,b){if(!a||!b)return 0;return Math.max(0,(new Date(b)-new Date(a))/36e5)}function show(screen){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));$(screen).classList.add("active");document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelector(`[data-screen='${screen}']`)?.classList.add("active");render()}document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>show(t.dataset.screen)));$("todayDate").textContent=new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});$("bookingDate").value=todayISO();if($("plannerDate")) $("plannerDate").value=todayISO();if($("futureBookingDate")) $("futureBookingDate").value=todayISO();if($("dailyTechCapacity")) $("dailyTechCapacity").value=plannerSettings.capacity||8;$("reg").addEventListener("input",e=>e.target.value=e.target.value.toUpperCase());$("jobType").addEventListener("change",()=>{$("authBox").style.display=val("jobType")==="Retail"?"block":"none"});function addTimeline(job,title,detail,type="info"){job.timeline=job.timeline||[];job.timeline.push({time:now().toISOString(),title,detail,type})}function ensureTimeline(job){job.timeline=job.timeline||[];job.interruptions=job.interruptions||[];job.activeClockOff=job.activeClockOff||null;if(job.reportReady===undefined)job.reportReady=!!job.report;if(job.reportReviewed===undefined)job.reportReviewed=false;job.partsRequests=job.partsRequests||[];if(!job.timeline.length&&job.createdAt){job.timeline.push({time:job.createdAt,title:"🟢 Job created",detail:`Job ${job.jobNo||""} created and assigned to ${job.technician}.`,type:"created"})}return job.timeline}$("assignJob").addEventListener("click",()=>{const reg=val("reg").toUpperCase();const hours=Number(val("hours"));if(!reg){alert("Please enter registration");return}if(!hours||hours<=0){alert("Please enter labour hours allowed");return}const type=val("jobType");const jobNo=`PCA-${todayISO().replaceAll("-","")}-${String(jobs.length+1).padStart(3,"0")}`;const job={id:Date.now().toString(),jobNo,createdAt:now().toISOString(),bookingDate:val("bookingDate")||todayISO(),completedAt:null,reg,customer:val("customer"),phone:val("phone"),make:val("make"),model:val("model"),mileage:val("mileage"),type,labourRateSnapshot:defaultRateForType(type),labourRateEffectiveDate:targets.rateEffectiveDate||todayISO(),labourRateSource:"default at job creation",technician:val("technician"),hours,originalHours:hours,hoursHistory:[`Created with ${hours} hrs`],priority:val("priority"),mot:val("mot"),auth:type==="Retail"?val("auth"):"Not required",workRequired:val("workRequired"),specialInstructions:val("specialInstructions"),status:"🔵 Waiting to Start",startedAt:null,finishedAt:null,actualHours:0,complaint:"",findings:"",repair:"",parts:"",advisories:"",photoCount:0,report:"",timeline:[],interruptions:[],activeClockOff:null,reportReady:false,reportReviewed:false,reportSentAt:null,partsRequests:[]};addTimeline(job,"🟢 Job created",`Job ${jobNo} created for ${reg}.`);addTimeline(job,"👨‍🔧 Technician assigned",`${job.technician} allocated ${hours} labour hours.`);jobs.push(job);save();clearForm();render();alert("Job assigned")});function clearForm(){["reg","customer","phone","make","model","mileage","hours","workRequired","specialInstructions"].forEach(id=>$(id).value="");$("bookingDate").value=todayISO();$("jobType").value="Retail";$("technician").value="Jake";$("priority").value="🟢 Routine";$("mot").value="None";$("auth").value="Awaiting Customer Approval";$("authBox").style.display="block"}function efficiency(allowed,actual){return actual>0?(allowed/actual)*100:null}function pct(n){return n===null?"Not clocked":n.toFixed(0)+"%"}function completed(j){return !!j.completedAt || (j.status||"").includes("Ready") || (j.status||"").includes("Collected") || (j.status||"").includes("Closed")}function card(job,open=true,manager=false){ensureTimeline(job);const eff=efficiency(Number(job.hours||0),Number(job.actualHours||0));return `<div class="job-card"><h3>${job.jobNo||""} | ${job.reg} — ${job.technician}</h3><p><strong>${job.make||"Make"} ${job.model||""}</strong></p><p><strong>Customer:</strong> ${job.customer||"Not entered"} ${job.phone?" | "+job.phone:""}</p><p><strong>Type:</strong> ${job.type} | <strong>Allowed:</strong> ${job.hours} hrs | <strong>Actual:</strong> ${(job.actualHours||0).toFixed(2)} hrs | <strong>Efficiency:</strong> ${pct(eff)}</p><p><strong>MOT:</strong> ${job.mot} | <strong>Status:</strong> ${job.status}</p><p><strong>Timeline:</strong> ${job.timeline.length} events</p>${!manager&&job.technicianNotice?`<div class="timeline-item good"><strong>🔔 Technician Update</strong><p>${job.technicianNotice}</p></div>`:""}${manager?`<button onclick="amendHours('${job.id}')">Amend Hours</button><button onclick="reassignTech('${job.id}')">Reassign Technician</button><button onclick="managerComment('${job.id}')">Manager Comment</button>`:""}<button onclick="showTimelineModal('${job.id}')">Timeline</button>${open?`<button onclick="openJob('${job.id}')">Start / Continue Job</button>`:""}</div>`}
 function populateTechnicianSelects(){
   const techSelect=$("technician");
   const filterSelect=$("techFilter");
@@ -83,14 +83,14 @@ function renderServicePartsAlert(){
   jobs.forEach(j=>{
     ensureTimeline(j);
     (j.partsRequests||[]).forEach(p=>{
-      if(["Requested","Ordered","Received","Partial Delivery","Incorrect Parts"].includes(p.status)){
+      if(["Requested","Ordered","Received","Partial Delivery","Supplier Chased","Incorrect Parts"].includes(p.status)){
         partsRows.push({job:j,part:p});
       }
     });
   });
-  const partsRequired=partsRows.filter(r=>["Requested","Partial Delivery","Incorrect Parts"].includes(r.part.status));
+  const partsRequired=partsRows.filter(r=>["Requested","Partial Delivery","Supplier Chased","Incorrect Parts"].includes(r.part.status));
   const partsOrdered=partsRows.filter(r=>r.part.status==="Ordered");
-  const approvals=jobs.filter(j=>j.status&&j.status.includes("Approval"));
+  const approvals=jobs.filter(j=>!completed(j)&&(((j.status||"").includes("Approval"))||((j.auth||"").includes("Awaiting"))));
   const ready=jobs.filter(j=>j.status&&j.status.includes("Ready"));
   const carryOvers=jobs.filter(j=>!completed(j) && (j.bookingDate||todayISO())<todayISO());
 
@@ -109,7 +109,9 @@ function renderServicePartsAlert(){
       <strong>Status:</strong> <span class="part-pill ${(p.status||"requested").toLowerCase().replaceAll(" ","-")}">${p.status}</span><br>
       <strong>Requested:</strong> ${fmt(p.requestedAt)}
       <div class="parts-actions">
-        ${["Requested","Partial Delivery","Incorrect Parts"].includes(p.status)?`<button onclick="markPartOrdered('${j.id}','${p.id}')">Mark Ordered</button>`:""}
+        ${p.status==="Requested"?`<button onclick="markPartOrdered('${j.id}','${p.id}')">Mark Ordered</button>`:""}
+        ${p.status==="Partial Delivery"?`<button onclick="chasePartsSupplier('${j.id}','${p.id}')">Chased Parts Company</button>`:""}
+        ${p.status==="Incorrect Parts"?`<button onclick="markPartOrdered('${j.id}','${p.id}')">Re-order Parts</button>`:""}
         ${p.status==="Received"?`<button onclick="markPartFitted('${j.id}','${p.id}')">Mark Fitted</button>`:""}
         <button onclick="showTimelineModal('${j.id}')">Timeline</button>
       </div>
@@ -120,11 +122,30 @@ function renderServicePartsAlert(){
       <strong>${j.reg} — ${j.technician}</strong><br>
       ${j.make||""} ${j.model||""}<br>
       <strong>Status:</strong> ${j.status}<br>
+      <strong>Authorisation:</strong> ${j.auth||"Not required"}<br>
       <strong>Customer:</strong> ${j.customer||"Not entered"} ${j.phone?" | "+j.phone:""}<br>
       <div class="parts-actions">
         <button onclick="showTimelineModal('${j.id}')">Timeline</button>
         <button onclick="openJob('${j.id}')">Open Job</button>
         ${extraButtons}
+      </div>
+    </div>`;
+
+  const approvalRow=(j)=>`
+    <div class="board-job">
+      <strong>${j.reg} — ${j.technician}</strong><br>
+      ${j.make||""} ${j.model||""}<br>
+      <strong>Status:</strong> ${j.status}<br>
+      <strong>Authorisation:</strong> ${j.auth||"Awaiting Customer Approval"}<br>
+      <strong>Customer:</strong> ${j.customer||"Not entered"} ${j.phone?" | "+j.phone:""}<br>
+      <strong>Work awaiting approval:</strong> ${j.workRequired||j.findings||"Additional work awaiting customer approval"}<br>
+      ${j.customerContactNote?`<strong>Latest contact update:</strong> ${j.customerContactNote}<br>`:""}
+      <div class="parts-actions">
+        <button onclick="customerApprovedWork('${j.id}')">✅ Customer Approved Work</button>
+        <button onclick="customerDeclinedWork('${j.id}')">❌ Customer Declined</button>
+        <button onclick="customerNotAnswering('${j.id}')">📞 Customer Not Answering</button>
+        <button onclick="customerCallBackLater('${j.id}')">🕒 Call Back Later</button>
+        <button onclick="showTimelineModal('${j.id}')">Timeline</button>
       </div>
     </div>`;
 
@@ -148,10 +169,70 @@ function renderServicePartsAlert(){
     <div class="parts-alert-list action-centre-sections">
       ${section("🔴 Parts Required",partsRequired.length,partsRequired.map(partRow),"None",actionClass(partsRequired.length))}
       ${section("📦 Parts Ordered / Technician To Receive",partsOrdered.length,partsOrdered.map(partRow),"None",actionClass(partsOrdered.length))}
-      ${section("📞 Customer Approval Required",approvals.length,approvals.map(j=>jobRow(j)),"None",actionClass(approvals.length))}
+      ${section("📞 Customer Approval Required",approvals.length,approvals.map(approvalRow),"None",actionClass(approvals.length))}
       ${section("🚗 Ready for Collection",ready.length,ready.map(j=>jobRow(j,`<button onclick=\"markCustomerCollected('${j.id}')\">Customer Collected</button>`)),"None",readyClass)}
       ${section("⚠️ Carry Over Jobs",carryOvers.length,carryOvers.map(j=>jobRow(j)),"None",actionClass(carryOvers.length))}
     </div>`;
+}
+
+function notifyTechnician(job,message,title="Technician update"){
+  job.technicianNotice=message;
+  job.technicianNoticeAt=now().toISOString();
+  addTimeline(job,`🔔 ${title}`,message,"notification");
+}
+function customerApprovedWork(id){
+  const j=jobs.find(x=>x.id===id);
+  if(!j) return;
+  if(!confirm(`${j.customer||"Customer"} has approved the work on ${j.reg}?`)) return;
+  j.auth="Customer Approved";
+  j.customerApprovalAt=now().toISOString();
+  j.customerContactNote=`Customer approved work at ${fmt(j.customerApprovalAt)}`;
+  if((j.status||"").toLowerCase().includes("approval")) j.status="🔧 Repairing Vehicle";
+  notifyTechnician(j,"✅ Customer has approved the additional work. You may continue with the repair.","Customer approved work");
+  addTimeline(j,"✅ Customer approval recorded",`${j.customer||"Customer"} approved the work. Recorded by Service Manager.`);
+  save();
+  render();
+  alert(`${j.technician} has been notified that the customer approved the work.`);
+}
+function customerDeclinedWork(id){
+  const j=jobs.find(x=>x.id===id);
+  if(!j) return;
+  const reason=prompt("Optional reason or customer comment:","");
+  if(reason===null) return;
+  j.auth="Customer Declined";
+  j.customerDeclinedAt=now().toISOString();
+  j.customerContactNote=`Customer declined work${reason?`: ${reason}`:""}`;
+  notifyTechnician(j,`❌ Customer declined the additional work.${reason?` Reason: ${reason}`:""} Do not continue with the declined work.`,"Customer declined work");
+  addTimeline(j,"❌ Customer declined work",reason||"Customer declined the additional work.");
+  save();
+  render();
+  alert(`${j.technician} has been notified that the customer declined the work.`);
+}
+function customerNotAnswering(id){
+  const j=jobs.find(x=>x.id===id);
+  if(!j) return;
+  const note=prompt("Optional note about the contact attempt:","");
+  if(note===null) return;
+  const at=now().toISOString();
+  j.auth="Awaiting Customer Approval";
+  j.customerContactNote=`Customer not answering at ${fmt(at)}${note?` — ${note}`:""}`;
+  notifyTechnician(j,"📞 Customer has been contacted but is not answering. Continue with authorised work only.","Customer contact attempted");
+  addTimeline(j,"📞 Customer not answering",note||"Service Manager attempted to contact the customer.");
+  save();
+  render();
+}
+function customerCallBackLater(id){
+  const j=jobs.find(x=>x.id===id);
+  if(!j) return;
+  const callback=prompt("Enter callback date/time or note:","");
+  if(callback===null||!callback.trim()) return;
+  j.auth="Awaiting Customer Approval";
+  j.customerCallback=callback.trim();
+  j.customerContactNote=`Call back later: ${j.customerCallback}`;
+  notifyTechnician(j,`🕒 Customer callback planned: ${j.customerCallback}. Continue with authorised work only.`,"Customer callback arranged");
+  addTimeline(j,"🕒 Customer callback arranged",j.customerCallback);
+  save();
+  render();
 }
 
 function markCustomerCollected(id){
@@ -172,9 +253,9 @@ function renderTechnicianPartsAlert(){
   const filter=$("techFilter") ? val("techFilter") : "All";
   const rows=allPartsRequests().filter(({job,part})=>{
     const techMatches = filter==="All" || !filter || job.technician===filter;
-    return techMatches && ["Ordered","Received","Partial Delivery","Incorrect Parts"].includes(part.status);
+    return techMatches && ["Ordered","Received","Partial Delivery","Supplier Chased","Incorrect Parts"].includes(part.status);
   });
-  const actionable=rows.filter(r=>r.part.status==="Ordered" || r.part.status==="Partial Delivery" || r.part.status==="Incorrect Parts");
+  const actionable=rows.filter(r=>["Ordered","Partial Delivery","Supplier Chased","Incorrect Parts"].includes(r.part.status));
   if(!rows.length){
     el.className="card service-parts-alert clear";
     el.innerHTML=`<h2>✅ Technician Parts Alerts</h2><p class="muted">No parts updates for the selected technician.</p>`;
@@ -191,10 +272,11 @@ function renderTechnicianPartsAlert(){
           <span><strong>Part:</strong> ${part.qty||1} x ${part.description||part.text||"Part"}</span><br>
           <span><strong>Status:</strong> <span class="part-pill ${(part.status||"requested").toLowerCase().replaceAll(" ","-")}">${part.status}</span></span><br>
           <span><strong>Requested:</strong> ${fmt(part.requestedAt)}${part.orderedAt?" | <strong>Ordered:</strong> "+fmt(part.orderedAt):""}${part.receivedAt?" | <strong>Received:</strong> "+fmt(part.receivedAt):""}</span>
-          ${part.issueNote?`<p><strong>Issue note:</strong> ${part.issueNote}</p>`:""}
+          ${part.issueNote?`<p><strong>Issue note:</strong> ${part.issueNote}</p>`:""}${part.chasedAt?`<p><strong>Supplier chased:</strong> ${fmt(part.chasedAt)}${part.chaseNote?" — "+part.chaseNote:""}</p>`:""}
           <div class="parts-actions">
-            ${part.status==="Ordered"?`<button onclick="technicianReceiveParts('${job.id}','${part.id}','all')">✅ Parts Received</button><button onclick="technicianReceiveParts('${job.id}','${part.id}','partial')">⚠️ Partial Delivery</button><button onclick="technicianReceiveParts('${job.id}','${part.id}','incorrect')">❌ Incorrect Parts</button>`:""}
-            ${part.status==="Received"?`<button onclick="markPartFitted('${job.id}','${part.id}')">Mark Fitted</button>`:""}
+            ${part.status==="Ordered"?`<button onclick="technicianReceiveParts('${job.id}','${part.id}','all')">✅ Parts Arrived</button><button onclick="technicianReceiveParts('${job.id}','${part.id}','partial')">⚠️ Partial Delivery</button><button onclick="technicianReceiveParts('${job.id}','${part.id}','incorrect')">❌ Incorrect Parts</button>`:""}
+            ${part.status==="Supplier Chased"?`<button onclick="technicianReceiveParts('${job.id}','${part.id}','remaining')">✅ Remaining Parts Arrived</button><button onclick="technicianReceiveParts('${job.id}','${part.id}','incorrect')">❌ Incorrect Parts</button>`:""}
+            ${part.status==="Received"?`<button onclick="markPartFitted('${job.id}','${part.id}')">🔧 Fitted</button>`:""}
             <button onclick="openJob('${job.id}')">Open Job</button>
             <button onclick="showTimelineModal('${job.id}')">Timeline</button>
           </div>
@@ -307,6 +389,7 @@ $("activeJobInfo").innerHTML=`
   <div><strong>Allocated Hours</strong><span>${j.hours} hrs</span></div>
   <div><strong>Actual Time</strong><span>${(j.actualHours||0).toFixed(2)} hrs</span></div>
   <div><strong>Status</strong><span>${j.status}</span></div>
+  ${j.technicianNotice?`<div class="timeline-item good"><strong>🔔 Technician Update</strong><span>${j.technicianNotice}</span></div>`:""}
 `;
 if(j.specialInstructions){
   $("activeSpecialInstructions").classList.remove("hidden");
@@ -646,7 +729,8 @@ if($("submitPartsRequest")) $("submitPartsRequest").addEventListener("click",sub
 function technicianPartAlertText(p){
   if(p.status==="Ordered") return `📦 Parts ordered — ${p.qty||1} x ${p.description||p.text} has been ordered. Confirm when the parts arrive in the workshop.`;
   if(p.status==="Received") return `✅ Parts received — ${p.qty||1} x ${p.description||p.text} is with the technician. Continue the repair.`;
-  if(p.status==="Partial Delivery") return `⚠️ Partial delivery reported — Service Manager action required.`;
+  if(p.status==="Partial Delivery") return `⚠️ Partial delivery reported — waiting for Service Manager to chase the supplier.`;
+  if(p.status==="Supplier Chased") return `📞 Supplier chased — Service Manager has chased the outstanding parts. Confirm when the remaining parts arrive.`;
   if(p.status==="Incorrect Parts") return `❌ Incorrect parts reported — Service Manager action required.`;
   if(p.status==="Fitted") return `🔧 Part fitted — ${p.qty||1} x ${p.description||p.text} has been fitted.`;
   return `🚨 Parts requested — waiting for Service Manager action.`;
@@ -662,11 +746,12 @@ function renderTechnicianPartsStatus(job){
       <p><strong>Part:</strong> ${p.qty||1} x ${p.description||p.text}</p>
       <p><strong>Priority:</strong> ${p.priority||"Today"} ${p.supplier? " | <strong>Supplier:</strong> "+p.supplier:""}</p>
       <p><strong>Requested:</strong> ${fmt(p.requestedAt)}${p.orderedAt?" | <strong>Ordered:</strong> "+fmt(p.orderedAt):""}${p.receivedAt?" | <strong>Received:</strong> "+fmt(p.receivedAt):""}${p.issueAt?" | <strong>Issue:</strong> "+fmt(p.issueAt):""}</p>
-      ${p.issueNote?`<p><strong>Issue note:</strong> ${p.issueNote}</p>`:""}
+      ${p.issueNote?`<p><strong>Issue note:</strong> ${p.issueNote}</p>`:""}${p.chasedAt?`<p><strong>Supplier chased:</strong> ${fmt(p.chasedAt)}${p.chaseNote?" — "+p.chaseNote:""}</p>`:""}
       <span class="part-pill ${(p.status||"requested").toLowerCase().replaceAll(" ","-")}">${p.status}</span>
       <div class="parts-actions">
-        ${p.status==="Ordered"?`<button onclick="technicianReceiveParts('${job.id}','${p.id}','all')">✅ Parts Received</button><button onclick="technicianReceiveParts('${job.id}','${p.id}','partial')">⚠️ Partial Delivery</button><button onclick="technicianReceiveParts('${job.id}','${p.id}','incorrect')">❌ Incorrect Parts</button>`:""}
-        ${p.status==="Received"?`<button onclick="markPartFitted('${job.id}','${p.id}')">Mark Fitted</button>`:""}
+        ${p.status==="Ordered"?`<button onclick="technicianReceiveParts('${job.id}','${p.id}','all')">✅ Parts Arrived</button><button onclick="technicianReceiveParts('${job.id}','${p.id}','partial')">⚠️ Partial Delivery</button><button onclick="technicianReceiveParts('${job.id}','${p.id}','incorrect')">❌ Incorrect Parts</button>`:""}
+        ${p.status==="Supplier Chased"?`<button onclick="technicianReceiveParts('${job.id}','${p.id}','remaining')">✅ Remaining Parts Arrived</button><button onclick="technicianReceiveParts('${job.id}','${p.id}','incorrect')">❌ Incorrect Parts</button>`:""}
+        ${p.status==="Received"?`<button onclick="markPartFitted('${job.id}','${p.id}')">🔧 Fitted</button>`:""}
       </div>
     </div>`).join("");
 }
@@ -691,7 +776,9 @@ function partsCard(job,part){
     <p><strong>Requested:</strong> ${fmt(part.requestedAt)}${part.orderedAt?" | <strong>Ordered:</strong> "+fmt(part.orderedAt):""}${part.receivedAt?" | <strong>Received by technician:</strong> "+fmt(part.receivedAt):""}</p>
     ${part.issueNote?`<p><strong>Issue note:</strong> ${part.issueNote}</p>`:""}
     <div class="parts-actions">
-      ${["Requested","Partial Delivery","Incorrect Parts"].includes(part.status)?`<button onclick="markPartOrdered('${job.id}','${part.id}')">Mark Ordered</button>`:""}
+      ${part.status==="Requested"?`<button onclick="markPartOrdered('${job.id}','${part.id}')">Mark Ordered</button>`:""}
+      ${part.status==="Partial Delivery"?`<button onclick="chasePartsSupplier('${job.id}','${part.id}')">Chased Parts Company</button>`:""}
+      ${part.status==="Incorrect Parts"?`<button onclick="markPartOrdered('${job.id}','${part.id}')">Re-order Parts</button>`:""}
       ${part.status==="Received"?`<button onclick="markPartFitted('${job.id}','${part.id}')">Mark Fitted</button>`:""}
       <button onclick="showTimelineModal('${job.id}')">Timeline</button>
     </div>
@@ -735,6 +822,20 @@ function technicianReceiveParts(jobId,partId,result){
     p.serviceManagerAlert="Partial Delivery";
     addTimeline(j,"⚠️ Partial parts delivery",`${p.description||p.text}: ${note}`);
     alert("Partial delivery alert sent to Service Manager.");
+  }else if(result==="remaining"){
+    p.status="Received";
+    p.receivedAt=now().toISOString();
+    p.remainingReceivedAt=p.receivedAt;
+    p.technicianAlert="Received";
+    p.serviceManagerAlert="Received";
+    p.issueNote="";
+    addTimeline(j,"✅ Remaining parts arrived",`${p.qty||1} x ${p.description||p.text}: technician confirmed all outstanding parts have now arrived.`);
+    if((j.partsRequests||[]).every(x=>["Received","Fitted"].includes(x.status)) && (j.status||"").includes("Awaiting Parts")){
+      const old=j.status;
+      j.status=resumeStatusAfterParts();
+      addTimeline(j,"▶ Repair resumed",`Status changed from ${old} to ${j.status} after the remaining parts arrived.`);
+    }
+    alert("Remaining parts arrival recorded. Service Manager has been updated.");
   }else if(result==="incorrect"){
     const note=prompt("What is wrong with the parts?")||"Incorrect parts reported by technician.";
     p.status="Incorrect Parts";
@@ -746,6 +847,22 @@ function technicianReceiveParts(jobId,partId,result){
     alert("Incorrect parts alert sent to Service Manager.");
   }
   save();renderTechnicianPartsStatus(j);render();
+}
+
+function chasePartsSupplier(jobId,partId){
+  const j=jobs.find(x=>x.id===jobId); if(!j) return;
+  const p=(j.partsRequests||[]).find(x=>x.id===partId); if(!p) return;
+  const response=prompt("Supplier response / updated ETA (optional):")||"Supplier chased; awaiting update.";
+  p.status="Supplier Chased";
+  p.chasedAt=now().toISOString();
+  p.chasedBy="Service Manager";
+  p.chaseNote=response;
+  p.technicianAlert="Supplier Chased";
+  p.serviceManagerAlert="Supplier Chased";
+  addTimeline(j,"📞 Parts supplier chased",`${p.description||p.text}: Service Manager chased the supplier. ${response}`);
+  save();
+  render();
+  alert("Technician has been notified that the parts company was chased.");
 }
 
 function markPartDelivered(jobId,partId){
@@ -764,11 +881,20 @@ function markPartDelivered(jobId,partId){
 function markPartFitted(jobId,partId){
   const j=jobs.find(x=>x.id===jobId); if(!j) return;
   const p=(j.partsRequests||[]).find(x=>x.id===partId); if(!p) return;
-  p.status="Fitted"; p.fittedAt=now().toISOString();
+  if(p.status!=="Received"){
+    alert("The part must be marked as arrived before it can be fitted.");
+    return;
+  }
+  p.status="Fitted";
+  p.fittedAt=now().toISOString();
+  p.fittedBy=j.technician||"Technician";
   p.technicianAlert="Fitted";
   p.serviceManagerAlert="Cleared";
-  addTimeline(j,"🔧 Part fitted",`${p.description||p.text} marked fitted.`);
-  save();render();
+  addTimeline(j,"🔧 Part fitted",`${p.description||p.text} marked fitted by ${p.fittedBy}.`);
+  save();
+  renderTechnicianPartsStatus(j);
+  render();
+  alert("Part marked as fitted and moved to Completed Parts History.");
 }
 function renderPartsManagement(){
   const stats=$("partsManagementStats");

@@ -213,3 +213,11 @@
 .action-section .board-job{background:#fff;color:#17202a}
 .action-section.good .board-job{border-left-color:#198754}
 .action-section.bad .board-job{border-left-color:#dc3545}
+
+/* WAI-065.3A Parts Dashboard */
+#partsOrderFormCard.hidden{display:none}
+#partsOrderFormCard{border:2px solid rgba(53,132,228,.35)}
+#partsScreen .parts-request-card p{margin:.35rem 0}
+#partsScreen .parts-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+.part-pill.back-order{background:#7f1d1d;color:#fff}
+.part-pill.delivered{background:#166534;color:#fff}

@@ -395,18 +395,89 @@
   <section id="partsScreen" class="screen">
     <div class="card">
       <h2>Parts Management</h2>
-      <p class="muted">All technician parts requests across the workshop. Service Manager can update status so technicians can see what is happening.</p>
+      <p class="muted">Live parts workflow from technician request through ordering, delivery and fitting. Supplier details remain attached to the part permanently.</p>
       <div id="partsManagementStats" class="stats"></div>
     </div>
 
+    <div id="partsOrderFormCard" class="card hidden">
+      <h2>Order Parts</h2>
+      <p id="partsOrderContext" class="muted">Select a requested part to order.</p>
+      <input id="partsOrderJobId" type="hidden">
+      <input id="partsOrderPartId" type="hidden">
+      <div class="grid">
+        <label>Supplier / Ordered From *
+          <select id="partsOrderSupplier">
+            <option value="">Select supplier</option>
+            <option>TPS</option>
+            <option>Euro Car Parts</option>
+            <option>GSF</option>
+            <option>Main Dealer</option>
+            <option>Auto Factors</option>
+            <option>eBay</option>
+            <option>Amazon</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+        <label>Other Supplier
+          <input id="partsOrderSupplierOther" placeholder="Enter supplier name">
+        </label>
+        <label>Part Number
+          <input id="partsOrderPartNumber" placeholder="Manufacturer / supplier part number">
+        </label>
+        <label>Order Reference / Invoice Number
+          <input id="partsOrderReference" placeholder="Order or invoice reference">
+        </label>
+        <label>Cost £
+          <input id="partsOrderCost" type="number" min="0" step="0.01" placeholder="0.00">
+        </label>
+        <label>Expected Delivery
+          <input id="partsOrderExpected" type="date">
+        </label>
+        <label>Ordered By
+          <input id="partsOrderBy" placeholder="Service Manager name">
+        </label>
+        <label>Order Status
+          <select id="partsOrderStatus">
+            <option value="Ordered">Ordered</option>
+            <option value="Back Order">Back Order</option>
+          </select>
+        </label>
+      </div>
+      <label>Order Notes
+        <textarea id="partsOrderNotes" placeholder="Delivery details, branch, special order information or anything the technician needs to know."></textarea>
+      </label>
+      <div class="button-row">
+        <button id="savePartsOrder" class="primary">Save Parts Order</button>
+        <button id="cancelPartsOrder" class="secondary">Cancel</button>
+      </div>
+    </div>
+
     <div class="card">
-      <h2>Outstanding Parts Queue</h2>
+      <h2>Parts Requested</h2>
+      <p class="muted">Technician requests waiting for the Service Manager to place an order.</p>
+      <div id="partsRequestedQueue" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Parts Ordered / Back Order</h2>
       <div id="partsManagementQueue" class="job-list"></div>
     </div>
 
     <div class="card">
-      <h2>Delivered / Completed Parts</h2>
+      <h2>Parts Delivered</h2>
+      <p class="muted">Delivered parts waiting to be fitted by the technician.</p>
       <div id="partsDeliveredQueue" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Completed Parts History</h2>
+      <p class="muted">Permanent record including where each part was ordered from.</p>
+      <div id="partsCompletedQueue" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Supplier Performance</h2>
+      <div id="partsSupplierPerformance" class="job-list"></div>
     </div>
   </section>
 
