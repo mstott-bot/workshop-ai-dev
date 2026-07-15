@@ -365,6 +365,53 @@
       <button id="savePlannerSettings" class="primary">Update Planner</button>
     </div>
 
+
+    <div class="card">
+      <h2>Technician Availability Planner</h2>
+      <p class="muted">Load holidays, sickness, training, half days, overtime or other availability weeks and months in advance. Capacity updates automatically for each selected date.</p>
+
+      <div class="grid">
+        <label>Technician
+          <select id="availabilityTechnician"></select>
+        </label>
+        <label>Start Date
+          <input id="availabilityStartDate" type="date">
+        </label>
+        <label>End Date
+          <input id="availabilityEndDate" type="date">
+        </label>
+        <label>Availability Status
+          <select id="availabilityStatus">
+            <option value="Working">Working</option>
+            <option value="Holiday">Holiday</option>
+            <option value="Sick">Sick</option>
+            <option value="Training">Training</option>
+            <option value="Half Day">Half Day</option>
+            <option value="Overtime">Overtime</option>
+            <option value="Not Scheduled">Not Scheduled</option>
+          </select>
+        </label>
+        <label>Available Hours Per Day
+          <input id="availabilityHours" type="number" min="0" step="0.25" value="8">
+        </label>
+        <label>Note
+          <input id="availabilityNote" placeholder="Example: Annual leave">
+        </label>
+      </div>
+
+      <div class="button-row">
+        <button id="saveAvailabilityRange" class="primary">Save Availability</button>
+        <button id="clearAvailabilityRange" class="secondary">Return to Default Hours</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Selected Date Availability</h2>
+      <p class="muted">Shows who is working, who is unavailable, and the capacity used by the Daily Workshop Planner.</p>
+      <div id="availabilityDaySummary" class="stats"></div>
+      <div id="availabilityDayList" class="job-list"></div>
+    </div>
+
     <div class="card">
       <h2>Today's Workshop Summary</h2>
       <div id="plannerSummary" class="stats"></div>

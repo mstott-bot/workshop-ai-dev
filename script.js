@@ -549,8 +549,8 @@ function renderDowntimeReports(){
   const today=downtimeTotals(1);
   const week=downtimeTotals(7);
   const html = `
-    <div class="job-card"><h3>Today</h3><p>Lunch: ${today.Lunch.toFixed(2)} hrs</p><p>Idle: ${today.Idle.toFixed(2)} hrs</p><p>Collecting Cars: ${today["Collecting Car"].toFixed(2)} hrs</p></div>
-    <div class="job-card"><h3>This Week</h3><p>Lunch: ${week.Lunch.toFixed(2)} hrs</p><p>Idle: ${week.Idle.toFixed(2)} hrs</p><p>Collecting Cars: ${week["Collecting Car"].toFixed(2)} hrs</p></div>
+    <div class="job-card"><h3>Today</h3><p>Lunch: ${Number(today.Lunch||0).toFixed(2)} hrs</p><p>Idle: ${Number(today.Idle||0).toFixed(2)} hrs</p><p>Collecting Cars: ${Number(today["Collecting Car"]||0).toFixed(2)} hrs</p></div>
+    <div class="job-card"><h3>This Week</h3><p>Lunch: ${Number(week.Lunch||0).toFixed(2)} hrs</p><p>Idle: ${Number(week.Idle||0).toFixed(2)} hrs</p><p>Collecting Cars: ${Number(week["Collecting Car"]||0).toFixed(2)} hrs</p></div>
   `;
   if($("downtimeReports")) $("downtimeReports").innerHTML=html;
   if($("ownerDowntimeReports")) $("ownerDowntimeReports").innerHTML=html;
@@ -597,8 +597,8 @@ function renderReportsInterface(){
   const today=downtimeTotals ? downtimeTotals(1) : {Lunch:0,Idle:0,"Collecting Car":0};
   const week=downtimeTotals ? downtimeTotals(7) : {Lunch:0,Idle:0,"Collecting Car":0};
   $("reportsDowntime").innerHTML=`
-    <div class="job-card"><h3>Today</h3><p>Lunch: ${today.Lunch.toFixed(2)} hrs</p><p>Idle: ${today.Idle.toFixed(2)} hrs</p><p>Collecting Cars: ${today["Collecting Car"].toFixed(2)} hrs</p></div>
-    <div class="job-card"><h3>This Week</h3><p>Lunch: ${week.Lunch.toFixed(2)} hrs</p><p>Idle: ${week.Idle.toFixed(2)} hrs</p><p>Collecting Cars: ${week["Collecting Car"].toFixed(2)} hrs</p></div>`;
+    <div class="job-card"><h3>Today</h3><p>Lunch: ${Number(today.Lunch||0).toFixed(2)} hrs</p><p>Idle: ${Number(today.Idle||0).toFixed(2)} hrs</p><p>Collecting Cars: ${Number(today["Collecting Car"]||0).toFixed(2)} hrs</p></div>
+    <div class="job-card"><h3>This Week</h3><p>Lunch: ${Number(week.Lunch||0).toFixed(2)} hrs</p><p>Idle: ${Number(week.Idle||0).toFixed(2)} hrs</p><p>Collecting Cars: ${Number(week["Collecting Car"]||0).toFixed(2)} hrs</p></div>`;
   const completedReports=jobs.filter(j=>j.report && (j.reportReady || completed(j))).sort((a,b)=>new Date(b.completedAt||b.finishedAt||b.createdAt)-new Date(a.completedAt||a.finishedAt||a.createdAt));
   $("reportsCompletedWriteups").innerHTML=completedReports.length?completedReports.map(j=>`
     <div class="job-card ${j.reportReviewed?'good':'warn'}">
@@ -727,7 +727,8 @@ function submitPartsRequest(){
 if($("submitPartsRequest")) $("submitPartsRequest").addEventListener("click",submitPartsRequest);
 
 function technicianPartAlertText(p){
-  if(p.status==="Ordered") return `📦 Parts ordered — ${p.qty||1} x ${p.description||p.text} has been ordered. Confirm when the parts arrive in the workshop.`;
+  p.status=normalisePartStatus(p.status);
+  if(p.status==="Ordered"||p.status==="Back Order") return `📦 Parts ordered — ${p.qty||1} x ${p.description||p.text} has been ordered. Confirm when the parts arrive in the workshop.`;
   if(p.status==="Received") return `✅ Parts received — ${p.qty||1} x ${p.description||p.text} is with the technician. Continue the repair.`;
   if(p.status==="Partial Delivery") return `⚠️ Partial delivery reported — waiting for Service Manager to chase the supplier.`;
   if(p.status==="Supplier Chased") return `📞 Supplier chased — Service Manager has chased the outstanding parts. Confirm when the remaining parts arrive.`;
@@ -749,174 +750,184 @@ function renderTechnicianPartsStatus(job){
       ${p.issueNote?`<p><strong>Issue note:</strong> ${p.issueNote}</p>`:""}${p.chasedAt?`<p><strong>Supplier chased:</strong> ${fmt(p.chasedAt)}${p.chaseNote?" — "+p.chaseNote:""}</p>`:""}
       <span class="part-pill ${(p.status||"requested").toLowerCase().replaceAll(" ","-")}">${p.status}</span>
       <div class="parts-actions">
-        ${p.status==="Ordered"?`<button onclick="technicianReceiveParts('${job.id}','${p.id}','all')">✅ Parts Arrived</button><button onclick="technicianReceiveParts('${job.id}','${p.id}','partial')">⚠️ Partial Delivery</button><button onclick="technicianReceiveParts('${job.id}','${p.id}','incorrect')">❌ Incorrect Parts</button>`:""}
+        ${["Ordered","Back Order"].includes(p.status)?`<button onclick="technicianReceiveParts('${job.id}','${p.id}','all')">✅ Parts Arrived</button><button onclick="technicianReceiveParts('${job.id}','${p.id}','partial')">⚠️ Partial Delivery</button><button onclick="technicianReceiveParts('${job.id}','${p.id}','incorrect')">❌ Incorrect Parts</button>`:""}
         ${p.status==="Supplier Chased"?`<button onclick="technicianReceiveParts('${job.id}','${p.id}','remaining')">✅ Remaining Parts Arrived</button><button onclick="technicianReceiveParts('${job.id}','${p.id}','incorrect')">❌ Incorrect Parts</button>`:""}
         ${p.status==="Received"?`<button onclick="markPartFitted('${job.id}','${p.id}')">🔧 Fitted</button>`:""}
       </div>
     </div>`).join("");
 }
+function normalisePartStatus(status,part={}){
+  const raw=String(status||part.status||part.orderStatus||part.deliveryStatus||part.partsStatus||part.state||"").trim();
+  const key=raw.toLowerCase().replace(/[✅📦⚠️❌🔧📞🟠🟡🔵🚚⏳]/g,"").replace(/[_-]+/g," ").replace(/\s+/g," ").trim();
+  if(part.fittedAt||part.completedAt||part.fitDate) return "Fitted";
+  if(part.receivedAt||part.arrivedAt||part.deliveredAt||part.deliveryDate) return "Received";
+  const map={
+    "":"Requested","requested":"Requested","parts requested":"Requested","required":"Requested","parts required":"Requested","waiting to order":"Requested",
+    "ordered":"Ordered","parts ordered":"Ordered","awaiting receipt":"Ordered","awaiting delivery":"Ordered","order placed":"Ordered","on order":"Ordered",
+    "back order":"Back Order","back ordered":"Back Order","backorder":"Back Order","on back order":"Back Order",
+    "delivered":"Received","received":"Received","parts received":"Received","parts arrived":"Received","arrived":"Received","ready to fit":"Received","delivery complete":"Received",
+    "partial":"Partial Delivery","partial delivery":"Partial Delivery","part delivery":"Partial Delivery",
+    "supplier chased":"Supplier Chased","chased":"Supplier Chased","parts company chased":"Supplier Chased",
+    "incorrect":"Incorrect Parts","incorrect part":"Incorrect Parts","incorrect parts":"Incorrect Parts","wrong parts":"Incorrect Parts",
+    "fitted":"Fitted","complete":"Fitted","completed":"Fitted","parts fitted":"Fitted"
+  };
+  if(map[key]) return map[key];
+  if(part.supplier||part.orderedAt||part.orderDate||part.orderReference) return "Ordered";
+  return "Requested";
+}
 function allPartsRequests(){
-  let rows=[];
-  jobs.forEach(j=>(j.partsRequests||[]).forEach(p=>rows.push({job:j,part:p})));
-  return rows.sort((a,b)=>new Date(b.part.requestedAt)-new Date(a.part.requestedAt));
+  const rows=[];
+  const seen=new Set();
+  jobs.forEach(job=>{
+    ensureTimeline(job);
+    const sources=[];
+    if(Array.isArray(job.partsRequests)) sources.push(...job.partsRequests);
+    if(Array.isArray(job.partRequests)) sources.push(...job.partRequests);
+    if(Array.isArray(job.partsOrders)) sources.push(...job.partsOrders);
+    if(Array.isArray(job.partsRequired)) sources.push(...job.partsRequired);
+    job.partsRequests=Array.isArray(job.partsRequests)?job.partsRequests:[];
+    sources.forEach((part,index)=>{
+      if(!part||typeof part!=="object") return;
+      if(!part.id) part.id=`part-${job.id}-${index+1}`;
+      const unique=`${job.id}:${part.id}`;
+      if(seen.has(unique)) return;
+      seen.add(unique);
+      part.description=part.description||part.text||part.name||part.partDescription||"Part";
+      part.qty=Number(part.qty||part.quantity||1);
+      part.requestedAt=part.requestedAt||part.createdAt||part.requestDate||job.createdAt||job.bookingDate||now().toISOString();
+      part.orderedAt=part.orderedAt||part.orderDate||part.orderedDate||null;
+      part.receivedAt=part.receivedAt||part.arrivedAt||part.deliveredAt||part.deliveryDate||null;
+      part.fittedAt=part.fittedAt||part.fitDate||part.completedAt||null;
+      part.supplier=part.supplier||part.orderedFrom||part.vendor||part.partsSupplier||"";
+      part.status=normalisePartStatus(part.status,part);
+      if(!job.partsRequests.includes(part)) job.partsRequests.push(part);
+      rows.push({job,part});
+    });
+  });
+  return rows.sort((a,b)=>new Date(b.part.requestedAt||0)-new Date(a.part.requestedAt||0));
 }
 function renderPartsQueues(){
   const el=$("servicePartsQueue");
   if(!el) return;
-  const rows=allPartsRequests().filter(r=>r.part.status!=="Fitted");
-  if(!rows.length){el.innerHTML="No outstanding parts requested yet.";return}
-  el.innerHTML=rows.map(({job,part})=>partsCard(job,part)).join("");
+  const rows=allPartsRequests().filter(r=>normalisePartStatus(r.part.status,r.part)!=="Fitted");
+  el.innerHTML=rows.length?rows.map(({job,part})=>partsCard(job,part)).join(""):"No outstanding parts requested yet.";
 }
-function partsCard(job,part){
-  return `<div class="job-card parts-request-card">
-    <h3>${job.reg} — ${job.technician}</h3>
-    <p><strong>Part:</strong> ${part.qty||1} x ${part.description||part.text}</p>
-    <p><strong>Priority:</strong> ${part.priority||"Today"} ${part.supplier? " | <strong>Supplier:</strong> "+part.supplier:""}</p>
-    <p><strong>Status:</strong> <span class="part-pill ${(part.status||"requested").toLowerCase().replaceAll(" ","-")}">${part.status}</span></p>
-    <p><strong>Requested:</strong> ${fmt(part.requestedAt)}${part.orderedAt?" | <strong>Ordered:</strong> "+fmt(part.orderedAt):""}${part.receivedAt?" | <strong>Received by technician:</strong> "+fmt(part.receivedAt):""}</p>
-    ${part.issueNote?`<p><strong>Issue note:</strong> ${part.issueNote}</p>`:""}
+function partsStatusClass(status){return String(status||"requested").toLowerCase().replaceAll(" ","-")}
+function partsCard(job,part,context="manager"){
+  part.status=normalisePartStatus(part.status,part);
+  const supplier=part.supplier||"Not recorded";
+  const desc=part.description||part.text||"Part";
+  const deliveryHours=part.orderedAt&&part.receivedAt?hoursBetween(part.orderedAt,part.receivedAt):null;
+  return `<div class="job-card parts-request-card ${part.status==="Received"?"good":part.status==="Ordered"?"warn":(part.status==="Partial Delivery"||part.status==="Incorrect Parts")?"bad":""}">
+    <h3>${job.reg} — ${job.technician}</h3><p><strong>Job:</strong> ${job.jobNo||"Not set"}</p>
+    <p><strong>Part:</strong> ${part.qty||1} x ${desc}</p>
+    <p><strong>Supplier:</strong> ${supplier}${part.partNumber?` | <strong>Part no:</strong> ${part.partNumber}`:""}</p>
+    <p><strong>Status:</strong> <span class="part-pill ${partsStatusClass(part.status)}">${part.status}</span></p>
+    <p><strong>Requested:</strong> ${fmt(part.requestedAt)}${part.orderedAt?` | <strong>Ordered:</strong> ${fmt(part.orderedAt)}`:""}${part.receivedAt?` | <strong>Arrived:</strong> ${fmt(part.receivedAt)}`:""}${part.fittedAt?` | <strong>Fitted:</strong> ${fmt(part.fittedAt)}`:""}</p>
+    ${part.expectedDelivery?`<p><strong>Expected delivery:</strong> ${part.expectedDelivery}</p>`:""}
+    ${part.orderReference?`<p><strong>Order reference:</strong> ${part.orderReference}</p>`:""}
+    ${part.orderedBy?`<p><strong>Ordered by:</strong> ${part.orderedBy}</p>`:""}
+    ${part.cost!==undefined&&part.cost!==null&&part.cost!==""?`<p><strong>Cost:</strong> £${Number(part.cost||0).toFixed(2)}</p>`:""}
+    ${deliveryHours!==null?`<p><strong>Delivery time:</strong> ${deliveryHours.toFixed(1)} hours</p>`:""}
+    ${part.orderNotes?`<p><strong>Order notes:</strong> ${part.orderNotes}</p>`:""}${part.issueNote?`<p><strong>Issue note:</strong> ${part.issueNote}</p>`:""}
+    ${part.chasedAt?`<p><strong>Supplier chased:</strong> ${fmt(part.chasedAt)}${part.chaseNote?` — ${part.chaseNote}`:""}</p>`:""}
     <div class="parts-actions">
-      ${part.status==="Requested"?`<button onclick="markPartOrdered('${job.id}','${part.id}')">Mark Ordered</button>`:""}
+      ${part.status==="Requested"?`<button onclick="openPartsOrderForm('${job.id}','${part.id}')">Order Parts</button>`:""}
       ${part.status==="Partial Delivery"?`<button onclick="chasePartsSupplier('${job.id}','${part.id}')">Chased Parts Company</button>`:""}
-      ${part.status==="Incorrect Parts"?`<button onclick="markPartOrdered('${job.id}','${part.id}')">Re-order Parts</button>`:""}
+      ${part.status==="Incorrect Parts"?`<button onclick="openPartsOrderForm('${job.id}','${part.id}')">Re-order Parts</button>`:""}
       ${part.status==="Received"?`<button onclick="markPartFitted('${job.id}','${part.id}')">Mark Fitted</button>`:""}
       <button onclick="showTimelineModal('${job.id}')">Timeline</button>
-    </div>
-  </div>`;
+    </div></div>`;
 }
-function markPartOrdered(jobId,partId){
-  const j=jobs.find(x=>x.id===jobId); if(!j) return;
-  const p=(j.partsRequests||[]).find(x=>x.id===partId); if(!p) return;
-  p.status="Ordered"; p.orderedAt=now().toISOString();
-  p.technicianAlert="Ordered";
-  p.serviceManagerAlert="Ordered";
-  p.issueNote="";
-  addTimeline(j,"📦 Parts ordered",`${p.description||p.text} marked ordered by Service Manager. Technician alert updated.`);
-  save();render();alert("Technician has been notified that the parts have been ordered.");
+function openPartsOrderForm(jobId,partId){
+  const job=jobs.find(x=>x.id===jobId);if(!job)return;const part=(job.partsRequests||[]).find(x=>x.id===partId);if(!part)return;
+  $("partsOrderJobId").value=jobId;$("partsOrderPartId").value=partId;$("partsOrderContext").textContent=`${job.reg} — ${part.qty||1} x ${part.description||part.text}`;
+  $("partsOrderSupplier").value=part.supplier||"TPS";$("partsOrderSupplierOther").value="";$("partsOrderPartNumber").value=part.partNumber||"";$("partsOrderReference").value=part.orderReference||"";$("partsOrderCost").value=part.cost??"";$("partsOrderExpected").value=part.expectedDelivery||"";$("partsOrderBy").value=part.orderedBy||"Service Manager";$("partsOrderStatus").value=part.status==="Back Order"?"Back Order":"Ordered";$("partsOrderNotes").value=part.orderNotes||"";$("partsOrderFormCard").classList.remove("hidden");$("partsOrderFormCard").scrollIntoView({behavior:"smooth",block:"start"});
 }
-function resumeStatusAfterParts(){
-  return "🟡 Started Repair";
+function closePartsOrderForm(){if($("partsOrderFormCard"))$("partsOrderFormCard").classList.add("hidden")}
+function savePartsOrderFromForm(){
+  const jobId=val("partsOrderJobId"),partId=val("partsOrderPartId"),job=jobs.find(x=>x.id===jobId);if(!job)return;const part=(job.partsRequests||[]).find(x=>x.id===partId);if(!part)return;
+  let supplier=val("partsOrderSupplier");if(supplier==="Other")supplier=val("partsOrderSupplierOther");if(!supplier){alert("Please select or enter the supplier.");return}
+  part.supplier=supplier;part.orderedFrom=supplier;part.partNumber=val("partsOrderPartNumber");part.orderReference=val("partsOrderReference");part.cost=val("partsOrderCost")===""?null:Number(val("partsOrderCost"));part.expectedDelivery=val("partsOrderExpected");part.orderedBy=val("partsOrderBy")||"Service Manager";part.orderNotes=val("partsOrderNotes");part.status=val("partsOrderStatus")||"Ordered";part.orderStatus=part.status;if(part.status==="Back Order")part.wasBackOrder=true;part.orderedAt=now().toISOString();part.orderDate=part.orderedAt;part.technicianAlert=part.status;part.serviceManagerAlert=part.status;part.issueNote="";
+  addTimeline(job,"📦 Parts order saved",`${part.qty||1} x ${part.description||part.text} ordered from ${supplier}. Status: ${part.status}.`);save();closePartsOrderForm();render();alert("Parts order saved and the technician has been updated.");
 }
+function markPartOrdered(jobId,partId){openPartsOrderForm(jobId,partId)}
+function resumeStatusAfterParts(){return "🟡 Started Repair"}
 function technicianReceiveParts(jobId,partId,result){
-  const j=jobs.find(x=>x.id===jobId); if(!j) return;
-  const p=(j.partsRequests||[]).find(x=>x.id===partId); if(!p) return;
-  if(result==="all"){
-    p.status="Received";
-    p.receivedAt=now().toISOString();
-    p.technicianAlert="Received";
-    p.serviceManagerAlert="Received";
-    p.issueNote="";
-    addTimeline(j,"✅ Parts received by technician",`${p.qty||1} x ${p.description||p.text} received in the workshop by ${j.technician}.`);
-    if((j.partsRequests||[]).every(x=>["Received","Fitted"].includes(x.status)) && (j.status||"").includes("Awaiting Parts")){
-      const old=j.status;
-      j.status=resumeStatusAfterParts();
-      addTimeline(j,"▶ Repair resumed",`Status changed from ${old} to ${j.status} after parts were received.`);
-    }
-    alert("Parts received recorded. Service Manager has been updated.");
-  }else if(result==="partial"){
-    const note=prompt("What is missing from the delivery?")||"Partial delivery reported by technician.";
-    p.status="Partial Delivery";
-    p.issueAt=now().toISOString();
-    p.issueNote=note;
-    p.technicianAlert="Partial Delivery";
-    p.serviceManagerAlert="Partial Delivery";
-    addTimeline(j,"⚠️ Partial parts delivery",`${p.description||p.text}: ${note}`);
-    alert("Partial delivery alert sent to Service Manager.");
-  }else if(result==="remaining"){
-    p.status="Received";
-    p.receivedAt=now().toISOString();
-    p.remainingReceivedAt=p.receivedAt;
-    p.technicianAlert="Received";
-    p.serviceManagerAlert="Received";
-    p.issueNote="";
-    addTimeline(j,"✅ Remaining parts arrived",`${p.qty||1} x ${p.description||p.text}: technician confirmed all outstanding parts have now arrived.`);
-    if((j.partsRequests||[]).every(x=>["Received","Fitted"].includes(x.status)) && (j.status||"").includes("Awaiting Parts")){
-      const old=j.status;
-      j.status=resumeStatusAfterParts();
-      addTimeline(j,"▶ Repair resumed",`Status changed from ${old} to ${j.status} after the remaining parts arrived.`);
-    }
-    alert("Remaining parts arrival recorded. Service Manager has been updated.");
-  }else if(result==="incorrect"){
-    const note=prompt("What is wrong with the parts?")||"Incorrect parts reported by technician.";
-    p.status="Incorrect Parts";
-    p.issueAt=now().toISOString();
-    p.issueNote=note;
-    p.technicianAlert="Incorrect Parts";
-    p.serviceManagerAlert="Incorrect Parts";
-    addTimeline(j,"❌ Incorrect parts",`${p.description||p.text}: ${note}`);
-    alert("Incorrect parts alert sent to Service Manager.");
-  }
+  const j=jobs.find(x=>x.id===jobId);if(!j)return;const p=(j.partsRequests||[]).find(x=>x.id===partId);if(!p)return;
+  if(result==="all"){p.status="Received";p.receivedAt=now().toISOString();p.arrivedAt=p.receivedAt;p.technicianAlert="Received";p.serviceManagerAlert="Received";p.issueNote="";addTimeline(j,"✅ Parts received by technician",`${p.qty||1} x ${p.description||p.text} received in the workshop by ${j.technician}.`);if((j.partsRequests||[]).every(x=>["Received","Fitted"].includes(normalisePartStatus(x.status,x)))&&(j.status||"").includes("Awaiting Parts")){const old=j.status;j.status=resumeStatusAfterParts();addTimeline(j,"▶ Repair resumed",`Status changed from ${old} to ${j.status} after parts were received.`)}alert("Parts arrived recorded. Service Manager has been updated.")}
+  else if(result==="partial"){const note=prompt("What is missing from the delivery?")||"Partial delivery reported by technician.";p.status="Partial Delivery";p.hadPartialDelivery=true;p.issueAt=now().toISOString();p.issueNote=note;p.technicianAlert="Partial Delivery";p.serviceManagerAlert="Partial Delivery";addTimeline(j,"⚠️ Partial parts delivery",`${p.description||p.text}: ${note}`);alert("Partial delivery alert sent to Service Manager.")}
+  else if(result==="remaining"){p.status="Received";p.receivedAt=now().toISOString();p.arrivedAt=p.receivedAt;p.issueNote="";p.technicianAlert="Received";p.serviceManagerAlert="Received";addTimeline(j,"✅ Remaining parts arrived",`${p.qty||1} x ${p.description||p.text}: technician confirmed all outstanding parts have now arrived.`);if((j.partsRequests||[]).every(x=>["Received","Fitted"].includes(normalisePartStatus(x.status,x)))&&(j.status||"").includes("Awaiting Parts")){const old=j.status;j.status=resumeStatusAfterParts();addTimeline(j,"▶ Repair resumed",`Status changed from ${old} to ${j.status} after the remaining parts arrived.`)}alert("Remaining parts arrival recorded. Service Manager has been updated.")}
+  else if(result==="incorrect"){const note=prompt("What is wrong with the parts?")||"Incorrect parts reported by technician.";p.status="Incorrect Parts";p.hadIncorrectParts=true;p.issueAt=now().toISOString();p.issueNote=note;p.technicianAlert="Incorrect Parts";p.serviceManagerAlert="Incorrect Parts";addTimeline(j,"❌ Incorrect parts",`${p.description||p.text}: ${note}`);alert("Incorrect parts alert sent to Service Manager.")}
   save();renderTechnicianPartsStatus(j);render();
 }
-
-function chasePartsSupplier(jobId,partId){
-  const j=jobs.find(x=>x.id===jobId); if(!j) return;
-  const p=(j.partsRequests||[]).find(x=>x.id===partId); if(!p) return;
-  const response=prompt("Supplier response / updated ETA (optional):")||"Supplier chased; awaiting update.";
-  p.status="Supplier Chased";
-  p.chasedAt=now().toISOString();
-  p.chasedBy="Service Manager";
-  p.chaseNote=response;
-  p.technicianAlert="Supplier Chased";
-  p.serviceManagerAlert="Supplier Chased";
-  addTimeline(j,"📞 Parts supplier chased",`${p.description||p.text}: Service Manager chased the supplier. ${response}`);
-  save();
-  render();
-  alert("Technician has been notified that the parts company was chased.");
+function chasePartsSupplier(jobId,partId){const j=jobs.find(x=>x.id===jobId);if(!j)return;const p=(j.partsRequests||[]).find(x=>x.id===partId);if(!p)return;const note=prompt("Supplier response / new ETA (optional):")||"Supplier chased; awaiting update.";p.status="Supplier Chased";p.chasedAt=now().toISOString();p.chaseNote=note;p.technicianAlert="Supplier Chased";p.serviceManagerAlert="Supplier Chased";addTimeline(j,"📞 Parts company chased",`${p.supplier||"Supplier"} chased by Service Manager. ${note}`);save();render();alert("Technician has been notified that the parts company was chased.")}
+function markRemainingPartsArrived(jobId,partId){technicianReceiveParts(jobId,partId,"remaining")}
+function markPartFitted(jobId,partId){const j=jobs.find(x=>x.id===jobId);if(!j)return;const p=(j.partsRequests||[]).find(x=>x.id===partId);if(!p)return;if(normalisePartStatus(p.status,p)!=="Received"){alert("The part must be marked as arrived before it can be fitted.");return}p.status="Fitted";p.fittedAt=now().toISOString();p.fitDate=p.fittedAt;p.fittedBy=j.technician||"Technician";p.technicianAlert="Fitted";p.serviceManagerAlert="Cleared";addTimeline(j,"🔧 Part fitted",`${p.description||p.text} marked fitted by ${p.fittedBy}.`);save();renderTechnicianPartsStatus(j);render();alert("Part marked as fitted and moved to Completed Parts History.")}
+function renderSupplierPerformance(rows){
+  const el=$("partsSupplierPerformance");if(!el)return;const currentMonth=todayISO().slice(0,7);
+  const supplierRows=rows.filter(({part})=>part.supplier||part.orderedFrom);
+  const monthRows=supplierRows.filter(({part})=>{const stamp=part.orderedAt||part.orderDate||part.requestedAt||part.receivedAt||part.fittedAt;return !stamp||String(stamp).slice(0,7)===currentMonth});
+  const useRows=monthRows.length?monthRows:supplierRows;
+  if(!useRows.length){el.innerHTML="No supplier orders recorded yet.";return}
+  const grouped={};useRows.forEach(({part})=>{const supplier=part.supplier||part.orderedFrom||"Unknown supplier";const m=grouped[supplier]||(grouped[supplier]={orders:0,delivered:0,totalHours:0,partial:0,incorrect:0,backOrders:0,outstanding:0});m.orders++;const status=normalisePartStatus(part.status,part);if(part.orderedAt&&part.receivedAt){m.delivered++;m.totalHours+=hoursBetween(part.orderedAt,part.receivedAt)}else if(!["Received","Fitted"].includes(status))m.outstanding++;if(part.hadPartialDelivery||status==="Partial Delivery")m.partial++;if(part.hadIncorrectParts||status==="Incorrect Parts")m.incorrect++;if(part.wasBackOrder||status==="Back Order")m.backOrders++});
+  el.innerHTML=Object.entries(grouped).sort((a,b)=>a[0].localeCompare(b[0])).map(([supplier,m])=>{const avg=m.delivered?`${(m.totalHours/m.delivered).toFixed(1)} hours`:"No completed delivery yet";return `<div class="job-card"><h3>${supplier}</h3><p><strong>Orders:</strong> ${m.orders}</p><p><strong>Delivered:</strong> ${m.delivered} | <strong>Outstanding:</strong> ${m.outstanding}</p><p><strong>Average delivery:</strong> ${avg}</p><p><strong>Partial:</strong> ${m.partial} | <strong>Incorrect:</strong> ${m.incorrect} | <strong>Back order:</strong> ${m.backOrders}</p></div>`}).join("");
 }
-
-function markPartDelivered(jobId,partId){
-  // Legacy support only. Parts should now be confirmed as received by the technician.
-  const j=jobs.find(x=>x.id===jobId); if(!j) return;
-  const p=(j.partsRequests||[]).find(x=>x.id===partId); if(!p) return;
-  p.status="Received"; p.receivedAt=now().toISOString();
-  p.technicianAlert="Received";
-  p.serviceManagerAlert="Received";
-  addTimeline(j,"✅ Parts received",`${p.description||p.text} marked received.`);
-  if((j.partsRequests||[]).every(x=>["Received","Fitted"].includes(x.status)) && j.status.includes("Awaiting Parts")) j.status=resumeStatusAfterParts();
-  save();render();
+function partArrivalDate(part){
+  return String(part.receivedAt||part.arrivedAt||part.deliveredAt||part.deliveryDate||"").slice(0,10);
 }
-
-
-function markPartFitted(jobId,partId){
-  const j=jobs.find(x=>x.id===jobId); if(!j) return;
-  const p=(j.partsRequests||[]).find(x=>x.id===partId); if(!p) return;
-  if(p.status!=="Received"){
-    alert("The part must be marked as arrived before it can be fitted.");
+function normaliseRegistration(value){
+  return String(value||"").toUpperCase().replace(/\s+/g,"").trim();
+}
+function renderCompletedPartsLookup(completedRows){
+  const completedEl=$("partsCompletedQueue");
+  if(!completedEl) return;
+  const input=$("partsHistoryRegSearch");
+  const query=normaliseRegistration(input?input.value:"");
+  if(!query){
+    completedEl.innerHTML="Enter a registration above to view completed parts history.";
     return;
   }
-  p.status="Fitted";
-  p.fittedAt=now().toISOString();
-  p.fittedBy=j.technician||"Technician";
-  p.technicianAlert="Fitted";
-  p.serviceManagerAlert="Cleared";
-  addTimeline(j,"🔧 Part fitted",`${p.description||p.text} marked fitted by ${p.fittedBy}.`);
-  save();
-  renderTechnicianPartsStatus(j);
-  render();
-  alert("Part marked as fitted and moved to Completed Parts History.");
+  const matches=completedRows.filter(({job})=>normaliseRegistration(job.reg).includes(query));
+  completedEl.innerHTML=matches.length
+    ? matches.map(({job,part})=>partsCard(job,part,"completed")).join("")
+    : `No completed parts history found for ${String(input.value||"").toUpperCase()}.`;
 }
 function renderPartsManagement(){
-  const stats=$("partsManagementStats");
-  const queue=$("partsManagementQueue");
-  const delivered=$("partsDeliveredQueue");
-  if(!stats||!queue||!delivered) return;
-  const rows=allPartsRequests();
-  const requested=rows.filter(r=>r.part.status==="Requested").length;
-  const ordered=rows.filter(r=>r.part.status==="Ordered").length;
-  const receivedCount=rows.filter(r=>r.part.status==="Received").length;
-  const fitted=rows.filter(r=>r.part.status==="Fitted").length;
-  stats.innerHTML=`
-    <div class="stat"><strong>${rows.length}</strong>Total</div>
-    <div class="stat"><strong>${requested}</strong>Requested</div>
-    <div class="stat"><strong>${ordered}</strong>Ordered</div>
-    <div class="stat"><strong>${receivedCount}</strong>Received</div>
-    <div class="stat"><strong>${fitted}</strong>Fitted</div>`;
-  const outstanding=rows.filter(r=>r.part.status!=="Fitted");
-  queue.innerHTML=outstanding.length?outstanding.map(({job,part})=>partsCard(job,part)).join(""):"No outstanding parts.";
-  const completedRows=rows.filter(r=>r.part.status==="Fitted");
-  delivered.innerHTML=completedRows.length?completedRows.map(({job,part})=>partsCard(job,part)).join(""):"No fitted parts yet.";
+  const stats=$("partsManagementStats"),requestedEl=$("partsRequestedQueue"),orderedEl=$("partsManagementQueue"),deliveredEl=$("partsDeliveredQueue"),completedEl=$("partsCompletedQueue");
+  if(!stats||!requestedEl||!orderedEl||!deliveredEl||!completedEl)return;
+
+  const rows=allPartsRequests(),requested=[],ordered=[],delivered=[],completedRows=[];
+  rows.forEach(row=>{
+    const status=normalisePartStatus(row.part.status,row.part);
+    row.part.status=status;
+    if(status==="Requested") requested.push(row);
+    else if(["Ordered","Back Order","Partial Delivery","Supplier Chased","Incorrect Parts"].includes(status)) ordered.push(row);
+    else if(status==="Received") delivered.push(row);
+    else if(status==="Fitted") completedRows.push(row);
+    else ordered.push(row);
+  });
+
+  const deliveredToday=delivered.filter(({part})=>partArrivalDate(part)===todayISO());
+
+  stats.innerHTML=`<div class="stat"><strong>${rows.length}</strong>Total</div><div class="stat"><strong>${requested.length}</strong>Requested</div><div class="stat"><strong>${ordered.length}</strong>Ordered / Issues</div><div class="stat"><strong>${deliveredToday.length}</strong>Delivered Today</div><div class="stat"><strong>${completedRows.length}</strong>Completed History</div>`;
+  requestedEl.innerHTML=requested.length?requested.map(({job,part})=>partsCard(job,part,"requested")).join(""):"No parts requests waiting to be ordered.";
+  orderedEl.innerHTML=ordered.length?ordered.map(({job,part})=>partsCard(job,part,"ordered")).join(""):"No ordered, back-ordered or problem parts.";
+  deliveredEl.innerHTML=deliveredToday.length?deliveredToday.map(({job,part})=>partsCard(job,part,"delivered")).join(""):"No parts delivered today waiting to be fitted.";
+  renderCompletedPartsLookup(completedRows);
+  renderSupplierPerformance(rows);
 }
+if($("savePartsOrder")) $("savePartsOrder").addEventListener("click",savePartsOrderFromForm);
+if($("cancelPartsOrder")) $("cancelPartsOrder").addEventListener("click",closePartsOrderForm);
+if($("partsOrderSupplier")) $("partsOrderSupplier").addEventListener("change",()=>{
+  const other=$("partsOrderSupplierOther"); if(other) other.style.display=val("partsOrderSupplier")==="Other"?"block":"none";
+});
+if($("partsHistorySearchBtn")) $("partsHistorySearchBtn").addEventListener("click",renderPartsManagement);
+if($("partsHistoryClearBtn")) $("partsHistoryClearBtn").addEventListener("click",()=>{
+  if($("partsHistoryRegSearch")) $("partsHistoryRegSearch").value="";
+  renderPartsManagement();
+});
+if($("partsHistoryRegSearch")) $("partsHistoryRegSearch").addEventListener("input",renderPartsManagement);
 
 function moveJobToStatus(jobId,newStatus){
   const j=jobs.find(x=>x.id===jobId); if(!j) return;
@@ -986,9 +997,9 @@ Waiting for parts: ${waitingParts}
 Waiting for customer approval: ${waitingApproval}
 
 Downtime today:
-Lunch: ${today.Lunch.toFixed(2)} hrs
-Idle: ${today.Idle.toFixed(2)} hrs
-Collecting cars: ${today["Collecting Car"].toFixed(2)} hrs
+Lunch: ${Number(today.Lunch||0).toFixed(2)} hrs
+Idle: ${Number(today.Idle||0).toFixed(2)} hrs
+Collecting cars: ${Number(today["Collecting Car"]||0).toFixed(2)} hrs
 
 Best efficiency today:
 ${best ? best.tech + " — " + pct(best.eff) : "Not enough data"}
@@ -2124,3 +2135,631 @@ if(document.readyState==="loading"){
 
 // WAI-065.1 rate snapshot migration
 if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",()=>{ensureRateHistory();backfillJobRateSnapshots();});}else{ensureRateHistory();backfillJobRateSnapshots();}
+
+
+/* =====================================================================
+   Workshop AI — WAI-065.5A
+   Workshop Operations Stabilisation
+   - Live Workshop Board shows every current job status
+   - Parts waiting is calculated from live parts records
+   - Customer telephone is prominent on Service Manager job cards
+   Built from script(31).js
+   ===================================================================== */
+
+function wai655NormaliseStatus(status){
+  const value=String(status||"").toLowerCase();
+
+  if(value.includes("waiting to start")) return "🔵 Waiting to Start";
+  if(value.includes("diagnos")) return "🔍 Diagnosing";
+  if(value.includes("repairing")) return "🔧 Repairing Vehicle";
+  if(value.includes("additional work")) return "⚠️ Additional Work Found";
+  if(value.includes("awaiting parts")||value.includes("waiting parts")) return "🟠 Awaiting Parts";
+  if(value.includes("approval")||value.includes("authorisation")) return "🟣 Awaiting Customer Approval";
+  if(value.includes("road test")) return "🚗 Road Test";
+  if(value.includes("quality check")) return "✅ Quality Check";
+  if(value.includes("repair complete")) return "🟢 Repair Complete";
+  if(value.includes("ready")) return "✅ Ready for Collection";
+  if(value.includes("collected")||value.includes("closed")) return "✔️ Collected / Closed";
+  return String(status||"🔵 Waiting to Start");
+}
+
+function wai655OpenPartRows(){
+  if(typeof allPartsRequests!=="function") return [];
+
+  return allPartsRequests().filter(({part})=>{
+    const status=typeof normalisePartStatus==="function"
+      ? normalisePartStatus(part.status,part)
+      : String(part.status||"Requested");
+
+    return !["Received","Fitted"].includes(status);
+  });
+}
+
+function wai655PartsWaitingJobs(){
+  const rows=wai655OpenPartRows();
+  const ids=new Set(rows.map(({job})=>String(job.id)));
+  return jobs.filter(job=>ids.has(String(job.id))&&!completed(job));
+}
+
+/* The Coach now counts parts from the actual Parts workflow,
+   not only from the job status label. */
+coachWaitingPartsJobs=function(){
+  return wai655PartsWaitingJobs();
+};
+
+/* Prominent customer contact details on the Service Manager job board. */
+card=function(job,open=true,manager=false){
+  ensureTimeline(job);
+  const eff=efficiency(Number(job.hours||0),Number(job.actualHours||0));
+  const telephone=job.phone||"Not entered";
+
+  return `<div class="job-card">
+    <h3>${job.jobNo||""} | ${job.reg} — ${job.technician}</h3>
+    <p><strong>${job.make||"Make"} ${job.model||""}</strong></p>
+    <p><strong>Customer:</strong> ${job.customer||"Not entered"}</p>
+    <p><strong>Telephone:</strong> ${telephone}</p>
+    <p><strong>Priority:</strong> ${job.priority||"Not set"} | <strong>Current Status:</strong> ${job.status||"Not set"}</p>
+    <p><strong>Type:</strong> ${job.type} | <strong>Allowed:</strong> ${job.hours} hrs | <strong>Actual:</strong> ${(job.actualHours||0).toFixed(2)} hrs | <strong>Efficiency:</strong> ${pct(eff)}</p>
+    <p><strong>MOT:</strong> ${job.mot}</p>
+    <p><strong>Timeline:</strong> ${job.timeline.length} events</p>
+    ${!manager&&job.technicianNotice?`<div class="timeline-item good"><strong>🔔 Technician Update</strong><p>${job.technicianNotice}</p></div>`:""}
+    ${manager?`<button onclick="amendHours('${job.id}')">Amend Hours</button><button onclick="reassignTech('${job.id}')">Reassign Technician</button><button onclick="managerComment('${job.id}')">Manager Comment</button>`:""}
+    <button onclick="showTimelineModal('${job.id}')">Timeline</button>
+    ${open?`<button onclick="openJob('${job.id}')">Start / Continue Job</button>`:""}
+  </div>`;
+};
+
+/* The board is generated from each job's current status, so no live status
+   disappears simply because its wording differs from an old fixed list. */
+renderStatusBoard=function(id){
+  const el=$(id);
+  if(!el) return;
+
+  const liveJobs=typeof getLiveWorkshopJobs==="function"
+    ? getLiveWorkshopJobs()
+    : jobs.filter(job=>!completed(job));
+
+  const preferredOrder=[
+    "🔵 Waiting to Start",
+    "🔍 Diagnosing",
+    "🔧 Repairing Vehicle",
+    "⚠️ Additional Work Found",
+    "🟠 Awaiting Parts",
+    "🟣 Awaiting Customer Approval",
+    "🚗 Road Test",
+    "✅ Quality Check",
+    "🟢 Repair Complete",
+    "✅ Ready for Collection"
+  ];
+
+  const groups={};
+  preferredOrder.forEach(status=>groups[status]=[]);
+
+  liveJobs.forEach(job=>{
+    const status=wai655NormaliseStatus(job.status);
+    if(status==="✔️ Collected / Closed") return;
+    if(!groups[status]) groups[status]=[];
+    groups[status].push(job);
+  });
+
+  const statuses=[
+    ...preferredOrder,
+    ...Object.keys(groups).filter(status=>!preferredOrder.includes(status))
+  ];
+
+  el.innerHTML=statuses.map(status=>{
+    const list=groups[status]||[];
+
+    return `<div class="board-column" data-status="${status}">
+      <h3>${status} <span class="parts-alert-count">${list.length}</span></h3>
+      ${list.length?list.map(job=>`
+        <div class="board-job" draggable="true" data-job-id="${job.id}">
+          <strong>${job.reg}</strong><br>
+          ${job.make||""} ${job.model||""}<br>
+          <strong>${job.technician||"Unassigned"}</strong> | ${Number(job.hours||0).toFixed(1)} hrs<br>
+          ${job.customer||"Customer not entered"}${job.phone?` | ${job.phone}`:""}<br>
+          <strong>Status:</strong> ${job.status||status}<br>
+          <button onclick="showTimelineModal('${job.id}')">Timeline</button>
+        </div>
+      `).join(""):"<p class='muted'>No jobs</p>"}
+    </div>`;
+  }).join("");
+
+  setTimeout(enableDragDropBoard,0);
+};
+
+/* Preserve the working dashboard, then add a live Parts Waiting tile based
+   on Parts records. */
+const wai655PreviousRenderDash=renderDash;
+renderDash=function(){
+  wai655PreviousRenderDash();
+
+  const openParts=wai655OpenPartRows();
+  const waitingJobs=wai655PartsWaitingJobs();
+
+  if($("ownerStats")){
+    $("ownerStats").insertAdjacentHTML(
+      "beforeend",
+      `<div class="stat ${openParts.length?"warn":"good"}">
+        <strong>${waitingJobs.length}</strong>Jobs Waiting Parts
+        <small>${openParts.length} outstanding part request(s)</small>
+      </div>`
+    );
+  }
+
+  /* Mission Control reads coachWaitingPartsJobs(), which now uses live
+     Parts records. Refresh it once after the tile is updated. */
+  if(typeof renderWorkshopCoachMissionControl==="function"){
+    renderWorkshopCoachMissionControl();
+  }
+};
+
+
+
+/* =====================================================================
+   Workshop AI — WAI-065.5B
+   Forward Technician Availability & Capacity Planning
+   ===================================================================== */
+
+let forwardTechnicianAvailability=JSON.parse(
+  localStorage.getItem("workshopAIForwardTechnicianAvailabilityV1")||"{}"
+);
+
+function saveForwardTechnicianAvailability(){
+  localStorage.setItem(
+    "workshopAIForwardTechnicianAvailabilityV1",
+    JSON.stringify(forwardTechnicianAvailability)
+  );
+}
+
+function forwardAvailabilityKey(date,technician){
+  return `${String(date||"").slice(0,10)}::${technician}`;
+}
+
+function forwardDefaultHours(status){
+  const normal=Number(plannerSettings.capacity||8);
+  if(["Holiday","Sick","Not Scheduled"].includes(status)) return 0;
+  if(status==="Half Day") return normal/2;
+  if(status==="Overtime") return normal+2;
+  if(status==="Training") return 0;
+  return normal;
+}
+
+function forwardAvailabilityFor(technician,date){
+  const saved=forwardTechnicianAvailability[
+    forwardAvailabilityKey(date,technician)
+  ];
+
+  if(saved){
+    return {
+      technician,
+      date,
+      status:saved.status||"Working",
+      hours:Number(saved.hours||0),
+      note:saved.note||"",
+      updatedAt:saved.updatedAt||null,
+      custom:true
+    };
+  }
+
+  return {
+    technician,
+    date,
+    status:"Working",
+    hours:Number(plannerSettings.capacity||8),
+    note:"",
+    updatedAt:null,
+    custom:false
+  };
+}
+
+function workshopAvailabilityForDate(date){
+  const rows=getTechs().map(
+    technician=>forwardAvailabilityFor(technician,date)
+  );
+
+  return {
+    date,
+    rows,
+    techniciansAvailable:rows.filter(row=>row.hours>0).length,
+    totalHours:rows.reduce(
+      (sum,row)=>sum+Number(row.hours||0),
+      0
+    ),
+    unavailable:rows.filter(row=>row.hours<=0)
+  };
+}
+
+function forwardDatesInclusive(startDate,endDate){
+  const dates=[];
+  const start=new Date(`${startDate}T12:00:00`);
+  const end=new Date(`${endDate}T12:00:00`);
+
+  if(
+    Number.isNaN(start.getTime())||
+    Number.isNaN(end.getTime())||
+    end<start
+  ){
+    return dates;
+  }
+
+  for(
+    let current=new Date(start);
+    current<=end;
+    current.setDate(current.getDate()+1)
+  ){
+    dates.push(current.toISOString().slice(0,10));
+  }
+
+  return dates;
+}
+
+function populateForwardAvailabilityTechnicians(){
+  const select=$("availabilityTechnician");
+  if(!select) return;
+
+  const current=select.value;
+  select.innerHTML=getTechs()
+    .map(technician=>`<option>${technician}</option>`)
+    .join("");
+
+  if(getTechs().includes(current)) select.value=current;
+}
+
+function updateForwardHoursSuggestion(){
+  if(!$("availabilityStatus")||!$("availabilityHours")) return;
+  $("availabilityHours").value=forwardDefaultHours(
+    val("availabilityStatus")
+  );
+}
+
+function saveForwardAvailabilityRange(){
+  const technician=val("availabilityTechnician");
+  const start=val("availabilityStartDate");
+  const end=val("availabilityEndDate")||start;
+  const status=val("availabilityStatus");
+  const hours=Number(val("availabilityHours"));
+  const note=val("availabilityNote");
+
+  if(!technician){
+    alert("Select a technician.");
+    return;
+  }
+  if(!start){
+    alert("Select a start date.");
+    return;
+  }
+
+  const dates=forwardDatesInclusive(start,end);
+  if(!dates.length){
+    alert("The end date must be the same as or later than the start date.");
+    return;
+  }
+
+  if(!Number.isFinite(hours)||hours<0){
+    alert("Enter valid available hours.");
+    return;
+  }
+
+  dates.forEach(date=>{
+    forwardTechnicianAvailability[
+      forwardAvailabilityKey(date,technician)
+    ]={
+      technician,
+      date,
+      status,
+      hours,
+      note,
+      updatedAt:new Date().toISOString()
+    };
+  });
+
+  saveForwardTechnicianAvailability();
+
+  if($("plannerDate")) $("plannerDate").value=start;
+  render();
+
+  alert(`${technician} availability saved for ${dates.length} day(s).`);
+}
+
+function clearForwardAvailabilityRange(){
+  const technician=val("availabilityTechnician");
+  const start=val("availabilityStartDate");
+  const end=val("availabilityEndDate")||start;
+
+  if(!technician||!start){
+    alert("Select a technician and date range.");
+    return;
+  }
+
+  const dates=forwardDatesInclusive(start,end);
+  if(!dates.length){
+    alert("The end date must be the same as or later than the start date.");
+    return;
+  }
+
+  dates.forEach(date=>{
+    delete forwardTechnicianAvailability[
+      forwardAvailabilityKey(date,technician)
+    ];
+  });
+
+  saveForwardTechnicianAvailability();
+
+  if($("plannerDate")) $("plannerDate").value=start;
+  render();
+
+  alert(`${technician} returned to default hours for ${dates.length} day(s).`);
+}
+
+function forwardAvailabilityClass(row){
+  if(row.hours<=0) return "bad";
+  if(["Half Day","Training"].includes(row.status)) return "warn";
+  if(row.status==="Overtime") return "good";
+  return "";
+}
+
+function renderForwardAvailabilityDay(){
+  if(!$("availabilityDaySummary")||!$("availabilityDayList")) return;
+
+  const date=selectedPlannerDate();
+  const availability=workshopAvailabilityForDate(date);
+  const dayJobs=jobs.filter(
+    job=>String(job.bookingDate||"").slice(0,10)===date
+  );
+  const allocated=dayJobs.reduce(
+    (sum,job)=>sum+Number(job.hours||0),
+    0
+  );
+  const spare=availability.totalHours-allocated;
+
+  $("availabilityDaySummary").innerHTML=`
+    <div class="stat">
+      <strong>${availability.techniciansAvailable}</strong>
+      Technicians Available
+    </div>
+    <div class="stat">
+      <strong>${availability.totalHours.toFixed(1)}</strong>
+      Available Hours
+    </div>
+    <div class="stat">
+      <strong>${allocated.toFixed(1)}</strong>
+      Allocated Hours
+    </div>
+    <div class="stat ${spare<0?"bad":spare<=2?"warn":"good"}">
+      <strong>${Math.abs(spare).toFixed(1)}</strong>
+      ${spare<0?"Overbooked Hours":"Spare Hours"}
+    </div>
+    <div class="stat ${availability.unavailable.length?"warn":"good"}">
+      <strong>${availability.unavailable.length}</strong>
+      Unavailable
+    </div>
+  `;
+
+  $("availabilityDayList").innerHTML=availability.rows.map(row=>{
+    const technicianJobs=dayJobs.filter(
+      job=>job.technician===row.technician
+    );
+    const technicianAllocated=technicianJobs.reduce(
+      (sum,job)=>sum+Number(job.hours||0),
+      0
+    );
+    const technicianSpare=Number(row.hours||0)-technicianAllocated;
+
+    return `<div class="job-card ${forwardAvailabilityClass(row)}">
+      <h3>${row.technician} — ${row.status}</h3>
+      <p>
+        <strong>Available:</strong> ${Number(row.hours||0).toFixed(1)} hrs |
+        <strong>Allocated:</strong> ${technicianAllocated.toFixed(1)} hrs |
+        <strong>${technicianSpare<0?"Overbooked":"Spare"}:</strong>
+        ${Math.abs(technicianSpare).toFixed(1)} hrs
+      </p>
+      <p><strong>Jobs:</strong> ${technicianJobs.length}</p>
+      ${row.note?`<p><strong>Note:</strong> ${row.note}</p>`:""}
+      <p class="muted">
+        ${row.custom
+          ? `Saved availability for ${date}`
+          : `Using default ${Number(plannerSettings.capacity||8).toFixed(1)} hours`}
+      </p>
+    </div>`;
+  }).join("");
+}
+
+/* Make today's Command Centre, Coach and Technician cards use a
+   date-specific availability entry when one exists. */
+const wai655bLegacyTechAvailability=techAvailability;
+
+techAvailability=function(technician){
+  const todayRecord=forwardTechnicianAvailability[
+    forwardAvailabilityKey(todayISO(),technician)
+  ];
+
+  if(!todayRecord){
+    return wai655bLegacyTechAvailability(technician);
+  }
+
+  const statusMap={
+    "Working":"in_work",
+    "Holiday":"holiday",
+    "Sick":"sick",
+    "Training":"training",
+    "Half Day":"half_day",
+    "Overtime":"overtime",
+    "Not Scheduled":"off_work"
+  };
+
+  return {
+    status:statusMap[todayRecord.status]||"custom",
+    hours:Number(todayRecord.hours||0),
+    forwardStatus:todayRecord.status,
+    note:todayRecord.note||""
+  };
+};
+
+techAvailableHours=function(technician){
+  const record=techAvailability(technician);
+  const option=TECH_STATUS_OPTIONS[record.status]||TECH_STATUS_OPTIONS.custom;
+
+  if(!option.available) return 0;
+  return Math.max(0,Number(record.hours||0));
+};
+
+techStatusLabel=function(technician){
+  const todayRecord=forwardTechnicianAvailability[
+    forwardAvailabilityKey(todayISO(),technician)
+  ];
+
+  if(todayRecord){
+    const icon={
+      "Working":"🟢",
+      "Holiday":"🏖",
+      "Sick":"🤒",
+      "Training":"🎓",
+      "Half Day":"🟡",
+      "Overtime":"⏰",
+      "Not Scheduled":"⚫"
+    }[todayRecord.status]||"⏱";
+
+    return `${icon} ${todayRecord.status}`;
+  }
+
+  const record=wai655bLegacyTechAvailability(technician);
+  return TECH_STATUS_OPTIONS[record.status].label;
+};
+
+/* Preserve existing planner features, then apply date-aware capacity. */
+const wai655bPreviousRenderDailyPlanner=renderDailyPlanner;
+
+renderDailyPlanner=function(){
+  wai655bPreviousRenderDailyPlanner();
+
+  populateForwardAvailabilityTechnicians();
+  renderForwardAvailabilityDay();
+
+  const date=selectedPlannerDate();
+  const availability=workshopAvailabilityForDate(date);
+  const dayJobs=jobs.filter(
+    job=>String(job.bookingDate||"").slice(0,10)===date
+  );
+  const allocated=dayJobs.reduce(
+    (sum,job)=>sum+Number(job.hours||0),
+    0
+  );
+  const spare=availability.totalHours-allocated;
+
+  if($("plannerSummary")){
+    $("plannerSummary").innerHTML=`
+      <div class="stat"><strong>${dayJobs.length}</strong>Jobs Booked</div>
+      <div class="stat"><strong>${availability.techniciansAvailable}</strong>Technicians In</div>
+      <div class="stat"><strong>${availability.totalHours.toFixed(1)}</strong>Available Hours</div>
+      <div class="stat"><strong>${allocated.toFixed(1)}</strong>Allocated Hours</div>
+      <div class="stat ${spare<0?"bad":spare<=2?"warn":"good"}">
+        <strong>${Math.abs(spare).toFixed(1)}</strong>
+        ${spare<0?"Overbooked Hours":"Spare Hours"}
+      </div>
+    `;
+  }
+
+  if($("plannerTechnicians")){
+    $("plannerTechnicians").innerHTML=availability.rows.map(row=>{
+      const list=dayJobs.filter(
+        job=>job.technician===row.technician
+      );
+      const allocatedHours=list.reduce(
+        (sum,job)=>sum+Number(job.hours||0),
+        0
+      );
+      const spareHours=Number(row.hours||0)-allocatedHours;
+      const usedPercent=row.hours>0
+        ? Math.min(100,(allocatedHours/row.hours)*100)
+        : allocatedHours>0?100:0;
+
+      let label="🟢 Capacity Available";
+      let cls="capacity-good";
+      let fillClass="planner-fill";
+
+      if(row.hours<=0&&allocatedHours>0){
+        label="🔴 Booked While Unavailable";
+        cls="capacity-bad";
+        fillClass="planner-fill bad";
+      }else if(spareHours<0){
+        label="🔴 Overloaded";
+        cls="capacity-bad";
+        fillClass="planner-fill bad";
+      }else if(spareHours<=1&&row.hours>0){
+        label="🟠 Nearly Full";
+        cls="capacity-warn";
+        fillClass="planner-fill warn";
+      }else if(row.hours<=0){
+        label=`⚪ ${row.status}`;
+        cls="capacity-warn";
+        fillClass="planner-fill warn";
+      }
+
+      return `<div class="job-card ${cls}">
+        <h3>${row.technician} — ${row.status}</h3>
+        <p>
+          ${list.length} job(s) |
+          ${allocatedHours.toFixed(1)} allocated hrs |
+          ${Number(row.hours||0).toFixed(1)} available hrs
+        </p>
+        <p><strong>${label}</strong></p>
+        ${row.note?`<p><strong>Availability note:</strong> ${row.note}</p>`:""}
+        <div class="progress">
+          <div class="${fillClass}" style="width:${usedPercent}%"></div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+};
+
+if($("availabilityStatus")){
+  $("availabilityStatus").addEventListener(
+    "change",
+    updateForwardHoursSuggestion
+  );
+}
+
+if($("saveAvailabilityRange")){
+  $("saveAvailabilityRange").addEventListener(
+    "click",
+    saveForwardAvailabilityRange
+  );
+}
+
+if($("clearAvailabilityRange")){
+  $("clearAvailabilityRange").addEventListener(
+    "click",
+    clearForwardAvailabilityRange
+  );
+}
+
+if($("plannerDate")){
+  $("plannerDate").addEventListener("change",()=>{
+    const date=val("plannerDate");
+
+    if($("availabilityStartDate")){
+      $("availabilityStartDate").value=date;
+    }
+    if($("availabilityEndDate")){
+      $("availabilityEndDate").value=date;
+    }
+
+    renderDailyPlanner();
+  });
+}
+
+(function initialiseForwardAvailability(){
+  const date=selectedPlannerDate();
+
+  if($("availabilityStartDate")){
+    $("availabilityStartDate").value=date;
+  }
+  if($("availabilityEndDate")){
+    $("availabilityEndDate").value=date;
+  }
+
+  populateForwardAvailabilityTechnicians();
+  updateForwardHoursSuggestion();
+})();
+
