@@ -468,11 +468,11 @@
         <label>Other Supplier
           <input id="partsOrderSupplierOther" placeholder="Enter supplier name">
         </label>
-        <label>Part Number
-          <input id="partsOrderPartNumber" placeholder="Manufacturer / supplier part number">
+        <label>Part Required
+          <input id="partsOrderPartNumber" placeholder="Example: Front brake pads">
         </label>
-        <label>Order Reference / Invoice Number
-          <input id="partsOrderReference" placeholder="Order or invoice reference">
+        <label>Order Number
+          <input id="partsOrderReference" placeholder="Supplier order number">
         </label>
         <label>Cost £
           <input id="partsOrderCost" type="number" min="0" step="0.01" placeholder="0.00">
@@ -518,7 +518,16 @@
 
     <div class="card">
       <h2>Completed Parts History</h2>
-      <p class="muted">Permanent record including where each part was ordered from.</p>
+      <p class="muted">Search by vehicle registration to view completed and fitted parts history.</p>
+      <div class="grid">
+        <label>Vehicle Registration
+          <input id="partsHistoryRegSearch" placeholder="Example: AB19 XYZ">
+        </label>
+      </div>
+      <div class="button-row">
+        <button id="partsHistorySearchBtn" class="primary">Search Parts History</button>
+        <button id="partsHistoryClearBtn" class="secondary">Clear Search</button>
+      </div>
       <div id="partsCompletedQueue" class="job-list"></div>
     </div>
 
@@ -528,41 +537,91 @@
     </div>
   </section>
 
+
   <section id="reportsInterfaceScreen" class="screen">
     <div class="card">
-      <h2>Reports Interface</h2>
-      <p class="muted">A cleaner reporting area for owner and manager review.</p>
-      <div class="stats" id="reportsTopStats"></div>
+      <h2>Workshop Intelligence</h2>
+      <p class="muted">Select a report and time period to review workshop and technician performance. All reports read the same live Workshop AI records.</p>
+
+      <div class="grid">
+        <label>Report Period
+          <select id="intelligencePeriod">
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month" selected>This Month</option>
+            <option value="previousMonth">Previous Month</option>
+            <option value="ytd">Year to Date</option>
+            <option value="custom">Custom Date Range</option>
+          </select>
+        </label>
+
+        <label>Technician
+          <select id="intelligenceTechnician">
+            <option value="All">All Technicians</option>
+          </select>
+        </label>
+
+        <label>Custom Start Date
+          <input id="intelligenceStartDate" type="date">
+        </label>
+
+        <label>Custom End Date
+          <input id="intelligenceEndDate" type="date">
+        </label>
+      </div>
+
+      <div class="grid intelligence-extra-filters">
+        <label>Compare Against
+          <select id="intelligenceComparison">
+            <option value="none">No comparison</option>
+            <option value="previousPeriod">Previous equivalent period</option>
+            <option value="previousMonth">Previous month</option>
+            <option value="lastYear">Same period last year</option>
+          </select>
+        </label>
+
+        <label>Search Reports
+          <input id="intelligenceReportSearch" placeholder="Example: downtime, parts, revenue">
+        </label>
+      </div>
+
+      <div class="button-row">
+        <button id="refreshWorkshopIntelligence" class="primary">Refresh Workshop Intelligence</button>
+        <button id="printWorkshopIntelligence" class="secondary">Print / Save PDF</button>
+        <button id="exportWorkshopIntelligenceExcel" class="secondary">Export to Excel</button>
+      </div>
     </div>
 
     <div class="card">
-      <h2>Workshop Performance Report</h2>
-      <div id="reportsPerformance" class="job-list"></div>
+      <h2>Favourite Reports</h2>
+      <p class="muted">Star the reports you use most. Favourites stay saved on this device.</p>
+      <div id="workshopIntelligenceFavourites" class="job-list"></div>
     </div>
 
     <div class="card">
-      <h2>Downtime Report</h2>
-      <div id="reportsDowntime" class="job-list"></div>
+      <h2>Reports Available</h2>
+      <p class="muted">Reports are grouped into clear management categories. Choose one to open it.</p>
+      <div id="workshopIntelligenceCategories" class="intelligence-categories"></div>
+      <div id="workshopIntelligenceReportList" class="job-list"></div>
     </div>
 
-    <div class="card">
-      <h2>End of Day Briefing</h2>
-      <pre id="reportsEndOfDayBriefing">No briefing yet.</pre>
-    </div>
-
-    <div class="card">
-      <h2>Morning Briefing / Action Required Today</h2>
-      <pre id="reportsMorningBriefing">No morning briefing yet.</pre>
+    <div id="workshopIntelligencePrintable" class="card">
+      <div class="intelligence-report-heading">
+        <div>
+          <h2 id="workshopIntelligenceTitle">Workshop Performance</h2>
+          <p id="workshopIntelligencePeriodLabel" class="muted"></p>
+        </div>
+        <button id="toggleFavouriteWorkshopIntelligence" class="secondary intelligence-favourite-button">☆ Favourite</button>
+      </div>
+      <div id="workshopIntelligenceComparison" class="coach-list"></div>
+      <div id="workshopIntelligenceSummary" class="stats"></div>
+      <div id="workshopIntelligenceInsight" class="coach-list"></div>
+      <div id="workshopIntelligenceOutput" class="job-list"></div>
     </div>
 
     <div class="card">
       <h2>Completed Write-Ups</h2>
       <div id="reportsCompletedWriteups" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>Technician League Table</h2>
-      <div id="reportsLeagueTable" class="table-wrap"></div>
     </div>
   </section>
 
@@ -703,5 +762,6 @@
 <script src="garage-health-fix.js"></script>
 <script src="vehicle-intelligence-fix.js"></script>
 <script src="performance-dashboard.js"></script>
+<script src="reports-intelligence.js"></script>
 </body>
 </html>

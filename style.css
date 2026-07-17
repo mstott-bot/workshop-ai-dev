@@ -221,3 +221,144 @@
 #partsScreen .parts-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
 .part-pill.back-order{background:#7f1d1d;color:#fff}
 .part-pill.delivered{background:#166534;color:#fff}
+
+
+/* WAI-066A Workshop Intelligence */
+#workshopIntelligenceReportList{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+#workshopIntelligenceReportList .job-card{
+  display:flex;
+  flex-direction:column;
+}
+#workshopIntelligenceReportList .job-card button{
+  margin-top:auto;
+}
+#workshopIntelligenceSummary{
+  grid-template-columns:repeat(6,minmax(0,1fr));
+}
+@media(max-width:1100px){
+  #workshopIntelligenceReportList{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #workshopIntelligenceSummary{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  #workshopIntelligenceReportList,
+  #workshopIntelligenceSummary{grid-template-columns:1fr}
+}
+
+
+/* WAI-066B Workshop Intelligence polish */
+.intelligence-extra-filters{margin-top:12px}
+.intelligence-categories{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:12px 0 16px;
+}
+.intelligence-categories button{
+  border:0;
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:bold;
+  cursor:pointer;
+  background:#e7edf4;
+  color:#101820;
+}
+.intelligence-categories button.active{
+  background:#0b6efd;
+  color:#fff;
+}
+.intelligence-card-title{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+.intelligence-card-title h3{margin:0}
+.intelligence-star{
+  width:auto!important;
+  min-width:44px;
+  margin:0!important;
+  padding:6px 10px!important;
+  background:#fff3cd!important;
+  color:#664d03!important;
+  font-size:20px;
+}
+.intelligence-category-label{
+  display:inline-block;
+  align-self:flex-start;
+  border-radius:999px;
+  padding:4px 9px;
+  background:#eef6ff;
+  color:#0b4f9c;
+  font-size:12px;
+  font-weight:bold;
+}
+.intelligence-report-heading{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.intelligence-favourite-button{
+  width:auto;
+  min-width:150px;
+}
+.intelligence-favourite-button.active{
+  background:#fff3cd;
+  color:#664d03;
+}
+.intelligence-comparison-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.intelligence-comparison-grid div{
+  background:#fff;
+  border-radius:10px;
+  padding:10px;
+}
+.intelligence-comparison-grid strong,
+.intelligence-comparison-grid span{
+  display:block;
+}
+#workshopIntelligenceFavourites{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+@media(max-width:1100px){
+  #workshopIntelligenceFavourites{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .intelligence-comparison-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  #workshopIntelligenceFavourites,
+  .intelligence-comparison-grid{grid-template-columns:1fr}
+  .intelligence-report-heading{display:block}
+  .intelligence-favourite-button{width:100%}
+}
+@media print{
+  body.printing-workshop-intelligence .app-header,
+  body.printing-workshop-intelligence .tabs,
+  body.printing-workshop-intelligence #reportsInterfaceScreen > .card:not(#workshopIntelligencePrintable),
+  body.printing-workshop-intelligence #reportsInterfaceScreen > section,
+  body.printing-workshop-intelligence #reportsCompletedWriteups{
+    display:none!important;
+  }
+  body.printing-workshop-intelligence .screen{
+    display:none!important;
+  }
+  body.printing-workshop-intelligence #reportsInterfaceScreen{
+    display:block!important;
+  }
+  body.printing-workshop-intelligence #workshopIntelligencePrintable{
+    box-shadow:none;
+    border:0;
+    margin:0;
+    padding:0;
+  }
+  body.printing-workshop-intelligence .intelligence-favourite-button{
+    display:none!important;
+  }
+  body.printing-workshop-intelligence{
+    background:#fff;
+  }
+}
