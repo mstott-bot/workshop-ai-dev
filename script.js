@@ -14,7 +14,7 @@ function backfillJobRateSnapshots(){let changed=false;jobs.forEach(j=>{if(!(Numb
 window.getWorkshopTargets=()=>targets;
 window.appliedJobRate=appliedJobRate;
 window.jobLabourValue=jobLabourValue;
-window.jobsForMonth=jobsForMonth;function now(){return new Date()}function fmt(dt){return dt?new Date(dt).toLocaleString("en-GB"):"Not set"}function timeOnly(dt){return dt?new Date(dt).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}):""}function hoursBetween(a,b){if(!a||!b)return 0;return Math.max(0,(new Date(b)-new Date(a))/36e5)}function show(screen){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));$(screen).classList.add("active");document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelector(`[data-screen='${screen}']`)?.classList.add("active");render()}document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>show(t.dataset.screen)));$("todayDate").textContent=new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});$("bookingDate").value=todayISO();if($("plannerDate")) $("plannerDate").value=todayISO();if($("futureBookingDate")) $("futureBookingDate").value=todayISO();if($("dailyTechCapacity")) $("dailyTechCapacity").value=plannerSettings.capacity||8;$("reg").addEventListener("input",e=>e.target.value=e.target.value.toUpperCase());$("jobType").addEventListener("change",()=>{$("authBox").style.display=val("jobType")==="Retail"?"block":"none"});function addTimeline(job,title,detail,type="info"){job.timeline=job.timeline||[];job.timeline.push({time:now().toISOString(),title,detail,type})}function ensureTimeline(job){job.timeline=job.timeline||[];job.interruptions=job.interruptions||[];job.activeClockOff=job.activeClockOff||null;if(job.reportReady===undefined)job.reportReady=!!job.report;if(job.reportReviewed===undefined)job.reportReviewed=false;job.partsRequests=job.partsRequests||[];if(!job.timeline.length&&job.createdAt){job.timeline.push({time:job.createdAt,title:"🟢 Job created",detail:`Job ${job.jobNo||""} created and assigned to ${job.technician}.`,type:"created"})}return job.timeline}$("assignJob").addEventListener("click",()=>{const reg=val("reg").toUpperCase();const hours=Number(val("hours"));if(!reg){alert("Please enter registration");return}if(!hours||hours<=0){alert("Please enter labour hours allowed");return}const type=val("jobType");const jobNo=`PCA-${todayISO().replaceAll("-","")}-${String(jobs.length+1).padStart(3,"0")}`;const job={id:Date.now().toString(),jobNo,createdAt:now().toISOString(),bookingDate:val("bookingDate")||todayISO(),completedAt:null,reg,customer:val("customer"),phone:val("phone"),make:val("make"),model:val("model"),mileage:val("mileage"),type,labourRateSnapshot:defaultRateForType(type),labourRateEffectiveDate:targets.rateEffectiveDate||todayISO(),labourRateSource:"default at job creation",technician:val("technician"),hours,originalHours:hours,hoursHistory:[`Created with ${hours} hrs`],priority:val("priority"),mot:val("mot"),auth:type==="Retail"?val("auth"):"Not required",workRequired:val("workRequired"),specialInstructions:val("specialInstructions"),status:"🔵 Waiting to Start",startedAt:null,finishedAt:null,actualHours:0,complaint:"",findings:"",repair:"",parts:"",advisories:"",photoCount:0,report:"",timeline:[],interruptions:[],activeClockOff:null,reportReady:false,reportReviewed:false,reportSentAt:null,partsRequests:[]};addTimeline(job,"🟢 Job created",`Job ${jobNo} created for ${reg}.`);addTimeline(job,"👨‍🔧 Technician assigned",`${job.technician} allocated ${hours} labour hours.`);jobs.push(job);save();clearForm();render();alert("Job assigned")});function clearForm(){["reg","customer","phone","make","model","mileage","hours","workRequired","specialInstructions"].forEach(id=>$(id).value="");$("bookingDate").value=todayISO();$("jobType").value="Retail";$("technician").value="Jake";$("priority").value="🟢 Routine";$("mot").value="None";$("auth").value="Awaiting Customer Approval";$("authBox").style.display="block"}function efficiency(allowed,actual){return actual>0?(allowed/actual)*100:null}function pct(n){return n===null?"Not clocked":n.toFixed(0)+"%"}function completed(j){return !!j.completedAt || (j.status||"").includes("Ready") || (j.status||"").includes("Collected") || (j.status||"").includes("Closed")}function card(job,open=true,manager=false){ensureTimeline(job);const eff=efficiency(Number(job.hours||0),Number(job.actualHours||0));return `<div class="job-card"><h3>${job.jobNo||""} | ${job.reg} — ${job.technician}</h3><p><strong>${job.make||"Make"} ${job.model||""}</strong></p><p><strong>Customer:</strong> ${job.customer||"Not entered"} ${job.phone?" | "+job.phone:""}</p><p><strong>Type:</strong> ${job.type} | <strong>Allowed:</strong> ${job.hours} hrs | <strong>Actual:</strong> ${(job.actualHours||0).toFixed(2)} hrs | <strong>Efficiency:</strong> ${pct(eff)}</p><p><strong>MOT:</strong> ${job.mot} | <strong>Status:</strong> ${job.status}</p><p><strong>Timeline:</strong> ${job.timeline.length} events</p>${!manager&&job.technicianNotice?`<div class="timeline-item good"><strong>🔔 Technician Update</strong><p>${job.technicianNotice}</p></div>`:""}${manager?`<button onclick="amendHours('${job.id}')">Amend Hours</button><button onclick="reassignTech('${job.id}')">Reassign Technician</button><button onclick="managerComment('${job.id}')">Manager Comment</button>`:""}<button onclick="showTimelineModal('${job.id}')">Timeline</button>${open?`<button onclick="openJob('${job.id}')">Start / Continue Job</button>`:""}</div>`}
+window.jobsForMonth=jobsForMonth;function now(){return new Date()}function fmt(dt){return dt?new Date(dt).toLocaleString("en-GB"):"Not set"}function timeOnly(dt){return dt?new Date(dt).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}):""}function hoursBetween(a,b){if(!a||!b)return 0;return Math.max(0,(new Date(b)-new Date(a))/36e5)}function show(screen){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));$(screen).classList.add("active");document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelector(`[data-screen='${screen}']`)?.classList.add("active");render()}document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>show(t.dataset.screen)));$("todayDate").textContent=new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});$("bookingDate").value=todayISO();if($("plannerDate")) $("plannerDate").value=todayISO();if($("futureBookingDate")) $("futureBookingDate").value=todayISO();if($("dailyTechCapacity")) $("dailyTechCapacity").value=plannerSettings.capacity||8;$("reg").addEventListener("input",e=>e.target.value=e.target.value.toUpperCase());$("jobType").addEventListener("change",()=>{$("authBox").style.display=val("jobType")==="Retail"?"block":"none"});function addTimeline(job,title,detail,type="info"){job.timeline=job.timeline||[];job.timeline.push({time:now().toISOString(),title,detail,type})}function ensureTimeline(job){job.timeline=job.timeline||[];job.interruptions=job.interruptions||[];job.activeClockOff=job.activeClockOff||null;if(job.reportReady===undefined)job.reportReady=!!job.report;if(job.reportReviewed===undefined)job.reportReviewed=false;job.partsRequests=job.partsRequests||[];if(!job.timeline.length&&job.createdAt){job.timeline.push({time:job.createdAt,title:"🟢 Job created",detail:`Job ${job.jobNo||""} created and assigned to ${job.technician}.`,type:"created"})}return job.timeline}$("assignJob").addEventListener("click",()=>{const reg=val("reg").toUpperCase();const hours=Number(val("hours"));if(!reg){alert("Please enter registration");return}if(!hours||hours<=0){alert("Please enter labour hours allowed");return}const type=val("jobType");const jobNo=`PCA-${todayISO().replaceAll("-","")}-${String(jobs.length+1).padStart(3,"0")}`;const job={id:Date.now().toString(),jobNo,createdAt:now().toISOString(),bookingDate:val("bookingDate")||todayISO(),completedAt:null,reg,customer:val("customer"),phone:val("phone"),make:val("make"),model:val("model"),mileage:val("mileage"),type,labourRateSnapshot:defaultRateForType(type),labourRateEffectiveDate:targets.rateEffectiveDate||todayISO(),labourRateSource:"default at job creation",technician:val("technician"),hours,originalHours:hours,hoursHistory:[`Created with ${hours} hrs`],priority:val("priority"),mot:val("mot"),auth:type==="Retail"?val("auth"):"Not required",workRequired:val("workRequired"),specialInstructions:val("specialInstructions"),status:"🔵 Waiting to Start",startedAt:null,finishedAt:null,actualHours:0,complaint:"",findings:"",repair:"",parts:"",advisories:"",photoCount:0,report:"",timeline:[],interruptions:[],activeClockOff:null,reportReady:false,reportReviewed:false,reportSentAt:null,partsRequests:[]};addTimeline(job,"🟢 Job created",`Job ${jobNo} created for ${reg}.`);addTimeline(job,"👨‍🔧 Technician assigned",`${job.technician} allocated ${hours} labour hours.`);jobs.push(job);save();clearForm();render();alert("Job assigned")});function clearForm(){["reg","customer","phone","make","model","mileage","hours","workRequired","specialInstructions"].forEach(id=>$(id).value="");$("bookingDate").value=todayISO();$("jobType").value="Retail";$("technician").value="Jake";$("priority").value="🟢 Routine";$("mot").value="None";$("auth").value="Awaiting Customer Approval";$("authBox").style.display="block"}function efficiency(allowed,actual){return actual>0?(allowed/actual)*100:null}function pct(n){return n===null?"Not clocked":n.toFixed(0)+"%"}function completed(j){return !!j.completedAt || (j.status||"").includes("Ready") || (j.status||"").includes("Collected") || (j.status||"").includes("Closed")}function card(job,open=true,manager=false){ensureTimeline(job);const eff=efficiency(Number(job.hours||0),Number(job.actualHours||0));return `<div class="job-card"><h3>${job.jobNo||""} | ${job.reg} — ${job.technician}</h3><p><strong>${job.make||"Make"} ${job.model||""}</strong></p><p><strong>Customer:</strong> ${job.customer||"Not entered"} ${job.phone?" | "+job.phone:""}</p><p><strong>Type:</strong> ${job.type} | <strong>Allowed:</strong> ${job.hours} hrs | <strong>Actual:</strong> ${(job.actualHours||0).toFixed(2)} hrs | <strong>Efficiency:</strong> ${pct(eff)}</p><p><strong>MOT:</strong> ${job.mot} | <strong>Status:</strong> ${job.status}</p><p><strong>Timeline:</strong> ${job.timeline.length} events</p>${!manager&&job.technicianNotice?`<div class="timeline-item good"><strong>🔔 Technician Update</strong><p>${job.technicianNotice}</p></div>`:""}${manager?`<button onclick="amendHours('${job.id}')">Add Hours</button><button onclick="reassignTech('${job.id}')">Reassign Technician</button><button onclick="managerComment('${job.id}')">Manager Comment</button><button onclick="deleteWorkshopJob('${job.id}')">Delete Job</button>`:""}<button onclick="showTimelineModal('${job.id}')">Timeline</button>${open?`<button onclick="openJob('${job.id}')">Start / Continue Job</button>`:""}</div>`}
 function populateTechnicianSelects(){
   const techSelect=$("technician");
   const filterSelect=$("techFilter");
@@ -556,7 +556,135 @@ function renderDowntimeReports(){
   if($("ownerDowntimeReports")) $("ownerDowntimeReports").innerHTML=html;
 }
 
-function makeReport(j){const eff=efficiency(Number(j.hours||0),Number(j.actualHours||0));return `PCA WORKSHOP AI REPORT\\n\\nJob Number: ${j.jobNo}\\nRegistration: ${j.reg}\\nVehicle: ${j.make||"Not entered"} ${j.model||""}\\nMileage: ${j.mileage||"Not entered"}\\nCustomer: ${j.customer||"Not entered"}\\nTelephone: ${j.phone||"Not entered"}\\n\\nCreated: ${fmt(j.createdAt)}\\nBooking Date: ${j.bookingDate}\\nCompleted: ${fmt(j.completedAt)}\\n\\nJob Type: ${j.type}\\nTechnician: ${j.technician}\\nLabour Hours Allowed: ${j.hours}\\nActual Hours Clocked: ${(j.actualHours||0).toFixed(2)}\\nEfficiency: ${pct(eff)}\\nMOT: ${j.mot}\\nPriority: ${j.priority}\\nStatus: ${j.status}\\nCustomer Authorisation: ${j.auth}\\nPhotos Added: ${j.photoCount}\\n\\nAI JOB SUMMARY\\n${jobSummary(j)}\\n\\nWORK REQUIRED\\n${j.workRequired||"Not entered"}\\n\\nJOB DESCRIPTION\\n${j.complaint||"Not entered"}\\n\\nTECHNICIAN FINDINGS\\n${j.findings||"Not entered"}\\n\\nREPAIR CARRIED OUT\\n${j.repair||"Not entered"}\\n\\nPARTS USED / REQUIRED\\n${j.parts||"Not entered"}\\n\\nADVISORIES\\n${j.advisories||"None entered"}\\n\\nDRAGON 2000 DESCRIPTION\\n${dragon(j)}\\n\\nTIMELINE EVENTS\\n${(j.timeline||[]).map(t=>`${timeOnly(t.time)} - ${t.title}: ${t.detail}`).join("\\n")}`}function jobSummary(j){let bits=[];if(j.findings)bits.push(j.findings);if(j.repair)bits.push(j.repair);if(j.advisories)bits.push("Advisories: "+j.advisories);return bits.length?bits.join(" "):"Job opened. Awaiting technician findings and repair summary."}function dragon(j){return (j.repair||j.findings||j.workRequired||"Job opened. Awaiting technician update.").slice(0,220)}function amendHours(id){const j=jobs.find(x=>x.id===id);if(!j)return;const newHours=Number(prompt(`Current hours: ${j.hours}\\nEnter new labour hours:`));if(!newHours||newHours<=0)return;addTimeline(j,"⏱ Labour hours amended",`Hours changed from ${j.hours} to ${newHours} by Service Manager.`);j.hours=newHours;if(j.report)j.report=makeReport(j);save();render()}function reassignTech(id){const j=jobs.find(x=>x.id===id);if(!j)return;const newTech=prompt(`Current technician: ${j.technician}\\nEnter new technician:`);if(!newTech)return;addTimeline(j,"👨‍🔧 Technician reassigned",`Changed from ${j.technician} to ${newTech} by Service Manager.`);j.technician=newTech;save();render()}function managerComment(id){const j=jobs.find(x=>x.id===id);if(!j)return;const text=prompt("Add manager comment to timeline:");if(!text)return;addTimeline(j,"💬 Manager comment",text);save();render()}function renderDash(){const totalAllowed=jobs.reduce((s,j)=>s+Number(j.hours||0),0);const totalActual=jobs.reduce((s,j)=>s+Number(j.actualHours||0),0);const workshopEff=efficiency(totalAllowed,totalActual);const utilisation=targets.availableHours>0?(totalAllowed/targets.availableHours)*100:null;const retail=sumType("Retail"),internal=sumType("Internal"),warranty=sumType("Warranty");const internalCompleted=jobs.filter(j=>j.type==="Internal"&&completed(j)).length;const waitingParts=jobs.filter(j=>j.status&&j.status.includes("Awaiting Parts")).length;const health=garageHealth({workshopEff,utilisation,retail,internal,warranty,internalCompleted,waitingParts});$("healthScore").innerHTML=`Garage Health: ${health.score}/100 ${health.score>=85?"🟢":health.score>=65?"🟠":"🔴"}<br><span>${health.message}</span>`;$("ownerStats").innerHTML=`<div class="stat"><strong>${getLiveJobCount()}</strong>Jobs</div><div class="stat"><strong>${totalAllowed.toFixed(1)}</strong>Allowed Hrs</div><div class="stat"><strong>${totalActual.toFixed(1)}</strong>Actual Hrs</div><div class="stat"><strong>${pct(workshopEff)}</strong>Efficiency</div><div class="stat"><strong>${pct(utilisation)}</strong>Utilisation</div><div class="stat ${waitingParts>0?'warn':'good'}"><strong>${waitingParts}</strong>Parts Required</div>`;renderLiveActivity();renderCoach({workshopEff,utilisation,retail,internal,warranty,internalCompleted,waitingParts});renderLeague("leagueTable");renderLeague("leagueTableOwner");renderScorecard({workshopEff,utilisation,retail,internal,warranty,internalCompleted});renderStatusBoard("statusBoard");renderStatusBoard("ownerStatusBoard");renderWorkload();renderDowntimeReports()}function garageHealth(m){let score=100;if(m.workshopEff!==null&&m.workshopEff<(targets.efficiency||95))score-=15;if(m.utilisation!==null&&m.utilisation<85)score-=15;if(targets.retailHours&&m.retail<targets.retailHours)score-=15;if(targets.internalCars&&m.internalCompleted<targets.internalCars)score-=10;if(m.waitingParts>0)score-=5*Math.min(m.waitingParts,3);score=Math.max(0,Math.round(score));return {score,message:score>=85?"Workshop is performing strongly.":score>=65?"Workshop needs attention in some areas.":"Workshop requires urgent management focus."}}function allEvents(){let events=[];const liveJobs=typeof getLiveWorkshopJobs==="function"?getLiveWorkshopJobs():jobs;liveJobs.forEach(j=>{ensureTimeline(j).forEach(t=>events.push({...t,reg:j.reg,jobNo:j.jobNo,tech:j.technician}))});return events.sort((a,b)=>new Date(b.time)-new Date(a.time)).slice(0,25)}function renderLiveActivity(){$("liveActivity").innerHTML=allEvents().length?allEvents().map(e=>`<div class="timeline-item"><strong>${timeOnly(e.time)} — ${e.reg} — ${e.title}</strong><small>${fmt(e.time)} | ${e.tech}</small><p>${e.detail||""}</p></div>`).join(""):"No activity yet."}function sumType(type){return jobs.filter(j=>j.type===type&&completed(j)).reduce((s,j)=>s+Number(j.hours||0),0)}function kpiCard(label,target,actual,unit=""){const pctDone=target>0?(actual/target)*100:null;let cls="warn";if(pctDone===null)cls="warn";else if(pctDone>=100)cls="good";else if(pctDone<80)cls="bad";return `<div class="job-card ${cls}"><h3>${label}</h3><p><strong>${actual.toFixed?actual.toFixed(1):actual}${unit}</strong> / ${target||0}${unit} ${pctDone!==null?`(${pctDone.toFixed(0)}%)`:""}</p><div class="progress"><div class="bar ${cls}" style="width:${Math.min(100,pctDone||0)}%"></div></div></div>`}function renderScorecard(m){$("kpiScorecard").innerHTML=kpiCard("Workshop efficiency",targets.efficiency||95,m.workshopEff||0,"%")+kpiCard("Workshop utilisation",100,m.utilisation||0,"%")+kpiCard("Retail hours completed",targets.retailHours,m.retail," hrs")+kpiCard("Warranty hours completed",targets.warrantyHours,m.warranty," hrs")+kpiCard("Internal hours completed",targets.internalHours,m.internal," hrs")+kpiCard("Internal cars completed",targets.internalCars,m.internalCompleted,"")}function techMetrics(t){const list=jobs.filter(j=>j.technician===t);const allowed=list.reduce((s,j)=>s+Number(j.hours||0),0);const actual=list.reduce((s,j)=>s+Number(j.actualHours||0),0);return {tech:t,jobs:list.length,allowed,actual,eff:efficiency(allowed,actual),retail:list.filter(j=>j.type==="Retail").reduce((s,j)=>s+Number(j.hours||0),0),warranty:list.filter(j=>j.type==="Warranty").reduce((s,j)=>s+Number(j.hours||0),0),internal:list.filter(j=>j.type==="Internal").reduce((s,j)=>s+Number(j.hours||0),0)}}function renderLeague(id){const rows=getTechs().map(techMetrics).sort((a,b)=>(b.eff||0)-(a.eff||0));$(id).innerHTML=`<table><thead><tr><th>Rank</th><th>Technician</th><th>Efficiency</th><th>Hours Sold</th><th>Hours Clocked</th><th>Jobs</th><th>Retail</th><th>Warranty</th><th>Internal</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</td><td>${r.tech}</td><td>${pct(r.eff)}</td><td>${r.allowed.toFixed(1)}</td><td>${r.actual.toFixed(1)}</td><td>${r.jobs}</td><td>${r.retail.toFixed(1)}</td><td>${r.warranty.toFixed(1)}</td><td>${r.internal.toFixed(1)}</td></tr>`).join("")}</tbody></table>`}function renderCoach(m){let notes=[];if(m.workshopEff!==null&&m.workshopEff<(targets.efficiency||95))notes.push(["Improve workshop efficiency",`Workshop efficiency is ${m.workshopEff.toFixed(0)}%, below the ${targets.efficiency||95}% target. Review jobs where actual clocked time exceeded allocated hours.`,"bad"]);else notes.push(["Efficiency on target","Workshop efficiency is currently on or above target based on completed clocked work.","good"]);if(m.utilisation!==null&&m.utilisation<85)notes.push(["Increase workshop utilisation",`Allocated hours are ${m.utilisation.toFixed(0)}% of available capacity. Look for extra retail work or bring internal prep forward.`,"warn"]);if(targets.retailHours&&m.retail<targets.retailHours)notes.push(["Retail hours below target",`Retail completed hours are ${m.retail.toFixed(1)} against a target of ${targets.retailHours}. Prioritise authorised retail work today.`,"bad"]);if(targets.internalCars&&m.internalCompleted<targets.internalCars)notes.push(["Internal cars need attention",`Internal cars completed are ${m.internalCompleted} against a target of ${targets.internalCars}. Review sales prep bottlenecks.`,"warn"]);if(m.waitingParts>0)notes.push(["Parts delay risk",`${m.waitingParts} job(s) are awaiting parts. Review parts queue to reduce technician downtime.`,"warn"]);$("ownerCoach").innerHTML=notes.map(n=>`<div class="coach-card ${n[2]}"><h3>${n[0]}</h3><p>${n[1]}</p></div>`).join("")}function renderStatusBoard(id){const statuses=["🔵 Waiting to Start","🟡 Diagnosis","🟠 Awaiting Parts","🟣 Awaiting Customer Approval","🟢 Repair Complete","✅ Ready for Collection"];$(id).innerHTML=statuses.map(st=>{const boardJobs=typeof getLiveWorkshopJobs==="function"?getLiveWorkshopJobs():jobs;const list=boardJobs.filter(j=>j.status===st);return `<div class="board-column" data-status="${st}"><h3>${st}</h3>${list.length?list.map(j=>`<div class="board-job" draggable="true" data-job-id="${j.id}"><strong>${j.reg}</strong><br>${j.technician} | ${j.hours} hrs<br>${j.type} | ${j.mot}<br><button onclick="showTimelineModal('${j.id}')">Timeline</button></div>`).join(""):"<p class='muted'>No jobs</p>"}</div>`}).join("");setTimeout(enableDragDropBoard,0)}function renderWorkload(){$("workload").innerHTML=getTechs().map(t=>{const r=techMetrics(t);return `<div class="job-card"><h3>${t}</h3><p>${r.jobs} jobs | ${r.allowed.toFixed(1)} allowed hrs | ${r.actual.toFixed(1)} actual hrs | Efficiency: ${pct(r.eff)}</p></div>`}).join("")}
+function makeReport(j){const eff=efficiency(Number(j.hours||0),Number(j.actualHours||0));return `PCA WORKSHOP AI REPORT\\n\\nJob Number: ${j.jobNo}\\nRegistration: ${j.reg}\\nVehicle: ${j.make||"Not entered"} ${j.model||""}\\nMileage: ${j.mileage||"Not entered"}\\nCustomer: ${j.customer||"Not entered"}\\nTelephone: ${j.phone||"Not entered"}\\n\\nCreated: ${fmt(j.createdAt)}\\nBooking Date: ${j.bookingDate}\\nCompleted: ${fmt(j.completedAt)}\\n\\nJob Type: ${j.type}\\nTechnician: ${j.technician}\\nLabour Hours Allowed: ${j.hours}\\nActual Hours Clocked: ${(j.actualHours||0).toFixed(2)}\\nEfficiency: ${pct(eff)}\\nMOT: ${j.mot}\\nPriority: ${j.priority}\\nStatus: ${j.status}\\nCustomer Authorisation: ${j.auth}\\nPhotos Added: ${j.photoCount}\\n\\nAI JOB SUMMARY\\n${jobSummary(j)}\\n\\nWORK REQUIRED\\n${j.workRequired||"Not entered"}\\n\\nJOB DESCRIPTION\\n${j.complaint||"Not entered"}\\n\\nTECHNICIAN FINDINGS\\n${j.findings||"Not entered"}\\n\\nREPAIR CARRIED OUT\\n${j.repair||"Not entered"}\\n\\nPARTS USED / REQUIRED\\n${j.parts||"Not entered"}\\n\\nADVISORIES\\n${j.advisories||"None entered"}\\n\\nDRAGON 2000 DESCRIPTION\\n${dragon(j)}\\n\\nTIMELINE EVENTS\\n${(j.timeline||[]).map(t=>`${timeOnly(t.time)} - ${t.title}: ${t.detail}`).join("\\n")}`}function jobSummary(j){let bits=[];if(j.findings)bits.push(j.findings);if(j.repair)bits.push(j.repair);if(j.advisories)bits.push("Advisories: "+j.advisories);return bits.length?bits.join(" "):"Job opened. Awaiting technician findings and repair summary."}function dragon(j){return (j.repair||j.findings||j.workRequired||"Job opened. Awaiting technician update.").slice(0,220)}function amendHours(id){
+  const j=jobs.find(x=>x.id===id);
+  if(!j)return;
+
+  const additional=Number(prompt(
+    `Current labour allowance: ${Number(j.hours||0).toFixed(2)} hrs\n`+
+    "Enter the additional hours to add:"
+  ));
+
+  if(!Number.isFinite(additional)||additional<=0){
+    if(!Number.isNaN(additional)&&additional!==0) alert("Please enter a valid number of additional hours.");
+    return;
+  }
+
+  const previous=Number(j.hours||0);
+  const updated=previous+additional;
+  j.hours=updated;
+  j.hoursHistory=j.hoursHistory||[];
+  j.hoursHistory.push(
+    `${fmt(now().toISOString())}: Service Manager added ${additional.toFixed(2)} hrs. `+
+    `Allowance changed from ${previous.toFixed(2)} to ${updated.toFixed(2)} hrs.`
+  );
+
+  addTimeline(
+    j,
+    "➕ Labour hours added",
+    `Service Manager added ${additional.toFixed(2)} hrs. Labour allowance increased from `+
+    `${previous.toFixed(2)} to ${updated.toFixed(2)} hrs.`
+  );
+
+  if(j.report)j.report=makeReport(j);
+  save();
+  render();
+  alert(`Updated labour allowance: ${updated.toFixed(2)} hours.`);
+}
+
+function reassignTech(id){
+  const j=jobs.find(x=>x.id===id);
+  if(!j)return;
+
+  const available=getTechs();
+  const choice=prompt(
+    `Current technician: ${j.technician}\n\nAvailable technicians:\n${available.join("\n")}\n\n`+
+    "Enter the technician's name exactly as shown:"
+  );
+
+  if(!choice)return;
+  const newTech=available.find(t=>t.toLowerCase()===choice.trim().toLowerCase());
+
+  if(!newTech){
+    alert("Technician not found. Please choose a technician from the configured list.");
+    return;
+  }
+  if(newTech===j.technician){
+    alert("This job is already assigned to that technician.");
+    return;
+  }
+
+  const oldTech=j.technician;
+  j.technician=newTech;
+  notifyTechnician(
+    j,
+    `Job ${j.reg} has been reassigned to ${newTech} by the Service Manager.`,
+    "Job reassigned"
+  );
+  addTimeline(
+    j,
+    "👨‍🔧 Technician reassigned",
+    `Service Manager reassigned the job from ${oldTech} to ${newTech}.`
+  );
+
+  save();
+  render();
+  alert(`${j.reg} has been reassigned to ${newTech}.`);
+}
+
+function deleteWorkshopJob(id){
+  const index=jobs.findIndex(x=>x.id===id);
+  if(index===-1)return;
+
+  const j=jobs[index];
+  if(completed(j)){
+    alert("Completed or closed jobs cannot be deleted. They must remain in Vehicle Intelligence and workshop history.");
+    return;
+  }
+
+  if(!confirm(
+    `Delete job ${j.jobNo||""} for ${j.reg}?\n\n`+
+    "Use this only when the work is cancelled or no longer available to complete."
+  ))return;
+
+  const reason=prompt(
+    "Enter the reason this job is being deleted:",
+    "Work cancelled / no longer available"
+  );
+  if(reason===null)return;
+  if(!reason.trim()){
+    alert("A deletion reason is required.");
+    return;
+  }
+
+  if(!confirm(
+    `Final confirmation:\n\nDelete ${j.reg} from the active workshop job list?\n\nReason: ${reason.trim()}`
+  ))return;
+
+  const deletionRecord={
+    deletedAt:now().toISOString(),
+    deletedBy:"Service Manager",
+    reason:reason.trim(),
+    jobId:j.id,
+    jobNo:j.jobNo||"",
+    reg:j.reg||"",
+    customer:j.customer||"",
+    technician:j.technician||"",
+    hours:Number(j.hours||0),
+    status:j.status||""
+  };
+
+  const deletedJobs=JSON.parse(localStorage.getItem("workshopAIDeletedJobs")||"[]");
+  deletedJobs.push(deletionRecord);
+  localStorage.setItem("workshopAIDeletedJobs",JSON.stringify(deletedJobs));
+
+  jobs.splice(index,1);
+  save();
+  render();
+  alert(`${j.reg} has been deleted from the active workshop list.`);
+}
+
+function managerComment(id){const j=jobs.find(x=>x.id===id);if(!j)return;const text=prompt("Add manager comment to timeline:");if(!text)return;addTimeline(j,"💬 Manager comment",text);save();render()}function renderDash(){const totalAllowed=jobs.reduce((s,j)=>s+Number(j.hours||0),0);const totalActual=jobs.reduce((s,j)=>s+Number(j.actualHours||0),0);const workshopEff=efficiency(totalAllowed,totalActual);const utilisation=targets.availableHours>0?(totalAllowed/targets.availableHours)*100:null;const retail=sumType("Retail"),internal=sumType("Internal"),warranty=sumType("Warranty");const internalCompleted=jobs.filter(j=>j.type==="Internal"&&completed(j)).length;const waitingParts=jobs.filter(j=>j.status&&j.status.includes("Awaiting Parts")).length;const health=garageHealth({workshopEff,utilisation,retail,internal,warranty,internalCompleted,waitingParts});$("healthScore").innerHTML=`Garage Health: ${health.score}/100 ${health.score>=85?"🟢":health.score>=65?"🟠":"🔴"}<br><span>${health.message}</span>`;$("ownerStats").innerHTML=`<div class="stat"><strong>${getLiveJobCount()}</strong>Jobs</div><div class="stat"><strong>${totalAllowed.toFixed(1)}</strong>Allowed Hrs</div><div class="stat"><strong>${totalActual.toFixed(1)}</strong>Actual Hrs</div><div class="stat"><strong>${pct(workshopEff)}</strong>Efficiency</div><div class="stat"><strong>${pct(utilisation)}</strong>Utilisation</div><div class="stat ${waitingParts>0?'warn':'good'}"><strong>${waitingParts}</strong>Parts Required</div>`;renderLiveActivity();renderCoach({workshopEff,utilisation,retail,internal,warranty,internalCompleted,waitingParts});renderLeague("leagueTable");renderLeague("leagueTableOwner");renderScorecard({workshopEff,utilisation,retail,internal,warranty,internalCompleted});renderStatusBoard("statusBoard");renderStatusBoard("ownerStatusBoard");renderWorkload();renderDowntimeReports()}function garageHealth(m){let score=100;if(m.workshopEff!==null&&m.workshopEff<(targets.efficiency||95))score-=15;if(m.utilisation!==null&&m.utilisation<85)score-=15;if(targets.retailHours&&m.retail<targets.retailHours)score-=15;if(targets.internalCars&&m.internalCompleted<targets.internalCars)score-=10;if(m.waitingParts>0)score-=5*Math.min(m.waitingParts,3);score=Math.max(0,Math.round(score));return {score,message:score>=85?"Workshop is performing strongly.":score>=65?"Workshop needs attention in some areas.":"Workshop requires urgent management focus."}}function allEvents(){let events=[];const liveJobs=typeof getLiveWorkshopJobs==="function"?getLiveWorkshopJobs():jobs;liveJobs.forEach(j=>{ensureTimeline(j).forEach(t=>events.push({...t,reg:j.reg,jobNo:j.jobNo,tech:j.technician}))});return events.sort((a,b)=>new Date(b.time)-new Date(a.time)).slice(0,25)}function renderLiveActivity(){$("liveActivity").innerHTML=allEvents().length?allEvents().map(e=>`<div class="timeline-item"><strong>${timeOnly(e.time)} — ${e.reg} — ${e.title}</strong><small>${fmt(e.time)} | ${e.tech}</small><p>${e.detail||""}</p></div>`).join(""):"No activity yet."}function sumType(type){return jobs.filter(j=>j.type===type&&completed(j)).reduce((s,j)=>s+Number(j.hours||0),0)}function kpiCard(label,target,actual,unit=""){const pctDone=target>0?(actual/target)*100:null;let cls="warn";if(pctDone===null)cls="warn";else if(pctDone>=100)cls="good";else if(pctDone<80)cls="bad";return `<div class="job-card ${cls}"><h3>${label}</h3><p><strong>${actual.toFixed?actual.toFixed(1):actual}${unit}</strong> / ${target||0}${unit} ${pctDone!==null?`(${pctDone.toFixed(0)}%)`:""}</p><div class="progress"><div class="bar ${cls}" style="width:${Math.min(100,pctDone||0)}%"></div></div></div>`}function renderScorecard(m){$("kpiScorecard").innerHTML=kpiCard("Workshop efficiency",targets.efficiency||95,m.workshopEff||0,"%")+kpiCard("Workshop utilisation",100,m.utilisation||0,"%")+kpiCard("Retail hours completed",targets.retailHours,m.retail," hrs")+kpiCard("Warranty hours completed",targets.warrantyHours,m.warranty," hrs")+kpiCard("Internal hours completed",targets.internalHours,m.internal," hrs")+kpiCard("Internal cars completed",targets.internalCars,m.internalCompleted,"")}function techMetrics(t){const list=jobs.filter(j=>j.technician===t);const allowed=list.reduce((s,j)=>s+Number(j.hours||0),0);const actual=list.reduce((s,j)=>s+Number(j.actualHours||0),0);return {tech:t,jobs:list.length,allowed,actual,eff:efficiency(allowed,actual),retail:list.filter(j=>j.type==="Retail").reduce((s,j)=>s+Number(j.hours||0),0),warranty:list.filter(j=>j.type==="Warranty").reduce((s,j)=>s+Number(j.hours||0),0),internal:list.filter(j=>j.type==="Internal").reduce((s,j)=>s+Number(j.hours||0),0)}}function renderLeague(id){const rows=getTechs().map(techMetrics).sort((a,b)=>(b.eff||0)-(a.eff||0));$(id).innerHTML=`<table><thead><tr><th>Rank</th><th>Technician</th><th>Efficiency</th><th>Hours Sold</th><th>Hours Clocked</th><th>Jobs</th><th>Retail</th><th>Warranty</th><th>Internal</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</td><td>${r.tech}</td><td>${pct(r.eff)}</td><td>${r.allowed.toFixed(1)}</td><td>${r.actual.toFixed(1)}</td><td>${r.jobs}</td><td>${r.retail.toFixed(1)}</td><td>${r.warranty.toFixed(1)}</td><td>${r.internal.toFixed(1)}</td></tr>`).join("")}</tbody></table>`}function renderCoach(m){let notes=[];if(m.workshopEff!==null&&m.workshopEff<(targets.efficiency||95))notes.push(["Improve workshop efficiency",`Workshop efficiency is ${m.workshopEff.toFixed(0)}%, below the ${targets.efficiency||95}% target. Review jobs where actual clocked time exceeded allocated hours.`,"bad"]);else notes.push(["Efficiency on target","Workshop efficiency is currently on or above target based on completed clocked work.","good"]);if(m.utilisation!==null&&m.utilisation<85)notes.push(["Increase workshop utilisation",`Allocated hours are ${m.utilisation.toFixed(0)}% of available capacity. Look for extra retail work or bring internal prep forward.`,"warn"]);if(targets.retailHours&&m.retail<targets.retailHours)notes.push(["Retail hours below target",`Retail completed hours are ${m.retail.toFixed(1)} against a target of ${targets.retailHours}. Prioritise authorised retail work today.`,"bad"]);if(targets.internalCars&&m.internalCompleted<targets.internalCars)notes.push(["Internal cars need attention",`Internal cars completed are ${m.internalCompleted} against a target of ${targets.internalCars}. Review sales prep bottlenecks.`,"warn"]);if(m.waitingParts>0)notes.push(["Parts delay risk",`${m.waitingParts} job(s) are awaiting parts. Review parts queue to reduce technician downtime.`,"warn"]);$("ownerCoach").innerHTML=notes.map(n=>`<div class="coach-card ${n[2]}"><h3>${n[0]}</h3><p>${n[1]}</p></div>`).join("")}function renderStatusBoard(id){const statuses=["🔵 Waiting to Start","🟡 Diagnosis","🟠 Awaiting Parts","🟣 Awaiting Customer Approval","🟢 Repair Complete","✅ Ready for Collection"];$(id).innerHTML=statuses.map(st=>{const boardJobs=typeof getLiveWorkshopJobs==="function"?getLiveWorkshopJobs():jobs;const list=boardJobs.filter(j=>j.status===st);return `<div class="board-column" data-status="${st}"><h3>${st}</h3>${list.length?list.map(j=>`<div class="board-job" draggable="true" data-job-id="${j.id}"><strong>${j.reg}</strong><br>${j.technician} | ${j.hours} hrs<br>${j.type} | ${j.mot}<br><button onclick="showTimelineModal('${j.id}')">Timeline</button></div>`).join(""):"<p class='muted'>No jobs</p>"}</div>`}).join("");setTimeout(enableDragDropBoard,0)}function renderWorkload(){$("workload").innerHTML=getTechs().map(t=>{const r=techMetrics(t);return `<div class="job-card"><h3>${t}</h3><p>${r.jobs} jobs | ${r.allowed.toFixed(1)} allowed hrs | ${r.actual.toFixed(1)} actual hrs | Efficiency: ${pct(r.eff)}</p></div>`}).join("")}
 function renderReportsInterface(){
   if(!$("reportsTopStats")) return;
   const month=currentMonthKey();
@@ -729,7 +857,10 @@ if($("submitPartsRequest")) $("submitPartsRequest").addEventListener("click",sub
 function technicianPartAlertText(p){
   p.status=normalisePartStatus(p.status);
   if(p.status==="Ordered"||p.status==="Back Order") return `📦 Parts ordered — ${p.qty||1} x ${p.description||p.text} has been ordered. Confirm when the parts arrive in the workshop.`;
-  if(p.status==="Received") return `✅ Parts received — ${p.qty||1} x ${p.description||p.text} is with the technician. Continue the repair.`;
+  if(p.status==="Received"){
+    const receivedBy=p.receivedBy?` Received by ${p.receivedBy}.`:"";
+    return `✅ Parts ready — ${p.qty||1} x ${p.description||p.text} has arrived in the workshop.${receivedBy} Continue the repair when ready.`;
+  }
   if(p.status==="Partial Delivery") return `⚠️ Partial delivery reported — waiting for Service Manager to chase the supplier.`;
   if(p.status==="Supplier Chased") return `📞 Supplier chased — Service Manager has chased the outstanding parts. Confirm when the remaining parts arrive.`;
   if(p.status==="Incorrect Parts") return `❌ Incorrect parts reported — Service Manager action required.`;
@@ -797,6 +928,8 @@ function allPartsRequests(){
       part.requestedAt=part.requestedAt||part.createdAt||part.requestDate||job.createdAt||job.bookingDate||now().toISOString();
       part.orderedAt=part.orderedAt||part.orderDate||part.orderedDate||null;
       part.receivedAt=part.receivedAt||part.arrivedAt||part.deliveredAt||part.deliveryDate||null;
+      part.receivedBy=part.receivedBy||part.arrivalConfirmedBy||part.deliveredBy||"";
+      part.receivedRole=part.receivedRole||part.arrivalConfirmedRole||"";
       part.fittedAt=part.fittedAt||part.fitDate||part.completedAt||null;
       part.supplier=part.supplier||part.orderedFrom||part.vendor||part.partsSupplier||"";
       part.status=normalisePartStatus(part.status,part);
@@ -823,7 +956,7 @@ function partsCard(job,part,context="manager"){
     <p><strong>Part:</strong> ${part.qty||1} x ${desc}</p>
     <p><strong>Supplier:</strong> ${supplier}${part.partNumber?` | <strong>Part no:</strong> ${part.partNumber}`:""}</p>
     <p><strong>Status:</strong> <span class="part-pill ${partsStatusClass(part.status)}">${part.status}</span></p>
-    <p><strong>Requested:</strong> ${fmt(part.requestedAt)}${part.orderedAt?` | <strong>Ordered:</strong> ${fmt(part.orderedAt)}`:""}${part.receivedAt?` | <strong>Arrived:</strong> ${fmt(part.receivedAt)}`:""}${part.fittedAt?` | <strong>Fitted:</strong> ${fmt(part.fittedAt)}`:""}</p>
+    <p><strong>Requested:</strong> ${fmt(part.requestedAt)}${part.orderedAt?` | <strong>Ordered:</strong> ${fmt(part.orderedAt)}`:""}${part.receivedAt?` | <strong>Arrived:</strong> ${fmt(part.receivedAt)}${part.receivedBy?` by ${part.receivedBy}`:""}`:""}${part.fittedAt?` | <strong>Fitted:</strong> ${fmt(part.fittedAt)}`:""}</p>
     ${part.expectedDelivery?`<p><strong>Expected delivery:</strong> ${part.expectedDelivery}</p>`:""}
     ${part.orderReference?`<p><strong>Order reference:</strong> ${part.orderReference}</p>`:""}
     ${part.orderedBy?`<p><strong>Ordered by:</strong> ${part.orderedBy}</p>`:""}
@@ -833,7 +966,16 @@ function partsCard(job,part,context="manager"){
     ${part.chasedAt?`<p><strong>Supplier chased:</strong> ${fmt(part.chasedAt)}${part.chaseNote?` — ${part.chaseNote}`:""}</p>`:""}
     <div class="parts-actions">
       ${part.status==="Requested"?`<button onclick="openPartsOrderForm('${job.id}','${part.id}')">Order Parts</button>`:""}
-      ${part.status==="Partial Delivery"?`<button onclick="chasePartsSupplier('${job.id}','${part.id}')">Chased Parts Company</button>`:""}
+      ${["Ordered","Back Order"].includes(part.status)?`
+        <button onclick="serviceManagerReceiveParts('${job.id}','${part.id}','all')">✅ Parts Arrived</button>
+        <button onclick="serviceManagerReceiveParts('${job.id}','${part.id}','partial')">⚠️ Partial Delivery</button>
+        <button onclick="serviceManagerReceiveParts('${job.id}','${part.id}','incorrect')">❌ Incorrect Parts</button>
+      `:""}
+      ${part.status==="Partial Delivery"?`<button onclick="chasePartsSupplier('${job.id}','${part.id}')">📞 Chased Parts Company</button>`:""}
+      ${part.status==="Supplier Chased"?`
+        <button onclick="serviceManagerReceiveParts('${job.id}','${part.id}','remaining')">✅ Remaining Parts Arrived</button>
+        <button onclick="serviceManagerReceiveParts('${job.id}','${part.id}','incorrect')">❌ Incorrect Parts</button>
+      `:""}
       ${part.status==="Incorrect Parts"?`<button onclick="openPartsOrderForm('${job.id}','${part.id}')">Re-order Parts</button>`:""}
       ${part.status==="Received"?`<button onclick="markPartFitted('${job.id}','${part.id}')">Mark Fitted</button>`:""}
       <button onclick="showTimelineModal('${job.id}')">Timeline</button>
@@ -853,13 +995,109 @@ function savePartsOrderFromForm(){
 }
 function markPartOrdered(jobId,partId){openPartsOrderForm(jobId,partId)}
 function resumeStatusAfterParts(){return "🟡 Started Repair"}
+function receivePartsUpdate(jobId,partId,result,actor="Technician"){
+  const j=jobs.find(x=>x.id===jobId);
+  if(!j) return;
+  const p=(j.partsRequests||[]).find(x=>x.id===partId);
+  if(!p) return;
+
+  const timestamp=now().toISOString();
+  const actorName=actor==="Service Manager"?"Service Manager":(j.technician||"Technician");
+
+  if(result==="all"){
+    p.status="Received";
+    p.receivedAt=timestamp;
+    p.arrivedAt=timestamp;
+    p.receivedBy=actorName;
+    p.receivedRole=actor;
+    p.technicianAlert="Received";
+    p.serviceManagerAlert="Received";
+    p.issueNote="";
+    p.technicianNotification=`Parts ready for ${j.reg}: ${p.qty||1} x ${p.description||p.text}. Received by ${actorName}.`;
+    p.technicianNotificationAt=timestamp;
+
+    addTimeline(
+      j,
+      actor==="Service Manager"?"✅ Parts received by Service Manager":"✅ Parts received by technician",
+      `${p.qty||1} x ${p.description||p.text} received in the workshop by ${actorName}. Assigned technician notified.`
+    );
+
+    if((j.partsRequests||[]).every(x=>["Received","Fitted"].includes(normalisePartStatus(x.status,x)))&&(j.status||"").includes("Awaiting Parts")){
+      const old=j.status;
+      j.status=resumeStatusAfterParts();
+      addTimeline(j,"▶ Repair ready to resume",`Status changed from ${old} to ${j.status} after parts were received.`);
+    }
+
+    alert(actor==="Service Manager"
+      ?"Parts arrival recorded and the assigned technician has been notified."
+      :"Parts arrival recorded and the Service Manager has been updated.");
+  }
+  else if(result==="partial"){
+    const note=prompt("What is missing from the delivery?")||`Partial delivery reported by ${actorName}.`;
+    p.status="Partial Delivery";
+    p.hadPartialDelivery=true;
+    p.issueAt=timestamp;
+    p.issueNote=note;
+    p.issueReportedBy=actorName;
+    p.technicianAlert="Partial Delivery";
+    p.serviceManagerAlert="Partial Delivery";
+    addTimeline(j,"⚠️ Partial parts delivery",`${p.description||p.text}: ${note} Reported by ${actorName}.`);
+    alert(actor==="Service Manager"
+      ?"Partial delivery recorded. The assigned technician has been updated."
+      :"Partial delivery alert sent to Service Manager.");
+  }
+  else if(result==="remaining"){
+    p.status="Received";
+    p.receivedAt=timestamp;
+    p.arrivedAt=timestamp;
+    p.receivedBy=actorName;
+    p.receivedRole=actor;
+    p.issueNote="";
+    p.technicianAlert="Received";
+    p.serviceManagerAlert="Received";
+    p.technicianNotification=`Remaining parts ready for ${j.reg}: ${p.qty||1} x ${p.description||p.text}. Received by ${actorName}.`;
+    p.technicianNotificationAt=timestamp;
+
+    addTimeline(
+      j,
+      "✅ Remaining parts arrived",
+      `${p.qty||1} x ${p.description||p.text}: ${actorName} confirmed all outstanding parts have arrived. Assigned technician notified.`
+    );
+
+    if((j.partsRequests||[]).every(x=>["Received","Fitted"].includes(normalisePartStatus(x.status,x)))&&(j.status||"").includes("Awaiting Parts")){
+      const old=j.status;
+      j.status=resumeStatusAfterParts();
+      addTimeline(j,"▶ Repair ready to resume",`Status changed from ${old} to ${j.status} after the remaining parts arrived.`);
+    }
+
+    alert(actor==="Service Manager"
+      ?"Remaining parts arrival recorded and the assigned technician has been notified."
+      :"Remaining parts arrival recorded and the Service Manager has been updated.");
+  }
+  else if(result==="incorrect"){
+    const note=prompt("What is wrong with the parts?")||`Incorrect parts reported by ${actorName}.`;
+    p.status="Incorrect Parts";
+    p.hadIncorrectParts=true;
+    p.issueAt=timestamp;
+    p.issueNote=note;
+    p.issueReportedBy=actorName;
+    p.technicianAlert="Incorrect Parts";
+    p.serviceManagerAlert="Incorrect Parts";
+    addTimeline(j,"❌ Incorrect parts",`${p.description||p.text}: ${note} Reported by ${actorName}.`);
+    alert(actor==="Service Manager"
+      ?"Incorrect parts recorded. The assigned technician has been updated."
+      :"Incorrect parts alert sent to Service Manager.");
+  }
+
+  save();
+  renderTechnicianPartsStatus(j);
+  render();
+}
 function technicianReceiveParts(jobId,partId,result){
-  const j=jobs.find(x=>x.id===jobId);if(!j)return;const p=(j.partsRequests||[]).find(x=>x.id===partId);if(!p)return;
-  if(result==="all"){p.status="Received";p.receivedAt=now().toISOString();p.arrivedAt=p.receivedAt;p.technicianAlert="Received";p.serviceManagerAlert="Received";p.issueNote="";addTimeline(j,"✅ Parts received by technician",`${p.qty||1} x ${p.description||p.text} received in the workshop by ${j.technician}.`);if((j.partsRequests||[]).every(x=>["Received","Fitted"].includes(normalisePartStatus(x.status,x)))&&(j.status||"").includes("Awaiting Parts")){const old=j.status;j.status=resumeStatusAfterParts();addTimeline(j,"▶ Repair resumed",`Status changed from ${old} to ${j.status} after parts were received.`)}alert("Parts arrived recorded. Service Manager has been updated.")}
-  else if(result==="partial"){const note=prompt("What is missing from the delivery?")||"Partial delivery reported by technician.";p.status="Partial Delivery";p.hadPartialDelivery=true;p.issueAt=now().toISOString();p.issueNote=note;p.technicianAlert="Partial Delivery";p.serviceManagerAlert="Partial Delivery";addTimeline(j,"⚠️ Partial parts delivery",`${p.description||p.text}: ${note}`);alert("Partial delivery alert sent to Service Manager.")}
-  else if(result==="remaining"){p.status="Received";p.receivedAt=now().toISOString();p.arrivedAt=p.receivedAt;p.issueNote="";p.technicianAlert="Received";p.serviceManagerAlert="Received";addTimeline(j,"✅ Remaining parts arrived",`${p.qty||1} x ${p.description||p.text}: technician confirmed all outstanding parts have now arrived.`);if((j.partsRequests||[]).every(x=>["Received","Fitted"].includes(normalisePartStatus(x.status,x)))&&(j.status||"").includes("Awaiting Parts")){const old=j.status;j.status=resumeStatusAfterParts();addTimeline(j,"▶ Repair resumed",`Status changed from ${old} to ${j.status} after the remaining parts arrived.`)}alert("Remaining parts arrival recorded. Service Manager has been updated.")}
-  else if(result==="incorrect"){const note=prompt("What is wrong with the parts?")||"Incorrect parts reported by technician.";p.status="Incorrect Parts";p.hadIncorrectParts=true;p.issueAt=now().toISOString();p.issueNote=note;p.technicianAlert="Incorrect Parts";p.serviceManagerAlert="Incorrect Parts";addTimeline(j,"❌ Incorrect parts",`${p.description||p.text}: ${note}`);alert("Incorrect parts alert sent to Service Manager.")}
-  save();renderTechnicianPartsStatus(j);render();
+  receivePartsUpdate(jobId,partId,result,"Technician");
+}
+function serviceManagerReceiveParts(jobId,partId,result){
+  receivePartsUpdate(jobId,partId,result,"Service Manager");
 }
 function chasePartsSupplier(jobId,partId){const j=jobs.find(x=>x.id===jobId);if(!j)return;const p=(j.partsRequests||[]).find(x=>x.id===partId);if(!p)return;const note=prompt("Supplier response / new ETA (optional):")||"Supplier chased; awaiting update.";p.status="Supplier Chased";p.chasedAt=now().toISOString();p.chaseNote=note;p.technicianAlert="Supplier Chased";p.serviceManagerAlert="Supplier Chased";addTimeline(j,"📞 Parts company chased",`${p.supplier||"Supplier"} chased by Service Manager. ${note}`);save();render();alert("Technician has been notified that the parts company was chased.")}
 function markRemainingPartsArrived(jobId,partId){technicianReceiveParts(jobId,partId,"remaining")}
@@ -1102,7 +1340,7 @@ function renderUpcomingWorkload(){
   el.innerHTML=html;
 }
 
-function setInputIfExists(id,value){const el=$(id);if(el)el.value=value??""}function numberVal(id,fallback=0){const el=$(id);if(!el)return fallback;const n=Number((el.value||"").trim());return Number.isFinite(n)?n:fallback}function loadTargetsInputs(){if(document.activeElement&&document.activeElement.closest("#targetsScreen"))return;setInputIfExists("targetAvailableHours",targets.availableHours||"");setInputIfExists("targetProductiveHours",targets.productiveHours||"");setInputIfExists("targetProductivity",targets.productivity||90);setInputIfExists("targetUtilisation",targets.utilisation||95);setInputIfExists("targetEfficiency",targets.efficiency||95);setInputIfExists("targetLabourRecovery",targets.labourRecovery||90);setInputIfExists("targetRateEffectiveDate",targets.rateEffectiveDate||todayISO());setInputIfExists("targetRetailRate",targets.retailRate||70);setInputIfExists("targetWarrantyRate",targets.warrantyRate||70);setInputIfExists("targetInternalRate",targets.internalRate||45);setInputIfExists("targetRetailHours",targets.retailHours||"");setInputIfExists("targetInternalHours",targets.internalHours||"");setInputIfExists("targetWarrantyHours",targets.warrantyHours||"");setInputIfExists("targetInternalCars",targets.internalCars||"");setInputIfExists("targetMonthlyRevenue",targets.monthlyRevenue||"");setInputIfExists("targetRetailRevenue",targets.retailRevenue||"");setInputIfExists("targetWarrantyRevenue",targets.warrantyRevenue||"");setInputIfExists("targetInternalRevenue",targets.internalRevenue||"");setInputIfExists("targetMOTs",targets.mots||"");setInputIfExists("targetMOTPass",targets.motPass||75);setInputIfExists("targetMOTAdvisory",targets.motAdvisory||25);setInputIfExists("targetCarryOver",targets.carryOver||0);setInputIfExists("targetDowntime",targets.downtime||"");renderKpiTargetsPreview()}function renderKpiTargetsPreview(){const el=$("kpiTargetsPreview");if(!el)return;el.innerHTML=`<div class="stat"><strong>${Number(targets.availableHours||0).toFixed(1)}</strong>Available Hrs</div><div class="stat"><strong>${Number(targets.productiveHours||0).toFixed(1)}</strong>Productive Target</div><div class="stat"><strong>${Number(targets.productivity||90).toFixed(0)}%</strong>Productivity</div><div class="stat"><strong>${Number(targets.utilisation||95).toFixed(0)}%</strong>Utilisation</div><div class="stat"><strong>£${Number(targets.retailRate||70).toFixed(0)}</strong>Retail Rate</div><div class="stat"><strong>£${Number(targets.monthlyRevenue||0).toFixed(0)}</strong>Monthly Revenue</div>`}if($("saveTargets")) $("saveTargets").addEventListener("click",()=>{targets={...targets,availableHours:numberVal("targetAvailableHours"),productiveHours:numberVal("targetProductiveHours"),productivity:numberVal("targetProductivity",90),utilisation:numberVal("targetUtilisation",95),efficiency:numberVal("targetEfficiency",95),labourRecovery:numberVal("targetLabourRecovery",90),rateEffectiveDate:($("targetRateEffectiveDate")&&$("targetRateEffectiveDate").value)||todayISO(),retailRate:numberVal("targetRetailRate",70),warrantyRate:numberVal("targetWarrantyRate",70),internalRate:numberVal("targetInternalRate",45),retailHours:numberVal("targetRetailHours"),internalHours:numberVal("targetInternalHours"),warrantyHours:numberVal("targetWarrantyHours"),internalCars:numberVal("targetInternalCars"),monthlyRevenue:numberVal("targetMonthlyRevenue"),retailRevenue:numberVal("targetRetailRevenue"),warrantyRevenue:numberVal("targetWarrantyRevenue"),internalRevenue:numberVal("targetInternalRevenue"),mots:numberVal("targetMOTs"),motPass:numberVal("targetMOTPass",75),motAdvisory:numberVal("targetMOTAdvisory",25),carryOver:numberVal("targetCarryOver"),downtime:numberVal("targetDowntime")};addRateHistoryEntry(targets.rateEffectiveDate,targets.retailRate,targets.warrantyRate,targets.internalRate);saveTargetsStore();renderKpiTargetsPreview();render();alert("KPI targets saved")});$("copyReport").addEventListener("click",()=>{navigator.clipboard.writeText($("generatedReport").textContent);alert("Report copied")});let recognition;if("webkitSpeechRecognition"in window){recognition=new webkitSpeechRecognition();recognition.continuous=false;recognition.interimResults=false;recognition.lang="en-GB";recognition.onresult=e=>{const text=e.results[0][0].transcript;if(activeVoiceTarget){const box=$(activeVoiceTarget);box.value=(box.value+" "+text).trim()}}}document.querySelectorAll(".voiceBtn").forEach(btn=>btn.addEventListener("click",()=>{activeVoiceTarget=btn.dataset.target;if(!recognition){alert("Voice recognition is not supported in this browser.");return}recognition.start()}));$("techFilter").addEventListener("change",renderTech);
+function setInputIfExists(id,value){const el=$(id);if(el)el.value=value??""}function numberVal(id,fallback=0){const el=$(id);if(!el)return fallback;const n=Number((el.value||"").trim());return Number.isFinite(n)?n:fallback}function loadTargetsInputs(){if(document.activeElement&&document.activeElement.closest("#targetsScreen"))return;setInputIfExists("targetAvailableHours",targets.availableHours||"");setInputIfExists("targetProductivity",targets.productivity||90);setInputIfExists("targetUtilisation",targets.utilisation||95);setInputIfExists("targetEfficiency",targets.efficiency||95);setInputIfExists("targetLabourRecovery",targets.labourRecovery||90);setInputIfExists("targetRateEffectiveDate",targets.rateEffectiveDate||todayISO());setInputIfExists("targetRetailRate",targets.retailRate||70);setInputIfExists("targetWarrantyRate",targets.warrantyRate||70);setInputIfExists("targetInternalRate",targets.internalRate||45);setInputIfExists("targetRetailHours",targets.retailHours||"");setInputIfExists("targetInternalHours",targets.internalHours||"");setInputIfExists("targetWarrantyHours",targets.warrantyHours||"");setInputIfExists("targetInternalCars",targets.internalCars||"");setInputIfExists("targetMonthlyRevenue",targets.monthlyRevenue||"");setInputIfExists("targetRetailRevenue",targets.retailRevenue||"");setInputIfExists("targetWarrantyRevenue",targets.warrantyRevenue||"");setInputIfExists("targetInternalRevenue",targets.internalRevenue||"");setInputIfExists("targetMOTs",targets.mots||"");setInputIfExists("targetMOTPass",targets.motPass||75);setInputIfExists("targetCarryOver",targets.carryOver||0);setInputIfExists("targetDowntime",targets.downtime||"");renderKpiTargetsPreview()}function renderKpiTargetsPreview(){const el=$("kpiTargetsPreview");if(!el)return;el.innerHTML=`<div class="stat"><strong>${Number(targets.availableHours||0).toFixed(1)}</strong>Available Hrs</div><div class="stat"><strong>${Number(targets.efficiency||95).toFixed(0)}%</strong>Efficiency Target</div><div class="stat"><strong>${Number(targets.productivity||90).toFixed(0)}%</strong>Productivity</div><div class="stat"><strong>${Number(targets.utilisation||95).toFixed(0)}%</strong>Utilisation</div><div class="stat"><strong>£${Number(targets.retailRate||70).toFixed(0)}</strong>Retail Rate</div><div class="stat"><strong>£${Number(targets.monthlyRevenue||0).toFixed(0)}</strong>Monthly Revenue</div>`}if($("saveTargets")) $("saveTargets").addEventListener("click",()=>{targets={...targets,availableHours:numberVal("targetAvailableHours"),productivity:numberVal("targetProductivity",90),utilisation:numberVal("targetUtilisation",95),efficiency:numberVal("targetEfficiency",95),labourRecovery:numberVal("targetLabourRecovery",90),rateEffectiveDate:($("targetRateEffectiveDate")&&$("targetRateEffectiveDate").value)||todayISO(),retailRate:numberVal("targetRetailRate",70),warrantyRate:numberVal("targetWarrantyRate",70),internalRate:numberVal("targetInternalRate",45),retailHours:numberVal("targetRetailHours"),internalHours:numberVal("targetInternalHours"),warrantyHours:numberVal("targetWarrantyHours"),internalCars:numberVal("targetInternalCars"),monthlyRevenue:numberVal("targetMonthlyRevenue"),retailRevenue:numberVal("targetRetailRevenue"),warrantyRevenue:numberVal("targetWarrantyRevenue"),internalRevenue:numberVal("targetInternalRevenue"),mots:numberVal("targetMOTs"),motPass:numberVal("targetMOTPass",75),carryOver:numberVal("targetCarryOver"),downtime:numberVal("targetDowntime")};addRateHistoryEntry(targets.rateEffectiveDate,targets.retailRate,targets.warrantyRate,targets.internalRate);saveTargetsStore();renderKpiTargetsPreview();render();alert("KPI targets saved")});$("copyReport").addEventListener("click",()=>{navigator.clipboard.writeText($("generatedReport").textContent);alert("Report copied")});let recognition;if("webkitSpeechRecognition"in window){recognition=new webkitSpeechRecognition();recognition.continuous=false;recognition.interimResults=false;recognition.lang="en-GB";recognition.onresult=e=>{const text=e.results[0][0].transcript;if(activeVoiceTarget){const box=$(activeVoiceTarget);box.value=(box.value+" "+text).trim()}}}document.querySelectorAll(".voiceBtn").forEach(btn=>btn.addEventListener("click",()=>{activeVoiceTarget=btn.dataset.target;if(!recognition){alert("Voice recognition is not supported in this browser.");return}recognition.start()}));$("techFilter").addEventListener("change",renderTech);
 
 /* =========================================================
    Workshop AI OS v4.1 — WAI-002 Garage Health Command Centre
@@ -2203,7 +2441,7 @@ card=function(job,open=true,manager=false){
     <p><strong>MOT:</strong> ${job.mot}</p>
     <p><strong>Timeline:</strong> ${job.timeline.length} events</p>
     ${!manager&&job.technicianNotice?`<div class="timeline-item good"><strong>🔔 Technician Update</strong><p>${job.technicianNotice}</p></div>`:""}
-    ${manager?`<button onclick="amendHours('${job.id}')">Amend Hours</button><button onclick="reassignTech('${job.id}')">Reassign Technician</button><button onclick="managerComment('${job.id}')">Manager Comment</button>`:""}
+    ${manager?`<button onclick="amendHours('${job.id}')">Add Hours</button><button onclick="reassignTech('${job.id}')">Reassign Technician</button><button onclick="managerComment('${job.id}')">Manager Comment</button><button onclick="deleteWorkshopJob('${job.id}')">Delete Job</button>`:""}
     <button onclick="showTimelineModal('${job.id}')">Timeline</button>
     ${open?`<button onclick="openJob('${job.id}')">Start / Continue Job</button>`:""}
   </div>`;
