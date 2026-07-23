@@ -1424,6 +1424,13 @@ function garageHealth(m){
   ].sort((a,b)=>b.loss-a.loss)[0];
   return {score,weighted,biggestIssue,message:score>=90?"Excellent workshop control.":score>=80?"Workshop is performing well with some improvements available.":score>=70?"Workshop needs attention today.":"Workshop requires urgent management focus."};
 }
+
+// WAI-080.1b: one shared Garage Health source for every dashboard.
+window.getMasterGarageHealthSnapshot=function(){
+  const metrics=getGarageHealthMetrics();
+  const health=garageHealth(metrics);
+  return {metrics,health,score:health.score,message:health.message};
+};
 function renderDash(){
   const m=getGarageHealthMetrics();
   const health=garageHealth(m);
@@ -3001,3 +3008,98 @@ if($("plannerDate")){
   updateForwardHoursSuggestion();
 })();
 
+
+/* =====================================================================
+   Workshop AI OS — WAI-080.1 Command Centre
+   Safe presentation wrapper: no changes to job, timer, parts or report logic.
+   ===================================================================== */
+(function initialiseWAI080CommandCentre(){
+  function number(value){const n=Number(value);return Number.isFinite(n)?n:0}
+  function money(value){return new Intl.NumberFormat("en-GB",{style:"currency",currency:"GBP",maximumFractionDigits:0}).format(number(value))}
+  function percent(value){return value===null||value===undefined||!Number.isFinite(Number(value))?"—":`${Math.round(Number(value))}%`}
+  function todayKey(){return new Date().toISOString().slice(0,10)}
+  function finished(job){return typeof completed==="function"?completed(job):Boolean(job.completedAt)}
+  function todayJobs(){return jobs.filter(j=>String(j.bookingDate||j.createdAt||"").slice(0,10)===todayKey())}
+  function completedToday(){return jobs.filter(j=>finished(j)&&String(j.completedAt||j.finishedAt||j.bookingDate||"").slice(0,10)===todayKey())}
+  function liveJobs(){return typeof getLiveWorkshopJobs==="function"?getLiveWorkshopJobs():todayJobs().filter(j=>!finished(j))}
+  function actualHours(job){return number(job.actualHours)}
+  function allowedHours(job){return number(job.hours)}
+  function rate(job){return typeof appliedJobRate==="function"?number(appliedJobRate(job)):number(targets&&targets.retailRate||70)}
+  function isWaitingParts(job){
+    const status=String(job.status||"").toLowerCase();
+    const openParts=(job.partsRequests||[]).some(p=>!["Fitted","Cancelled"].includes(p.status));
+    return status.includes("parts")||openParts;
+  }
+  function isWaitingApproval(job){return String(job.status||"").toLowerCase().includes("approval")||String(job.auth||"").toLowerCase().includes("awaiting")}
+  function metrics(){
+    const live=liveJobs();
+    const day=todayJobs();
+    const done=completedToday();
+    const inProgress=live.filter(j=>j.startedAt&&!finished(j));
+    const carried=typeof getCarryOverJobs==="function"?getCarryOverJobs():live.filter(j=>String(j.bookingDate||"").slice(0,10)<todayKey());
+    const sold=live.reduce((s,j)=>s+allowedHours(j),0);
+    const clocked=live.reduce((s,j)=>s+actualHours(j),0);
+    const efficiencyValue=clocked>0?(sold/clocked)*100:null;
+    const available=number(targets&&targets.availableHours) || (typeof getTechs==="function"?getTechs().length:0)*number(plannerSettings&&plannerSettings.capacity||8);
+    const productivityValue=available>0?(sold/available)*100:null;
+    const revenue=day.reduce((s,j)=>s+allowedHours(j)*rate(j),0);
+    const spare=Math.max(0,available-sold);
+    const downtime=(live.reduce((sum,j)=>sum+(j.interruptions||[]).reduce((a,i)=>a+number(i.hours||i.durationHours),0),0));
+    const parts=live.filter(isWaitingParts);
+    const approvals=live.filter(isWaitingApproval);
+    const master=typeof window.getMasterGarageHealthSnapshot==="function"?window.getMasterGarageHealthSnapshot():null;
+    const health=master?master.score:0;
+    return {live,day,done,inProgress,carried,sold,clocked,efficiencyValue,available,productivityValue,revenue,spare,downtime,parts,approvals,health};
+  }
+  function tile(label,value,detail){return `<div class="wai80-kpi"><span>${label}</span><strong>${value}</strong><small>${detail||""}</small></div>`}
+  function performance(label,value,detail,cls=""){return `<div class="wai80-performance-card ${cls}"><span>${label}</span><strong>${value}</strong><small>${detail||""}</small></div>`}
+  function action(title,detail,cls){return `<div class="wai80-priority ${cls}"><strong>${title}</strong><p>${detail}</p></div>`}
+  function renderWAI080(){
+    if(!document.getElementById("wai80CommandCentre"))return;
+    const m=metrics();
+    const banner=document.getElementById("wai80StatusBanner");
+    const title=document.getElementById("wai80StatusTitle");
+    const summary=document.getElementById("wai80StatusSummary");
+    const health=document.getElementById("wai80HealthValue");
+    const state=m.health>=85?"on-track":m.health>=65?"attention":"critical";
+    banner.className=`wai80-status-banner wai80-status-${state}`;
+    title.textContent=state==="on-track"?"🟢 Workshop On Track":state==="attention"?"🟠 Attention Required":"🔴 Management Action Required";
+    health.textContent=`${m.health}%`;
+    const issues=[];
+    if(m.parts.length)issues.push(`${m.parts.length} waiting for parts`);
+    if(m.approvals.length)issues.push(`${m.approvals.length} awaiting approval`);
+    if(m.carried.length)issues.push(`${m.carried.length} carry-over job${m.carried.length===1?"":"s"}`);
+    summary.textContent=issues.length?`Today's focus: ${issues.join(" • ")}.`:"No urgent workshop blockers detected. Keep the live plan moving.";
+    document.getElementById("wai80LastUpdated").textContent=`Updated ${new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`;
+    document.getElementById("wai80SummaryCards").innerHTML=[
+      tile("Jobs Completed",m.done.length,"Completed today"),
+      tile("Jobs In Progress",m.inProgress.length,`${m.live.length} live workshop jobs`),
+      tile("Labour Sold",`${m.sold.toFixed(1)} hrs`,`${m.available.toFixed(1)} hrs available`),
+      tile("Efficiency",percent(m.efficiencyValue),"Allowed versus clocked time"),
+      tile("Productivity",percent(m.productivityValue),"Sold versus available time"),
+      tile("Revenue Today",money(m.revenue),"Labour value at saved rates")
+    ].join("");
+    document.getElementById("wai80PerformanceCards").innerHTML=[
+      performance("Garage Health",`${m.health}%`,state==="on-track"?"Strong performance":"Review priority actions"),
+      performance("Spare Capacity",`${m.spare.toFixed(1)} hrs`,m.spare>0?"Potential booking capacity":"Workshop fully loaded"),
+      performance("Downtime",`${m.downtime.toFixed(1)} hrs`,"Recorded interruption time"),
+      performance("Parts Delays",m.parts.length,"Live jobs affected"),
+      performance("Authorisations",m.approvals.length,"Waiting for customer decision"),
+      performance("Carry Over",m.carried.length,"Unfinished from earlier dates")
+    ].join("");
+    const priorities=[];
+    if(m.parts.length)priorities.push(action("🔴 Chase outstanding parts",`${m.parts.length} live job${m.parts.length===1?" is":"s are"} affected by parts.`,"bad"));
+    if(m.approvals.length)priorities.push(action("🟠 Contact customers",`${m.approvals.length} job${m.approvals.length===1?" is":"s are"} awaiting authorisation.`,"warn"));
+    if(m.carried.length)priorities.push(action("🟠 Recover carry-over work",`${m.carried.length} unfinished job${m.carried.length===1?" needs":"s need"} a completion plan.`,"warn"));
+    if(m.spare>=1)priorities.push(action("🟢 Use spare capacity",`${m.spare.toFixed(1)} technician hours remain available today.`,"good"));
+    if(m.efficiencyValue!==null&&m.efficiencyValue<number(targets&&targets.efficiency||95))priorities.push(action("🟠 Review overrunning jobs",`Workshop efficiency is ${percent(m.efficiencyValue)}. Check jobs exceeding allocated time.`,"warn"));
+    if(!priorities.length)priorities.push(action("🟢 Maintain current plan","No urgent actions detected. Monitor progress and protect completion times.","good"));
+    document.getElementById("wai80PriorityActions").innerHTML=priorities.slice(0,3).join("");
+  }
+  document.querySelectorAll("[data-wai80-screen]").forEach(button=>button.addEventListener("click",()=>show(button.dataset.wai80Screen)));
+  const previous=typeof renderDash==="function"?renderDash:null;
+  if(previous){renderDash=function(){previous();renderWAI080()}}
+  window.renderWAI080=renderWAI080;
+  document.addEventListener("DOMContentLoaded",renderWAI080);
+  setTimeout(renderWAI080,0);
+})();

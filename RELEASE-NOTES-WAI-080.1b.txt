@@ -1,0 +1,16 @@
+Workshop AI OS — WAI-080.1b Garage Health Synchronisation
+
+Changed
+- Added one master Garage Health calculation source.
+- Live Workshop Status now reads the master Garage Health score.
+- Garage Health panel continues to use the same master score.
+- Workshop Coach now reads the master Garage Health score.
+
+Protected
+- Reports and Reports Interface unchanged.
+- Vehicle Intelligence unchanged.
+- Technician workflow, timers, parts, revenue and navigation unchanged.
+
+Test status
+- JavaScript syntax checked.
+- This remains a test build until verified with live workshop data.

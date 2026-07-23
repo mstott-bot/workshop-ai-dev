@@ -50,11 +50,10 @@
     const remaining = available - allowed;
     const labourRate = num(targets.labourRate || targets.hourlyRate || 80);
     const opportunity = Math.max(0, remaining) * labourRate;
-    let health = 100;
-    if(efficiency !== null && efficiency < num(targets.efficiency || 95)) health -= 15;
-    if(used !== null && used < 85) health -= 10;
-    if(waitingApproval.length) health -= Math.min(15, waitingApproval.length * 5);
-    health = Math.max(0, Math.round(health));
+    const master = typeof window.getMasterGarageHealthSnapshot === "function"
+      ? window.getMasterGarageHealthSnapshot()
+      : null;
+    const health = master ? master.score : 0;
     return {jobs,todayJobs,open,waitingParts,waitingApproval,ready,allowed,actual,efficiency,available,used,remaining,labourRate,opportunity,health};
   }
   function priorityCards(m){

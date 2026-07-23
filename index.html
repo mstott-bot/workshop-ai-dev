@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Workshop AI Rescue v3.0</title>
+  <title>Workshop AI OS — WAI-080.1 Test Build</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -17,7 +17,7 @@
     <div>
       <h1><span>WORKSHOP</span> <strong>AI</strong></h1>
       <p class="tagline">Revolutionising workshops</p>
-      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Rescue build v3.0</p>
+      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">WAI-080.1 Test Build</p>
     </div>
   </div>
   <div class="role-pill">Service Manager</div>
@@ -38,6 +38,52 @@
   </nav>
 
   <section id="commandScreen" class="screen active">
+    <div id="wai80CommandCentre" class="wai80-command-centre">
+      <section id="wai80StatusBanner" class="wai80-status-banner wai80-status-attention">
+        <div>
+          <span class="wai80-eyebrow">LIVE WORKSHOP STATUS</span>
+          <h2 id="wai80StatusTitle">Loading workshop status…</h2>
+          <p id="wai80StatusSummary">Reviewing jobs, capacity and workshop activity.</p>
+        </div>
+        <div class="wai80-health-ring">
+          <strong id="wai80HealthValue">—</strong>
+          <span>Garage Health</span>
+        </div>
+      </section>
+
+      <section class="card wai80-panel">
+        <div class="wai80-section-heading">
+          <div><span class="wai80-eyebrow">TODAY</span><h2>Workshop Summary</h2></div>
+          <span id="wai80LastUpdated" class="muted"></span>
+        </div>
+        <div id="wai80SummaryCards" class="wai80-kpi-grid"></div>
+      </section>
+
+      <div class="wai80-two-column">
+        <section class="card wai80-panel">
+          <div class="wai80-section-heading"><div><span class="wai80-eyebrow">PERFORMANCE</span><h2>Workshop Performance Centre</h2></div></div>
+          <div id="wai80PerformanceCards" class="wai80-performance-grid"></div>
+        </section>
+
+        <section class="card wai80-panel wai80-actions-panel">
+          <div class="wai80-section-heading"><div><span class="wai80-eyebrow">ACTION</span><h2>Top Priorities</h2></div></div>
+          <div id="wai80PriorityActions" class="wai80-priority-list"></div>
+        </section>
+      </div>
+
+      <section class="card wai80-quick-access">
+        <div><span class="wai80-eyebrow">QUICK ACCESS</span><h2>Open a Workshop Area</h2></div>
+        <div class="wai80-quick-buttons">
+          <button class="primary" data-wai80-screen="reportsInterfaceScreen">Open Reports Dashboard</button>
+          <button class="secondary" data-wai80-screen="managerScreen">Service Manager</button>
+          <button class="secondary" data-wai80-screen="plannerScreen">Daily Planner</button>
+          <button class="secondary" data-wai80-screen="partsScreen">Parts Centre</button>
+        </div>
+      </section>
+    </div>
+
+    <details class="wai80-existing-dashboard">
+      <summary>Open detailed Command Centre</summary>
     <div class="hero">
       <div>
         <h2>Workshop AI Command Centre</h2>
@@ -116,6 +162,7 @@
       <h2>Downtime Today / This Week</h2>
       <div id="ownerDowntimeReports" class="job-list"></div>
     </div>
+    </details>
   </section>
 
   <section id="managerScreen" class="screen">

@@ -12,21 +12,25 @@
   "use strict";
 
   const REPORTS = [
-    {id:"workshop", title:"Workshop Performance", description:"Jobs, labour hours, efficiency, productivity and labour value."},
-    {id:"technicians", title:"Technician Performance", description:"Technician scorecards with jobs, completed labour hours, efficiency and job mix."},
-    {id:"jobs", title:"Jobs Completed", description:"Daily, weekly and monthly jobs including and excluding MOTs."},
-    {id:"labour", title:"Completed Labour Hours", description:"Completed sold labour hours by technician and workshop."},
-    {id:"productivity", title:"Productivity & Efficiency", description:"Actual clocked productive time, available capacity and sold-hours efficiency."},
-    {id:"downtime", title:"Downtime Intelligence", description:"Lost hours, reasons and technician downtime patterns."},
-    {id:"parts", title:"Parts & Supplier Performance", description:"Outstanding parts, delivery times, partial deliveries and incorrect parts."},
-    {id:"mot", title:"MOT Performance", description:"MOT volume, results and MOT-inclusive versus non-MOT workload."},
-    {id:"approvals", title:"Customer Approval Performance", description:"Outstanding approvals, completed approvals and average response times."},
-    {id:"revenue", title:"Revenue Watch", description:"Completed labour value by job type and technician."},
-    {id:"carryover", title:"Carry-over Jobs", description:"Open jobs from earlier dates and the hours tied up in them."},
-    {id:"garageHealth", title:"Garage Health", description:"Operational health summary and the largest current risks."}
+    {id:"workshop", category:"Performance", icon:"📈", title:"Workshop Performance", description:"Jobs, labour hours, efficiency, productivity and labour value."},
+    {id:"technicians", category:"Performance", icon:"👨‍🔧", title:"Technician Performance", description:"Technician scorecards with jobs, completed labour hours, efficiency and job mix."},
+    {id:"jobs", category:"Performance", icon:"✅", title:"Jobs Completed", description:"Daily, weekly and monthly jobs including and excluding MOTs."},
+    {id:"labour", category:"Performance", icon:"⏱", title:"Completed Labour Hours", description:"Completed sold labour hours by technician and workshop."},
+    {id:"productivity", category:"Performance", icon:"⚡", title:"Productivity & Efficiency", description:"Actual clocked productive time, available capacity and sold-hours efficiency."},
+    {id:"revenue", category:"Financial", icon:"💷", title:"Revenue Watch", description:"Completed labour value by job type and technician."},
+    {id:"parts", category:"Operations", icon:"📦", title:"Parts & Supplier Performance", description:"Outstanding parts, delivery times, partial deliveries and incorrect parts."},
+    {id:"downtime", category:"Operations", icon:"⏸", title:"Downtime Intelligence", description:"Lost hours, reasons and technician downtime patterns."},
+    {id:"carryover", category:"Operations", icon:"⚠️", title:"Carry-over Jobs", description:"Open jobs from earlier dates and the hours tied up in them."},
+    {id:"mot", category:"MOT", icon:"🚗", title:"MOT Performance", description:"MOT volume, results and MOT-inclusive versus non-MOT workload."},
+    {id:"approvals", category:"Customers", icon:"📞", title:"Customer Approval Performance", description:"Outstanding approvals, completed approvals and average response times."},
+    {id:"garageHealth", category:"Management", icon:"🏆", title:"Garage Health", description:"Operational health summary and the largest current risks."}
   ];
 
+  const CATEGORIES=["All","Performance","Financial","Operations","MOT","Customers","Management"];
+  const FAVOURITES_KEY="workshopAIReportFavouritesV1";
   let activeReport="workshop";
+  let activeCategory="All";
+  let favourites=JSON.parse(localStorage.getItem(FAVOURITES_KEY)||"[]");
 
   function el(id){ return document.getElementById(id); }
   function safeNumber(value){ return Number.isFinite(Number(value)) ? Number(value) : 0; }
@@ -95,6 +99,84 @@
     }
 
     return {start,end,label:`${start.toLocaleDateString("en-GB")} – ${end.toLocaleDateString("en-GB")}`};
+  }
+  function daysBetweenInclusive(start,end){
+    return Math.max(1,Math.round((end-start)/(1000*60*60*24))+1);
+  }
+  function comparisonRange(current=range()){
+    const mode=el("intelligenceComparison")?.value||"none";
+    if(mode==="none") return null;
+
+    let start;
+    let end;
+
+    if(mode==="previousMonth"){
+      start=new Date(current.start.getFullYear(),current.start.getMonth()-1,1);
+      end=new Date(current.start.getFullYear(),current.start.getMonth(),0,23,59,59,999);
+    }else if(mode==="lastYear"){
+      start=new Date(current.start);
+      end=new Date(current.end);
+      start.setFullYear(start.getFullYear()-1);
+      end.setFullYear(end.getFullYear()-1);
+    }else{
+      const days=daysBetweenInclusive(current.start,current.end);
+      end=new Date(current.start);
+      end.setDate(end.getDate()-1);
+      end.setHours(23,59,59,999);
+      start=new Date(end);
+      start.setDate(start.getDate()-days+1);
+      start.setHours(0,0,0,0);
+    }
+
+    return {start,end,label:`${start.toLocaleDateString("en-GB")} – ${end.toLocaleDateString("en-GB")}`};
+  }
+  function jobsForSelectedRange(selectedRange,{completedOnly=false}={}){
+    const tech=selectedTechnician();
+    return jobs.filter(job=>{
+      if(tech!=="All"&&job.technician!==tech) return false;
+      if(completedOnly&&!completed(job)) return false;
+      return inRange(jobDate(job),selectedRange);
+    });
+  }
+  function coreMetricsForRange(selectedRange){
+    const list=jobsForSelectedRange(selectedRange,{completedOnly:true});
+    const sold=list.reduce((sum,job)=>sum+soldHours(job),0);
+    const actual=list.reduce((sum,job)=>sum+actualClocked(job),0);
+    const value=list.reduce((sum,job)=>sum+labourValue(job),0);
+    const efficiency=actual>0?(sold/actual)*100:null;
+    return {jobs:list.length,sold,actual,value,efficiency};
+  }
+  function changeText(current,previous,suffix=""){
+    if(previous===null||previous===undefined||Number(previous)===0){
+      return "No earlier comparison data";
+    }
+    const change=((Number(current)-Number(previous))/Math.abs(Number(previous)))*100;
+    const arrow=change>0?"▲":change<0?"▼":"■";
+    return `${arrow} ${Math.abs(change).toFixed(0)}% ${change>0?"up":change<0?"down":"unchanged"}${suffix}`;
+  }
+  function renderComparison(){
+    const container=el("workshopIntelligenceComparison");
+    if(!container) return;
+
+    const previousRange=comparisonRange();
+    if(!previousRange){
+      container.innerHTML="";
+      return;
+    }
+
+    const currentMetrics=coreMetricsForRange(range());
+    const previousMetrics=coreMetricsForRange(previousRange);
+
+    container.innerHTML=`
+      <div class="coach-card">
+        <h3>Comparison: ${previousRange.label}</h3>
+        <div class="intelligence-comparison-grid">
+          <div><strong>Jobs</strong><span>${changeText(currentMetrics.jobs,previousMetrics.jobs)}</span></div>
+          <div><strong>Sold Labour</strong><span>${changeText(currentMetrics.sold,previousMetrics.sold)}</span></div>
+          <div><strong>Labour Value</strong><span>${changeText(currentMetrics.value,previousMetrics.value)}</span></div>
+          <div><strong>Efficiency</strong><span>${changeText(currentMetrics.efficiency||0,previousMetrics.efficiency||0)}</span></div>
+        </div>
+      </div>`;
   }
   function jobDate(job){
     return new Date(job.completedAt||job.finishedAt||job.bookingDate||job.createdAt||0);
@@ -223,9 +305,14 @@
   }
   function setOutput({title,summary="",insightHtml="",output=""}){
     if(el("workshopIntelligenceTitle")) el("workshopIntelligenceTitle").textContent=title;
+    if(el("workshopIntelligencePeriodLabel")){
+      el("workshopIntelligencePeriodLabel").textContent=`${range().label} | ${selectedTechnician()}`;
+    }
     if(el("workshopIntelligenceSummary")) el("workshopIntelligenceSummary").innerHTML=summary;
     if(el("workshopIntelligenceInsight")) el("workshopIntelligenceInsight").innerHTML=insightHtml;
     if(el("workshopIntelligenceOutput")) el("workshopIntelligenceOutput").innerHTML=output;
+    renderComparison();
+    updateFavouriteButton();
   }
 
   function renderWorkshopPerformance(){
@@ -646,18 +733,118 @@
     (renderers[activeReport]||renderWorkshopPerformance)();
   }
 
+  function saveFavourites(){
+    localStorage.setItem(FAVOURITES_KEY,JSON.stringify(favourites));
+  }
+  function isFavourite(reportId){
+    return favourites.includes(reportId);
+  }
+  function filteredReportDefinitions(){
+    const search=String(el("intelligenceReportSearch")?.value||"").trim().toLowerCase();
+    return REPORTS.filter(report=>{
+      const categoryMatch=activeCategory==="All"||report.category===activeCategory;
+      const searchMatch=!search||
+        report.title.toLowerCase().includes(search)||
+        report.description.toLowerCase().includes(search)||
+        report.category.toLowerCase().includes(search);
+      return categoryMatch&&searchMatch;
+    });
+  }
+  function renderCategories(){
+    const container=el("workshopIntelligenceCategories");
+    if(!container) return;
+    container.innerHTML=CATEGORIES.map(category=>`
+      <button class="${activeCategory===category?"active":""}"
+        onclick="selectWorkshopIntelligenceCategory('${category}')">${category}</button>
+    `).join("");
+  }
+  function reportDefinitionCard(report){
+    return `<div class="job-card ${activeReport===report.id?"good":""}">
+      <div class="intelligence-card-title">
+        <h3>${report.icon} ${report.title}</h3>
+        <button class="intelligence-star" onclick="toggleWorkshopIntelligenceFavourite('${report.id}',event)">
+          ${isFavourite(report.id)?"★":"☆"}
+        </button>
+      </div>
+      <p class="intelligence-category-label">${report.category}</p>
+      <p>${report.description}</p>
+      <button onclick="selectWorkshopIntelligenceReport('${report.id}')">
+        ${activeReport===report.id?"Selected":"Open Report"}
+      </button>
+    </div>`;
+  }
   function renderReportList(){
     const container=el("workshopIntelligenceReportList");
     if(!container) return;
-    container.innerHTML=REPORTS.map(report=>`
-      <div class="job-card ${activeReport===report.id?"good":""}">
-        <h3>${report.title}</h3>
-        <p>${report.description}</p>
-        <button onclick="selectWorkshopIntelligenceReport('${report.id}')">
-          ${activeReport===report.id?"Selected":"Open Report"}
-        </button>
-      </div>
-    `).join("");
+    const definitions=filteredReportDefinitions();
+    container.innerHTML=definitions.length
+      ? definitions.map(reportDefinitionCard).join("")
+      : `<div class="job-card warn"><p>No reports match the current category or search.</p></div>`;
+  }
+  function renderFavourites(){
+    const container=el("workshopIntelligenceFavourites");
+    if(!container) return;
+    const definitions=REPORTS.filter(report=>isFavourite(report.id));
+    container.innerHTML=definitions.length
+      ? definitions.map(reportDefinitionCard).join("")
+      : `<div class="job-card"><p>No favourite reports saved yet. Press ☆ on a report to add it here.</p></div>`;
+  }
+  function updateFavouriteButton(){
+    const button=el("toggleFavouriteWorkshopIntelligence");
+    if(!button) return;
+    button.textContent=isFavourite(activeReport)?"★ Favourite":"☆ Favourite";
+    button.classList.toggle("active",isFavourite(activeReport));
+  }
+
+  function csvEscape(value){
+    const text=String(value??"");
+    return `"${text.replaceAll('"','""')}"`;
+  }
+  function currentReportRows(){
+    const title=el("workshopIntelligenceTitle")?.textContent||"Workshop Intelligence";
+    const rows=[
+      ["Report",title],
+      ["Period",range().label],
+      ["Technician",selectedTechnician()],
+      []
+    ];
+
+    el("workshopIntelligenceSummary")?.querySelectorAll(".stat").forEach(card=>{
+      const value=card.querySelector("strong")?.textContent||"";
+      const label=Array.from(card.childNodes)
+        .filter(node=>node.nodeType===Node.TEXT_NODE)
+        .map(node=>node.textContent.trim())
+        .filter(Boolean)
+        .join(" ");
+      rows.push([label,value]);
+    });
+
+    const tableElement=el("workshopIntelligenceOutput")?.querySelector("table");
+    if(tableElement){
+      rows.push([]);
+      tableElement.querySelectorAll("tr").forEach(row=>{
+        rows.push(Array.from(row.children).map(cell=>cell.textContent.trim()));
+      });
+    }
+
+    return rows;
+  }
+  function downloadCsv(){
+    const rows=currentReportRows();
+    const csv=rows.map(row=>row.map(csvEscape).join(",")).join("\n");
+    const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+    const link=document.createElement("a");
+    link.href=URL.createObjectURL(blob);
+    link.download=`workshop-intelligence-${activeReport}-${isoLocal(new Date())}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(link.href);
+  }
+  function printCurrentReport(){
+    document.body.classList.add("printing-workshop-intelligence");
+    window.print();
+    setTimeout(()=>document.body.classList.remove("printing-workshop-intelligence"),500);
   }
 
   function populateTechnicians(){
@@ -680,6 +867,8 @@
     if(!el("workshopIntelligenceReportList")) return;
     populateTechnicians();
     initialiseDates();
+    renderCategories();
+    renderFavourites();
     renderReportList();
     renderActiveReport();
   }
@@ -687,12 +876,31 @@
   window.selectWorkshopIntelligenceReport=function(reportId){
     activeReport=REPORTS.some(report=>report.id===reportId)?reportId:"workshop";
     renderAll();
+    el("workshopIntelligencePrintable")?.scrollIntoView({behavior:"smooth",block:"start"});
+  };
+  window.selectWorkshopIntelligenceCategory=function(category){
+    activeCategory=CATEGORIES.includes(category)?category:"All";
+    renderAll();
+  };
+  window.toggleWorkshopIntelligenceFavourite=function(reportId,event){
+    event?.stopPropagation();
+    favourites=isFavourite(reportId)
+      ? favourites.filter(id=>id!==reportId)
+      : [...favourites,reportId];
+    saveFavourites();
+    renderAll();
   };
 
-  ["intelligencePeriod","intelligenceTechnician","intelligenceStartDate","intelligenceEndDate"].forEach(id=>{
+  ["intelligencePeriod","intelligenceTechnician","intelligenceStartDate","intelligenceEndDate","intelligenceComparison"].forEach(id=>{
     el(id)?.addEventListener("change",renderAll);
   });
+  el("intelligenceReportSearch")?.addEventListener("input",renderAll);
   el("refreshWorkshopIntelligence")?.addEventListener("click",renderAll);
+  el("printWorkshopIntelligence")?.addEventListener("click",printCurrentReport);
+  el("exportWorkshopIntelligenceExcel")?.addEventListener("click",downloadCsv);
+  el("toggleFavouriteWorkshopIntelligence")?.addEventListener("click",()=>{
+    window.toggleWorkshopIntelligenceFavourite(activeReport);
+  });
 
   const previousRender=typeof render==="function"?render:null;
   if(previousRender){
