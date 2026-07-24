@@ -27,3 +27,6 @@ Added MOT Testing as a Technician job status while retaining the separate MOT cl
 ## WAI-091
 - Technician Today’s Jobs board with completed-job access and carry-over.
 - Corrected Parts Delivered Today list and separate parts/tyres delivery counters.
+
+## WAI-092 Technician League Intelligence
+Adds league trends, rank movement, most improved/biggest drop, personal bests, consistency streaks and a permanent Hall of Fame to both Command Centre and Reports.
