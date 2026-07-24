@@ -1,19 +1,29 @@
-# Workshop AI OS v5.7.3 — Vehicle Intelligence Search Fix
+# Workshop AI WAI-090.1
 
-Built from v5.7.2 Garage Health Hard Fix baseline.
+Tyre delivery confirmation restored for both Service Manager and Technician, with the Technician MOT clock restored on the active-job screen.
 
-## Fixed
-- Vehicle Intelligence search button now runs the search reliably.
-- Pressing Enter in the Vehicle Intelligence search box also runs the search.
-- Quick filter changes refresh the results.
-- Garage Health hard fix preserved.
-- Workshop Coach fix preserved.
-- Action Centre 2.0 preserved.
+# Workshop AI WAI-087
 
-## Files
-- index.html
-- style.css
-- script.js
-- coach-fix.js
-- garage-health-fix.js
-- vehicle-intelligence-fix.js
+## Workshop Control Centre
+
+This release transforms the Targets screen into a polished monthly planning dashboard while retaining all existing Workshop AI workflows.
+
+### Included
+- Premium Control Centre layout
+- Live monthly KPI preview
+- Automatic retail, warranty and internal labour revenue projections
+- Capacity validation against available workshop hours
+- Workshop AI review with achievable, warning and over-capacity guidance
+- Copy Previous Month and Reset Draft controls
+- One Save Workshop Settings action
+- Existing Service Manager Action Queue, MOT workflow and Parts & Tyre Intelligence retained
+
+Open `index.html` to run Workshop AI.
+
+
+## WAI-090.2
+Added MOT Testing as a Technician job status while retaining the separate MOT clock and main job timer.
+
+## WAI-091
+- Technician Today’s Jobs board with completed-job access and carry-over.
+- Corrected Parts Delivered Today list and separate parts/tyres delivery counters.

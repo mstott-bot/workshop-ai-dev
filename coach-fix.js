@@ -42,12 +42,15 @@
     const waitingParts = open.filter(j => String(j.status||"").includes("Awaiting Parts"));
     const waitingApproval = open.filter(j => String(j.status||"").includes("Approval") || String(j.auth||"").includes("Awaiting"));
     const ready = jobs.filter(j => String(j.status||"").includes("Ready"));
-    const allowed = todayJobs.reduce((s,j)=>s+num(j.hours),0);
+    const unified = typeof window.getUnifiedWorkshopCapacity === "function"
+      ? window.getUnifiedWorkshopCapacity()
+      : null;
+    const allowed = unified ? unified.sold : todayJobs.reduce((s,j)=>s+num(j.hours),0);
     const actual = todayJobs.reduce((s,j)=>s+num(j.actualHours),0);
     const efficiency = actual > 0 ? (allowed / actual) * 100 : null;
-    const available = num(targets.availableHours) || Math.max(8, todayJobs.length * 2);
-    const used = available > 0 ? (allowed / available) * 100 : null;
-    const remaining = available - allowed;
+    const available = unified ? unified.available : (num(targets.availableHours) || Math.max(8, todayJobs.length * 2));
+    const used = unified ? unified.used : (available > 0 ? (allowed / available) * 100 : null);
+    const remaining = unified ? unified.remaining : (available - allowed);
     const labourRate = num(targets.labourRate || targets.hourlyRate || 80);
     const opportunity = Math.max(0, remaining) * labourRate;
     const master = typeof window.getMasterGarageHealthSnapshot === "function"

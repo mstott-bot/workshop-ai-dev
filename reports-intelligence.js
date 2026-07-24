@@ -556,10 +556,16 @@
     const results={Pass:0,Advisory:0,Fail:0,Other:0};
 
     motJobs.forEach(job=>{
-      const value=String(job.motResult||job.motStatus||job.mot||"").toLowerCase();
-      if(value.includes("fail")) results.Fail++;
-      else if(value.includes("advis")) results.Advisory++;
-      else if(value.includes("pass")) results.Pass++;
+      const rec=job.motRecord||{};
+      // MOT Intelligence stores the live outcome inside motRecord. Legacy
+      // fields are retained as fallbacks for jobs created before WAI-084.
+      const value=String(
+        rec.result || rec.stage || job.motResult || job.motStatus || job.mot || ""
+      ).toLowerCase();
+
+      if(value.includes("advis")) results.Advisory++;
+      else if(value.includes("fail") || value.includes("awaiting authorisation") || value.includes("awaiting retest") || value.includes("repair")) results.Fail++;
+      else if(value.includes("pass") || value.includes("ready for collection")) results.Pass++;
       else results.Other++;
     });
 

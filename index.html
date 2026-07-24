@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Workshop AI OS — WAI-080.1 Test Build</title>
+  <title>Workshop AI OS — WAI-087 Workshop Control Centre</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -17,7 +17,7 @@
     <div>
       <h1><span>WORKSHOP</span> <strong>AI</strong></h1>
       <p class="tagline">Revolutionising workshops</p>
-      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">WAI-080.1 Test Build</p>
+      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Version WAI-087 · Workshop Control Centre</p>
     </div>
   </div>
   <div class="role-pill">Service Manager</div>
@@ -31,6 +31,8 @@
     <button class="tab" data-screen="reportsScreen">Reports</button>
     <button class="tab" data-screen="plannerScreen">Daily Planner</button>
     <button class="tab" data-screen="partsScreen">Parts</button>
+    <button class="tab" data-screen="partsTyreIntelligenceScreen">Parts &amp; Tyres</button>
+    <button class="tab" data-screen="motIntelligenceScreen">MOT Intelligence</button>
     <button class="tab" data-screen="reportsInterfaceScreen">Reports Interface</button>
     <button class="tab" data-screen="techniciansScreen">Technicians</button>
     <button class="tab" data-screen="targetsScreen">Targets</button>
@@ -296,6 +298,8 @@
         <button id="finishTimer" class="secondary">■ Finish Job Timer</button>
       </div>
 
+      <div id="technicianMOTControls" class="mot-technician-controls hidden" aria-live="polite"></div>
+
       <div class="clockoff-panel">
         <h3>Technician Clock Off</h3>
         <p id="clockOffStatus" class="muted">Currently clocked on to job.</p>
@@ -324,6 +328,7 @@
         <select id="status">
           <option>🔍 Diagnosing</option>
           <option>🔧 Repairing Vehicle</option>
+          <option>🧪 MOT Testing</option>
           <option>⚠️ Additional Work Found</option>
           <option>🚗 Road Test</option>
           <option>🟢 Repair Complete</option>
@@ -388,7 +393,22 @@
   </section>
 
   <section id="reportsScreen" class="screen">
-    <div class="card"><h2>Workshop KPI Scorecard</h2><div id="kpiScorecard" class="job-list"></div></div>
+    <div class="card">
+      <div class="scorecard-heading">
+        <div>
+          <h2>Workshop KPI Scorecard</h2>
+          <p class="muted">See whether the workshop is on track for the selected period.</p>
+        </div>
+        <label class="scorecard-period">View
+          <select id="kpiPeriod">
+            <option value="today">Today</option>
+            <option value="mtd" selected>Month to Date</option>
+            <option value="ytd">Year to Date</option>
+          </select>
+        </label>
+      </div>
+      <div id="kpiScorecard" class="job-list"></div>
+    </div>
     <div class="card"><h2>Technician League Table</h2><div id="leagueTable" class="table-wrap"></div></div>
     <div class="card"><h2>Live Workshop Board</h2><div id="statusBoard" class="board-grid"></div></div>
     <div class="card"><h2>Technician Workload</h2><div id="workload"></div></div>
@@ -694,72 +714,95 @@
     </div>
   </section>
 
-  <section id="targetsScreen" class="screen">
-    <div class="card">
-      <h2>Workshop KPI & Targets</h2>
-      <p class="muted">Master control panel for Workshop AI. These targets and labour rates drive Command Centre, Performance Dashboard, Garage Health, Reports and future monthly intelligence.</p>
-    </div>
-
-    <div class="card">
-      <h2>Workshop Capacity Targets</h2>
-      <div class="grid">
-        <label>Workshop Hours Available This Month<input id="targetAvailableHours" type="number" step="0.25"></label>
-        <label>Productivity Target %<input id="targetProductivity" type="number" step="1" placeholder="90"></label>
-        <label>Utilisation Target %<input id="targetUtilisation" type="number" step="1" placeholder="95"></label>
-        <label>Workshop Efficiency Target %<input id="targetEfficiency" type="number" step="1" placeholder="95"></label>
-        <label>Labour Recovery Target %<input id="targetLabourRecovery" type="number" step="1" placeholder="90"></label>
+  <section id="targetsScreen" class="screen targets-control-centre">
+    <div class="card targets-hero">
+      <div>
+        <div class="targets-eyebrow">WORKSHOP PLANNING</div>
+        <h2>🎯 Workshop Control Centre</h2>
+        <p class="muted">Set realistic monthly targets, review projected labour revenue and keep every Workshop AI dashboard aligned.</p>
+      </div>
+      <div class="targets-hero-actions">
+        <button id="copyPreviousTargets" class="secondary">Copy Previous Month</button>
+        <button id="resetTargetsDraft" class="secondary">Reset Draft</button>
       </div>
     </div>
 
-    <div class="card">
-      <h2>Labour Rates</h2>
-      <p class="muted">Different rates allow Workshop AI to value retail, warranty and internal work correctly.</p>
-      <div class="grid">
-        <label>Rates Effective From<input id="targetRateEffectiveDate" type="date"></label>
-        <label>Retail Labour Rate £/hr<input id="targetRetailRate" type="number" step="0.01" placeholder="70"></label>
-        <label>Warranty Labour Rate £/hr<input id="targetWarrantyRate" type="number" step="0.01" placeholder="70"></label>
-        <label>Internal Labour Rate £/hr<input id="targetInternalRate" type="number" step="0.01" placeholder="45"></label>
+    <div id="targetsHeadlinePreview" class="targets-headline-grid"></div>
+
+    <div class="targets-layout">
+      <div class="targets-main-column">
+        <div class="card targets-module">
+          <div class="targets-module-heading"><span class="targets-icon">⚙️</span><div><h2>Capacity & Performance</h2><p class="muted">Define the workshop capacity and the standards the team is working towards.</p></div></div>
+          <div class="grid targets-form-grid">
+            <label>Workshop Hours Available This Month<input id="targetAvailableHours" type="number" step="0.25"></label>
+            <label>Productivity Target %<input id="targetProductivity" type="number" step="1" placeholder="90"></label>
+            <label>Utilisation Target %<input id="targetUtilisation" type="number" step="1" placeholder="95"></label>
+            <label>Workshop Efficiency Target %<input id="targetEfficiency" type="number" step="1" placeholder="95"></label>
+            <label>Labour Recovery Target %<input id="targetLabourRecovery" type="number" step="1" placeholder="90"></label>
+          </div>
+        </div>
+
+        <div class="card targets-module">
+          <div class="targets-module-heading"><span class="targets-icon">💷</span><div><h2>Labour Rates</h2><p class="muted">Rates are used throughout Revenue Watch, reports and workshop forecasts.</p></div></div>
+          <div class="grid targets-form-grid">
+            <label>Rates Effective From<input id="targetRateEffectiveDate" type="date"></label>
+            <label class="rate-retail">Retail Labour Rate £/hr<input id="targetRetailRate" type="number" step="0.01" placeholder="70"></label>
+            <label class="rate-warranty">Warranty Labour Rate £/hr<input id="targetWarrantyRate" type="number" step="0.01" placeholder="70"></label>
+            <label class="rate-internal">Internal Labour Rate £/hr<input id="targetInternalRate" type="number" step="0.01" placeholder="45"></label>
+          </div>
+        </div>
+
+        <div class="card targets-module">
+          <div class="targets-module-heading"><span class="targets-icon">🕒</span><div><h2>Monthly Labour Targets</h2><p class="muted">Set the planned mix of retail, internal and warranty hours.</p></div></div>
+          <div class="grid targets-form-grid">
+            <label>Retail Hours Target<input id="targetRetailHours" type="number" step="0.25"></label>
+            <label>Internal Hours Target<input id="targetInternalHours" type="number" step="0.25"></label>
+            <label>Warranty Hours Target<input id="targetWarrantyHours" type="number" step="0.25"></label>
+            <label>Internal Cars Completed Target<input id="targetInternalCars" type="number" step="1"></label>
+          </div>
+          <div id="labourProjectionPreview" class="target-projection-strip"></div>
+        </div>
+
+        <div class="card targets-module">
+          <div class="targets-module-heading"><span class="targets-icon">📈</span><div><h2>Revenue Targets</h2><p class="muted">Enter management goals or use the live labour projections as a guide.</p></div></div>
+          <div class="grid targets-form-grid">
+            <label>Monthly Labour Revenue Target £<input id="targetMonthlyRevenue" type="number" step="0.01"></label>
+            <label>Retail Revenue Target £<input id="targetRetailRevenue" type="number" step="0.01"></label>
+            <label>Warranty Revenue Target £<input id="targetWarrantyRevenue" type="number" step="0.01"></label>
+            <label>Internal Revenue Target £<input id="targetInternalRevenue" type="number" step="0.01"></label>
+          </div>
+        </div>
+
+        <div class="card targets-module">
+          <div class="targets-module-heading"><span class="targets-icon">🚗</span><div><h2>MOT & Operational Targets</h2><p class="muted">Keep MOT performance, carry-over and downtime expectations visible.</p></div></div>
+          <div class="grid targets-form-grid">
+            <label>Monthly MOT Target<input id="targetMOTs" type="number" step="1"></label>
+            <label>MOT Pass Target %<input id="targetMOTPass" type="number" step="1" placeholder="75"></label>
+            <label>Carry-over Target<input id="targetCarryOver" type="number" step="1" placeholder="0"></label>
+            <label>Downtime Target Hours<input id="targetDowntime" type="number" step="0.25"></label>
+          </div>
+        </div>
       </div>
+
+      <aside class="targets-side-column">
+        <div class="card targets-review-card">
+          <div class="targets-module-heading"><span class="targets-icon">🤖</span><div><h2>Workshop AI Review</h2><p class="muted">Live review of the values currently entered.</p></div></div>
+          <div id="targetsAiReview" class="targets-review-list"></div>
+        </div>
+
+        <div class="card targets-preview-card">
+          <h2>Live Monthly Preview</h2>
+          <p class="muted">Updates immediately as targets are changed.</p>
+          <div id="kpiTargetsPreview" class="targets-preview-grid"></div>
+        </div>
+      </aside>
     </div>
 
-    <div class="card">
-      <h2>Monthly Labour Targets</h2>
-      <div class="grid">
-        <label>Retail Hours Target<input id="targetRetailHours" type="number" step="0.25"></label>
-        <label>Internal Hours Target<input id="targetInternalHours" type="number" step="0.25"></label>
-        <label>Warranty Hours Target<input id="targetWarrantyHours" type="number" step="0.25"></label>
-        <label>Internal Cars Completed Target<input id="targetInternalCars" type="number" step="1"></label>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Revenue Targets</h2>
-      <div class="grid">
-        <label>Monthly Labour Revenue Target £<input id="targetMonthlyRevenue" type="number" step="0.01"></label>
-        <label>Retail Revenue Target £<input id="targetRetailRevenue" type="number" step="0.01"></label>
-        <label>Warranty Revenue Target £<input id="targetWarrantyRevenue" type="number" step="0.01"></label>
-        <label>Internal Revenue Target £<input id="targetInternalRevenue" type="number" step="0.01"></label>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>MOT & Operational Targets</h2>
-      <div class="grid">
-        <label>Monthly MOT Target<input id="targetMOTs" type="number" step="1"></label>
-        <label>MOT Pass Target %<input id="targetMOTPass" type="number" step="1" placeholder="75"></label>
-        <label>Carry-over Target<input id="targetCarryOver" type="number" step="1" placeholder="0"></label>
-        <label>Downtime Target Hours<input id="targetDowntime" type="number" step="0.25"></label>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Targets Preview</h2>
-      <p class="muted">Shows the values Workshop AI will use after saving.</p>
-      <div id="kpiTargetsPreview" class="stats"></div>
-      <button id="saveTargets" class="primary">Save KPI Targets</button>
+    <div class="card targets-save-panel">
+      <div><h2>Ready to update the workshop?</h2><p class="muted">Saved settings feed Command Centre, Revenue Watch, Garage Health, Reports, Performance and MOT Intelligence.</p></div>
+      <button id="saveTargets" class="primary targets-save-button">💾 Save Workshop Settings</button>
     </div>
   </section>
-
 
   <section id="vehicleIntelligenceScreen" class="screen">
     <div class="card">
@@ -793,6 +836,90 @@
     </div>
   </section>
 
+  <section id="motIntelligenceScreen" class="screen">
+    <div class="hero mot-hero">
+      <div>
+        <span class="wai80-eyebrow">WAI-085.1</span>
+        <h2>MOT Intelligence</h2>
+        <p>Live MOT workflow, advisory opportunities, retests and workshop-board integration.</p>
+      </div>
+      <button class="primary mot-new-booking" onclick="show('managerScreen')">＋ New MOT Booking</button>
+    </div>
+
+    <div class="card">
+      <h2>MOT Command Centre</h2>
+      <div id="motKpiCards" class="stats"></div>
+    </div>
+
+    <div class="card">
+      <div class="mot-heading-row">
+        <div><h2>Live MOT Board</h2><p class="muted">Every job with an MOT add-on appears automatically. Updating its MOT stage also updates the Live Workshop Board.</p></div>
+        <label class="mot-filter">View
+          <select id="motBoardFilter" onchange="renderMOTIntelligence()">
+            <option value="live">Live / Current</option>
+            <option value="today">Booked Today</option>
+            <option value="all">All MOT History</option>
+          </select>
+        </label>
+      </div>
+      <div id="motLiveBoard" class="mot-board"></div>
+    </div>
+
+    <div class="mot-two-column">
+      <div class="card">
+        <h2>MOT Opportunity Board</h2>
+        <div id="motOpportunityStats" class="stats"></div>
+        <div id="motOpportunityList" class="job-list"></div>
+      </div>
+      <div class="card">
+        <h2>AI MOT Coach</h2>
+        <div id="motCoach" class="coach-list"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>MOT Performance</h2>
+      <div id="motPerformance" class="job-list"></div>
+    </div>
+  </section>
+
+  <section id="partsTyreIntelligenceScreen" class="screen">
+    <div class="card wai085-hero">
+      <div>
+        <p class="wai085-eyebrow">WAI-085 · LIVE OPERATIONAL CONTROL</p>
+        <h2>Parts &amp; Tyre Intelligence</h2>
+        <p class="muted">See exactly which vehicles need parts or tyres ordering, what is still awaiting delivery, and what arrived today. Outstanding requests carry forward; delivered-today counters reset automatically the next day.</p>
+      </div>
+      <button id="wai085Refresh" class="secondary">Refresh Live Board</button>
+    </div>
+    <div id="wai085Stats" class="stats"></div>
+    <div id="wai085Coach" class="card"></div>
+    <div class="wai085-grid">
+      <div class="card">
+        <h2>📦 Parts Still Outstanding</h2>
+        <p class="muted">Requested, ordered, back-ordered or affected by a delivery issue. These remain until they arrive.</p>
+        <div id="wai085PartsOutstanding" class="job-list"></div>
+      </div>
+      <div class="card">
+        <h2>🛞 Tyres Still Outstanding</h2>
+        <p class="muted">Tyres needing ordering or still awaiting delivery. These remain until delivery is confirmed.</p>
+        <div id="wai085TyresOutstanding" class="job-list"></div>
+      </div>
+    </div>
+    <div class="wai085-grid">
+      <div class="card">
+        <h2>✅ Parts Delivered Today</h2>
+        <p class="muted">Today’s arrivals only. This counter returns to zero tomorrow.</p>
+        <div id="wai085PartsDeliveredToday" class="job-list"></div>
+      </div>
+      <div class="card">
+        <h2>✅ Tyres Delivered Today</h2>
+        <p class="muted">Today’s tyre arrivals only. This counter returns to zero tomorrow.</p>
+        <div id="wai085TyresDeliveredToday" class="job-list"></div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <div id="modal" class="modal hidden">
@@ -803,10 +930,14 @@
   </div>
 </div>
 <script src="script.js"></script>
+<script src="unified-capacity-engine.js"></script>
 <script src="coach-fix.js"></script>
 <script src="garage-health-fix.js"></script>
 <script src="vehicle-intelligence-fix.js"></script>
 <script src="performance-dashboard.js"></script>
 <script src="reports-intelligence.js"></script>
+<script src="tyres.js"></script>
+<script src="mot-intelligence.js"></script>
+<script src="parts-tyre-intelligence.js"></script>
 </body>
 </html>
