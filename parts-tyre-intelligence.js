@@ -60,16 +60,16 @@
     const {job,tyre,status}=r;const days=ageDays(tyre.requestedAt);const eta=tyre.expectedDate||tyre.expectedDelivery||tyre.eta||"Not entered";
     return `<div class="job-card wai085-live-card ${days>=3?"bad":days>=1?"warn":""}">${regTitle(job)}<p><strong>Waiting for:</strong> ${esc(tyre.quantity||1)} × ${esc(tyre.brand?tyre.brand+" ":"")}${esc(tyre.size||"Tyre")}</p><p><strong>Status:</strong> <span class="wai085-pill">${esc(status)}</span> · <strong>Supplier:</strong> ${esc(tyre.supplier||"Not entered")}</p><p><strong>ETA:</strong> ${esc(eta)} · <strong>Days waiting:</strong> ${days}</p><p class="muted">Requested ${fmt(tyre.requestedAt)}</p><div class="wai085-actions">${openJobButton(job)}</div></div>`;
   }
-  function deliveredPartCard(r){const {job,part}=r;return `<div class="job-card good">${regTitle(job)}<p>${esc(part.qty||1)} × ${esc(part.description||part.text||"Part")}</p><p><strong>Arrived:</strong> ${fmt(part.receivedAt||part.arrivedAt||part.deliveredAt)}</p><div class="wai085-actions">${openJobButton(job)}</div></div>`}
-  function deliveredTyreCard(r){const {job,tyre}=r;return `<div class="job-card good">${regTitle(job)}<p>${esc(tyre.quantity||1)} × ${esc(tyre.brand?tyre.brand+" ":"")}${esc(tyre.size||"Tyre")}</p><p><strong>Arrived:</strong> ${fmt(tyre.deliveredAt||tyre.receivedAt)}</p><div class="wai085-actions">${openJobButton(job)}</div></div>`}
+  function deliveredPartCard(r){const {job,part,status}=r;return `<div class="job-card good">${regTitle(job)}<p>${esc(part.qty||1)} × ${esc(part.description||part.text||"Part")}</p><p><strong>Arrived:</strong> ${fmt(part.receivedAt||part.arrivedAt||part.deliveredAt||part.deliveryDate)}</p><p><strong>Current status:</strong> ${esc(status)}</p><div class="wai085-actions">${openJobButton(job)}</div></div>`}
+  function deliveredTyreCard(r){const {job,tyre,status}=r;return `<div class="job-card good">${regTitle(job)}<p>${esc(tyre.quantity||1)} × ${esc(tyre.brand?tyre.brand+" ":"")}${esc(tyre.size||"Tyre")}</p><p><strong>Arrived:</strong> ${fmt(tyre.deliveredAt||tyre.arrivedAt||tyre.receivedAt)}</p><p><strong>Current status:</strong> ${esc(status)}</p><div class="wai085-actions">${openJobButton(job)}</div></div>`}
   const empty=msg=>`<div class="job-card"><p>${esc(msg)}</p></div>`;
   function render(){
     if(!$('wai085Stats'))return;
     const parts=partsRows(),tyres=tyreRows();
     const po=parts.filter(r=>!["Received","Fitted"].includes(r.status));
     const to=tyres.filter(r=>!["Delivered","Fitted"].includes(r.status));
-    const pd=parts.filter(r=>r.status==="Received"&&dayKey(r.part.receivedAt||r.part.arrivedAt||r.part.deliveredAt)===today());
-    const td=tyres.filter(r=>r.status==="Delivered"&&dayKey(r.tyre.deliveredAt||r.tyre.receivedAt)===today());
+    const pd=parts.filter(r=>dayKey(r.part.receivedAt||r.part.arrivedAt||r.part.deliveredAt||r.part.deliveryDate)===today());
+    const td=tyres.filter(r=>dayKey(r.tyre.deliveredAt||r.tyre.arrivedAt||r.tyre.receivedAt)===today());
     const needOrder=po.filter(r=>r.status==="Requested").length+to.filter(r=>r.status==="Requested").length;
     const awaiting=po.filter(r=>r.status!=="Requested").length+to.filter(r=>r.status!=="Requested").length;
     $('wai085Stats').innerHTML=`<div class="stat ${needOrder?'bad':'good'}"><strong>${needOrder}</strong>Need Ordering</div><div class="stat ${awaiting?'warn':'good'}"><strong>${awaiting}</strong>Awaiting Delivery / Issue</div><div class="stat good"><strong>${pd.length}</strong>Parts Delivered Today</div><div class="stat good"><strong>${td.length}</strong>Tyres Delivered Today</div><div class="stat ${po.length+to.length?'warn':'good'}"><strong>${po.length+to.length}</strong>Items Outstanding</div>`;

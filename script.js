@@ -1,6 +1,28 @@
 let jobs=JSON.parse(localStorage.getItem("workshopAIJobsV27")||localStorage.getItem("workshopAIJobsV26")||localStorage.getItem("workshopAIJobsV25")||localStorage.getItem("workshopAIJobsV24")||localStorage.getItem("workshopAIJobsV23")||localStorage.getItem("workshopAIJobsV22")||localStorage.getItem("workshopAIJobsV21")||localStorage.getItem("pcaJobsV11")||localStorage.getItem("pcaJobsV10")||localStorage.getItem("pcaJobsV09")||localStorage.getItem("pcaJobsV08")||localStorage.getItem("pcaJobsV07")||localStorage.getItem("pcaJobsV06")||"[]");let targets=JSON.parse(localStorage.getItem("pcaTargetsV11")||localStorage.getItem("pcaTargetsV10")||localStorage.getItem("pcaTargetsV09")||localStorage.getItem("pcaTargetsV08")||localStorage.getItem("pcaTargetsV07")||localStorage.getItem("pcaTargetsV06")||"{\"availableHours\":0,\"productiveHours\":0,\"productivity\":90,\"utilisation\":95,\"efficiency\":95,\"labourRecovery\":90,\"retailRate\":70,\"warrantyRate\":70,\"internalRate\":45,\"retailHours\":0,\"internalHours\":0,\"warrantyHours\":0,\"internalCars\":0,\"monthlyRevenue\":0,\"retailRevenue\":0,\"warrantyRevenue\":0,\"internalRevenue\":0,\"mots\":0,\"motPass\":75,\"motAdvisory\":25,\"carryOver\":0,\"downtime\":0}");let activeJobId=null;let activeVoiceTarget=null;let plannerSettings=JSON.parse(localStorage.getItem("workshopAIPlannerSettings")||"{\"capacity\":8}");let technicians=JSON.parse(localStorage.getItem("workshopAITechnicians")||'["Jake","Gordon","James","Jimmy","Ross","Other"]');
 function saveTechnicians(){localStorage.setItem("workshopAITechnicians",JSON.stringify(technicians))}
-function getTechs(){return technicians.length?technicians:["Other"]}function $(id){return document.getElementById(id)}function val(id){return $(id).value.trim()}function save(){localStorage.setItem("workshopAIJobsV27",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV26",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV25",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV24",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV23",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV22",JSON.stringify(jobs));localStorage.setItem("workshopAIJobsV21",JSON.stringify(jobs));localStorage.setItem("pcaJobsV11",JSON.stringify(jobs));localStorage.setItem("pcaJobsV10",JSON.stringify(jobs));localStorage.setItem("pcaJobsV09",JSON.stringify(jobs));localStorage.setItem("pcaJobsV08",JSON.stringify(jobs));localStorage.setItem("pcaJobsV07",JSON.stringify(jobs));localStorage.setItem("pcaJobsV06",JSON.stringify(jobs))}function saveTargetsStore(){localStorage.setItem("pcaTargetsV11",JSON.stringify(targets));localStorage.setItem("pcaTargetsV10",JSON.stringify(targets));localStorage.setItem("pcaTargetsV09",JSON.stringify(targets));localStorage.setItem("pcaTargetsV08",JSON.stringify(targets));localStorage.setItem("pcaTargetsV07",JSON.stringify(targets));localStorage.setItem("pcaTargetsV06",JSON.stringify(targets))}function todayISO(){return new Date().toISOString().split("T")[0]}
+function getTechs(){return technicians.length?technicians:["Other"]}function $(id){return document.getElementById(id)}function val(id){const el=$(id);return el?String(el.value??"").trim():""}
+function save(){
+  const payload=JSON.stringify(jobs);
+  const primaryKey="workshopAIJobsV27";
+  const legacyKeys=["workshopAIJobsV26","workshopAIJobsV25","workshopAIJobsV24","workshopAIJobsV23","workshopAIJobsV22","workshopAIJobsV21","pcaJobsV11","pcaJobsV10","pcaJobsV09","pcaJobsV08","pcaJobsV07","pcaJobsV06"];
+  try{
+    // Save one canonical copy. The previous implementation wrote the same large job file
+    // to 13 keys, which could fill browser storage and make Parts Order saving fail.
+    localStorage.setItem(primaryKey,payload);
+    legacyKeys.forEach(key=>{try{localStorage.removeItem(key)}catch(_){}});
+    return true;
+  }catch(error){
+    // Make room by removing redundant historic copies, then retry once.
+    legacyKeys.forEach(key=>{try{localStorage.removeItem(key)}catch(_){}});
+    try{
+      localStorage.setItem(primaryKey,payload);
+      return true;
+    }catch(retryError){
+      console.error("Workshop AI save failed",retryError);
+      throw retryError;
+    }
+  }
+}function saveTargetsStore(){localStorage.setItem("pcaTargetsV11",JSON.stringify(targets));localStorage.setItem("pcaTargetsV10",JSON.stringify(targets));localStorage.setItem("pcaTargetsV09",JSON.stringify(targets));localStorage.setItem("pcaTargetsV08",JSON.stringify(targets));localStorage.setItem("pcaTargetsV07",JSON.stringify(targets));localStorage.setItem("pcaTargetsV06",JSON.stringify(targets))}function todayISO(){return new Date().toISOString().split("T")[0]}
 function monthKeyFromDate(value){const d=value?new Date(value):new Date();if(Number.isNaN(d.getTime()))return todayISO().slice(0,7);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`}
 function currentMonthKey(){return todayISO().slice(0,7)}
 function jobActivityDate(j){return String(j.completedAt||j.finishedAt||j.bookingDate||j.createdAt||"").slice(0,10)}
@@ -1039,11 +1061,80 @@ function openPartsOrderForm(jobId,partId){
 }
 function closePartsOrderForm(){if($("partsOrderFormCard"))$("partsOrderFormCard").classList.add("hidden")}
 function savePartsOrderFromForm(){
-  const jobId=val("partsOrderJobId"),partId=val("partsOrderPartId"),job=jobs.find(x=>x.id===jobId);if(!job)return;const part=(job.partsRequests||[]).find(x=>x.id===partId);if(!part)return;
-  let supplier=val("partsOrderSupplier");if(supplier==="Other")supplier=val("partsOrderSupplierOther");if(!supplier){alert("Please select or enter the supplier.");return}
-  part.supplier=supplier;part.orderedFrom=supplier;part.partNumber=val("partsOrderPartNumber");part.orderReference=val("partsOrderReference");part.cost=val("partsOrderCost")===""?null:Number(val("partsOrderCost"));part.expectedDelivery=val("partsOrderExpected");part.orderedBy=val("partsOrderBy")||"Service Manager";part.orderNotes=val("partsOrderNotes");part.status=val("partsOrderStatus")||"Ordered";part.orderStatus=part.status;if(part.status==="Back Order")part.wasBackOrder=true;part.orderedAt=now().toISOString();part.orderDate=part.orderedAt;part.technicianAlert=part.status;part.serviceManagerAlert=part.status;part.issueNote="";
-  addTimeline(job,"📦 Parts order saved",`${part.qty||1} x ${part.description||part.text} ordered from ${supplier}. Status: ${part.status}.`);save();closePartsOrderForm();render();alert("Parts order saved and the technician has been updated.");
+  const button=$("savePartsOrder");
+  const jobId=val("partsOrderJobId");
+  const partId=val("partsOrderPartId");
+  const job=jobs.find(x=>String(x.id)===String(jobId));
+
+  if(!job){
+    alert("The job for this parts order could not be found. Please reopen the order from Parts Requested.");
+    return false;
+  }
+
+  // Search every supported parts collection so older jobs and migrated records can still be ordered.
+  const collections=[job.partsRequests,job.partRequests,job.partsOrders,job.partsRequired].filter(Array.isArray);
+  let part=null;
+  for(const collection of collections){
+    part=collection.find(x=>x&&String(x.id)===String(partId));
+    if(part) break;
+  }
+  if(!part){
+    alert("The requested part could not be found. Please close this form and reopen the part request.");
+    return false;
+  }
+
+  let supplier=val("partsOrderSupplier");
+  if(supplier==="Other") supplier=val("partsOrderSupplierOther").trim();
+  if(!supplier){
+    alert("Please select or enter the supplier.");
+    return false;
+  }
+
+  try{
+    if(button){button.disabled=true;button.textContent="Saving Parts Order…";}
+
+    const timestamp=now().toISOString();
+    part.supplier=supplier;
+    part.orderedFrom=supplier;
+    part.partNumber=val("partsOrderPartNumber").trim();
+    part.orderReference=val("partsOrderReference").trim();
+    part.cost=val("partsOrderCost")===""?null:Number(val("partsOrderCost"));
+    part.expectedDelivery=val("partsOrderExpected");
+    part.orderedBy=val("partsOrderBy").trim()||"Service Manager";
+    part.orderNotes=val("partsOrderNotes").trim();
+    part.status=val("partsOrderStatus")||"Ordered";
+    part.orderStatus=part.status;
+    part.orderedAt=timestamp;
+    part.orderDate=timestamp;
+    part.technicianAlert=part.status;
+    part.serviceManagerAlert=part.status;
+    part.issueNote="";
+    if(part.status==="Back Order") part.wasBackOrder=true;
+
+    // Keep the canonical partsRequests collection populated for all renderers.
+    job.partsRequests=Array.isArray(job.partsRequests)?job.partsRequests:[];
+    if(!job.partsRequests.includes(part)) job.partsRequests.push(part);
+
+    addTimeline(job,"📦 Parts order saved",`${part.qty||1} x ${part.description||part.text||"Part"} ordered from ${supplier}. Status: ${part.status}.`);
+    save();
+    closePartsOrderForm();
+    render();
+
+    // Ensure the Parts screen refreshes immediately even if another extension wraps render().
+    if(typeof renderPartsManagement==="function") renderPartsManagement();
+    const orderedQueue=$("partsManagementQueue");
+    if(orderedQueue) orderedQueue.scrollIntoView({behavior:"smooth",block:"start"});
+    alert("Parts order saved successfully.");
+    return true;
+  }catch(error){
+    console.error("Save Parts Order failed",error);
+    alert("The parts order could not be saved. Please try again.");
+    return false;
+  }finally{
+    if(button){button.disabled=false;button.textContent="Save Parts Order";}
+  }
 }
+window.savePartsOrderFromForm=savePartsOrderFromForm;
 function markPartOrdered(jobId,partId){openPartsOrderForm(jobId,partId)}
 function resumeStatusAfterParts(){return "🟡 Started Repair"}
 function receivePartsUpdate(jobId,partId,result,actor="Technician"){
@@ -1197,16 +1288,22 @@ function renderPartsManagement(){
     else ordered.push(row);
   });
 
-  const deliveredToday=delivered.filter(({part})=>partArrivalDate(part)===todayISO());
+  const deliveredToday=rows.filter(({part})=>partArrivalDate(part)===todayISO());
 
   stats.innerHTML=`<div class="stat"><strong>${rows.length}</strong>Total</div><div class="stat"><strong>${requested.length}</strong>Requested</div><div class="stat"><strong>${ordered.length}</strong>Ordered / Issues</div><div class="stat"><strong>${deliveredToday.length}</strong>Delivered Today</div><div class="stat"><strong>${completedRows.length}</strong>Completed History</div>`;
   requestedEl.innerHTML=requested.length?requested.map(({job,part})=>partsCard(job,part,"requested")).join(""):"No parts requests waiting to be ordered.";
   orderedEl.innerHTML=ordered.length?ordered.map(({job,part})=>partsCard(job,part,"ordered")).join(""):"No ordered, back-ordered or problem parts.";
-  deliveredEl.innerHTML=deliveredToday.length?deliveredToday.map(({job,part})=>partsCard(job,part,"delivered")).join(""):"No parts delivered today waiting to be fitted.";
+  deliveredEl.innerHTML=deliveredToday.length?deliveredToday.map(({job,part})=>partsCard(job,part,"delivered")).join(""):"No parts delivered today.";
   renderCompletedPartsLookup(completedRows);
   renderSupplierPerformance(rows);
 }
-if($("savePartsOrder")) $("savePartsOrder").addEventListener("click",savePartsOrderFromForm);
+if($("savePartsOrder")){
+  $("savePartsOrder").addEventListener("click",function(event){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    savePartsOrderFromForm();
+  },true);
+}
 if($("cancelPartsOrder")) $("cancelPartsOrder").addEventListener("click",closePartsOrderForm);
 if($("partsOrderSupplier")) $("partsOrderSupplier").addEventListener("change",()=>{
   const other=$("partsOrderSupplierOther"); if(other) other.style.display=val("partsOrderSupplier")==="Other"?"block":"none";

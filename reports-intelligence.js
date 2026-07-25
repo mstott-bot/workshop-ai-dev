@@ -19,6 +19,7 @@
     {id:"productivity", category:"Performance", icon:"⚡", title:"Productivity & Efficiency", description:"Actual clocked productive time, available capacity and sold-hours efficiency."},
     {id:"revenue", category:"Financial", icon:"💷", title:"Revenue Watch", description:"Completed labour value by job type and technician."},
     {id:"parts", category:"Operations", icon:"📦", title:"Parts & Supplier Performance", description:"Outstanding parts, delivery times, partial deliveries and incorrect parts."},
+    {id:"returns", category:"Operations", icon:"↩️", title:"Parts & Tyres Returns", description:"Returned parts and tyres, suppliers, reasons, values and credit status."},
     {id:"downtime", category:"Operations", icon:"⏸", title:"Downtime Intelligence", description:"Lost hours, reasons and technician downtime patterns."},
     {id:"carryover", category:"Operations", icon:"⚠️", title:"Carry-over Jobs", description:"Open jobs from earlier dates and the hours tied up in them."},
     {id:"mot", category:"MOT", icon:"🚗", title:"MOT Performance", description:"MOT volume, results and MOT-inclusive versus non-MOT workload."},
@@ -35,6 +36,8 @@
   function el(id){ return document.getElementById(id); }
   function safeNumber(value){ return Number.isFinite(Number(value)) ? Number(value) : 0; }
   function money(value){ return "£"+Math.round(safeNumber(value)).toLocaleString("en-GB"); }
+  function moneyExact(value){ return "£"+safeNumber(value).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function escapeHtml(value){ return String(value??"").replace(/[&<>'"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch])); }
   function hours(value){ return safeNumber(value).toFixed(1)+" hrs"; }
   function percent(value){
     return value===null||value===undefined||Number.isNaN(Number(value))
@@ -286,6 +289,39 @@
     }
     return [];
   }
+  function returnsRows(){
+    const selectedRange=range();
+    const tech=selectedTechnician();
+    const rows=[];
+
+    jobs.forEach(job=>{
+      if(tech!=="All"&&job.technician!==tech) return;
+      const collections=[
+        {items:Array.isArray(job.partsRequests)?job.partsRequests:[],type:"Part"},
+        {items:Array.isArray(job.tyreRequests)?job.tyreRequests:[],type:"Tyre"}
+      ];
+      collections.forEach(group=>group.items.forEach(item=>{
+        (Array.isArray(item.returns)?item.returns:[]).forEach(ret=>{
+          const date=ret.createdAt||item.returnRequestedAt||ret.returnedAt||ret.updatedAt;
+          if(!inRange(date,selectedRange)) return;
+          rows.push({
+            job,item,ret,type:group.type,
+            date,
+            description:group.type==="Part"
+              ? (item.description||item.text||"Part")
+              : ([item.brand,item.size].filter(Boolean).join(" ")||"Tyre"),
+            supplier:ret.destination||item.supplier||item.orderedFrom||"Not recorded",
+            status:ret.status||item.returnStatus||"Return Requested",
+            value:safeNumber(ret.value),
+            quantity:Math.max(1,safeNumber(ret.quantity)||1)
+          });
+        });
+      }));
+    });
+
+    return rows.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  }
+
   function approvalJobs(){
     return filteredJobs().filter(job=>{
       return job.customerApprovalAt||job.customerDeclinedAt||
@@ -550,6 +586,57 @@
     });
   }
 
+  function renderReturnsReport(){
+    const rows=returnsRows();
+    const parts=rows.filter(row=>row.type==="Part");
+    const tyres=rows.filter(row=>row.type==="Tyre");
+    const creditsReceived=rows.filter(row=>row.status==="Credit Received");
+    const creditOutstanding=rows.filter(row=>row.status!=="Credit Received");
+    const totalValue=rows.reduce((sum,row)=>sum+row.value,0);
+    const receivedValue=creditsReceived.reduce((sum,row)=>sum+row.value,0);
+    const outstandingValue=creditOutstanding.reduce((sum,row)=>sum+row.value,0);
+    const suppliers={};
+    rows.forEach(row=>{suppliers[row.supplier]=(suppliers[row.supplier]||0)+row.quantity;});
+    const topSupplier=Object.entries(suppliers).sort((a,b)=>b[1]-a[1])[0];
+
+    setOutput({
+      title:"Parts & Tyres Returns",
+      summary:[
+        reportCard("Returns",rows.length,"Total Returns"),
+        reportCard("Parts",parts.length,"Parts Returns"),
+        reportCard("Tyres",tyres.length,"Tyre Returns"),
+        reportCard("Value",moneyExact(totalValue),"Return Value"),
+        reportCard("Received",moneyExact(receivedValue),"Credits Received","good"),
+        reportCard("Outstanding",moneyExact(outstandingValue),"Credits Outstanding",outstandingValue>0?"warn":"good")
+      ].join(""),
+      insightHtml:rows.length
+        ? insight(
+            "Returns Overview",
+            `${topSupplier?escapeHtml(topSupplier[0])+" has the most returned items ("+topSupplier[1]+"). ":""}${creditOutstanding.length} return(s) still have credit outstanding.`,
+            creditOutstanding.length?"warn":"good"
+          )
+        : insight("No Returns","No parts or tyre returns were recorded for this period.","good"),
+      output:table(
+        ["Return Requested","Registration","Customer","Job Number","Type","Description","Qty","Supplier","Reason","Technician","Returned Date","Credit Status","Value"],
+        rows.map(row=>`<tr>
+          <td>${escapeHtml(new Date(row.date).toLocaleDateString("en-GB"))}</td>
+          <td>${escapeHtml(String(row.job.reg||row.job.registration||"—").toUpperCase())}</td>
+          <td>${escapeHtml(row.job.customer||row.job.customerName||"—")}</td>
+          <td>${escapeHtml(row.job.jobNumber||row.job.jobNo||row.job.id||"—")}</td>
+          <td>${escapeHtml(row.type)}</td>
+          <td>${escapeHtml(row.description)}</td>
+          <td>${row.quantity}</td>
+          <td>${escapeHtml(row.supplier)}</td>
+          <td>${escapeHtml(row.ret.reason||"Not recorded")}</td>
+          <td>${escapeHtml(row.ret.createdBy||row.job.technician||"Unassigned")}</td>
+          <td>${escapeHtml(row.ret.returnedAt?new Date(row.ret.returnedAt).toLocaleDateString("en-GB"):"—")}</td>
+          <td>${escapeHtml(row.status)}</td>
+          <td>${moneyExact(row.value)}</td>
+        </tr>`)
+      )
+    });
+  }
+
   function renderMot(){
     const list=completedJobs();
     const motJobs=list.filter(isMotJob);
@@ -730,6 +817,7 @@
       productivity:renderProductivity,
       downtime:renderDowntime,
       parts:renderParts,
+      returns:renderReturnsReport,
       mot:renderMot,
       approvals:renderApprovals,
       revenue:renderRevenue,

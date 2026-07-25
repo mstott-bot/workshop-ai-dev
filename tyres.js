@@ -32,6 +32,7 @@
   function tyreList(job){if(!job)return[];if(!Array.isArray(job.tyreRequests))job.tyreRequests=[];return job.tyreRequests}
   function tyreStatus(tyre){
     const raw=String(tyre?.status||"Requested").trim().toLowerCase();
+    if(tyre?.fittedAt||tyre?.fitDate||raw.includes("fitted")||raw==="completed")return "Fitted";
     if(tyre?.deliveredAt||tyre?.arrivedAt||tyre?.receivedAt||raw.includes("delivered")||raw.includes("arrived")||raw.includes("received"))return "Delivered";
     if(tyre?.orderedAt||raw.includes("ordered")||raw.includes("awaiting delivery")||raw.includes("on order"))return "Ordered";
     return "Requested";
@@ -211,6 +212,22 @@
     alert(role==="Service Manager"?"Tyre delivery recorded and the assigned technician has been notified.":"Tyre delivery recorded and the Service Manager has been updated.");
   }
 
+  function markTyresFitted(jobId,tyreId){
+    const job=findJob(jobId);if(!job)return;
+    const tyre=tyreList(job).find(item=>String(item.id)===String(tyreId));if(!tyre)return;
+    const currentStatus=tyreStatus(tyre);
+    if(currentStatus!=="Delivered"){
+      alert(currentStatus==="Fitted"?"These tyres have already been marked as fitted.":"Tyres must be marked as delivered before they can be fitted.");
+      return;
+    }
+    const actor=job.technician||"Technician";
+    const timestamp=nowISO();
+    Object.assign(tyre,{status:"Fitted",fittedAt:timestamp,fitDate:timestamp,fittedBy:actor,technicianAlert:"Fitted",serviceManagerAlert:"Fitted"});
+    timeline(job,"🔧 Tyres fitted",`${tyre.quantity||1} x ${tyre.brand||""} ${tyre.size||""} marked fitted by ${actor}.`.replace(/\s+/g," ").trim());
+    persist();renderAfterChange();
+    alert("Tyres marked as fitted. They will remain in Tyres Delivered Today until tomorrow.");
+  }
+
   function installServiceAlert(){
     if(el("wai081ServiceTyreAlert"))return;
     const anchor=el("servicePartsAlert");if(!anchor)return;
@@ -283,7 +300,7 @@
     const target=el("wai081TechnicianList");if(!target)return;
     if(!job){target.innerHTML="<div class='job-card'><p>Open a job to view tyre requests.</p></div>";return}
     const list=tyreList(job);
-    target.innerHTML=list.length?list.map(tyre=>{const status=tyreStatus(tyre);const ordered=status==="Ordered";const delivered=status==="Delivered";return `<div class="job-card"><h3>${esc(tyre.quantity||1)} x ${esc(tyre.size||"Size not entered")}</h3><p>${status!=="Requested"?`<strong>Ordered:</strong> ${esc(tyre.brand||"")} | ${esc(tyre.supplier||"")} | ${money(tyre.cost)}`:"Awaiting Service Manager order details."}</p>${tyre.deliveredAt?`<p><strong>Delivered:</strong> ${fmt(tyre.deliveredAt)}${tyre.deliveredBy?` by ${esc(tyre.deliveredBy)}`:""}</p>`:""}<span class="wai081-status ${delivered?"delivered":ordered?"ordered":""}">${delivered?"🔵 Delivered":ordered?"🟢 Ordered":"🟡 Requested"}</span>${ordered?`<div class="wai081-actions"><button onclick="WAI081.markTyresDelivered('${esc(job.id)}','${esc(tyre.id)}','Technician')">✅ Tyres Delivered</button></div>`:""}</div>`}).join(""):"<div class='job-card'><p>No tyres requested for this job.</p></div>";
+    target.innerHTML=list.length?list.map(tyre=>{const status=tyreStatus(tyre);const ordered=status==="Ordered";const delivered=status==="Delivered";const fitted=status==="Fitted";return `<div class="job-card ${fitted?"good":""}"><h3>${esc(tyre.quantity||1)} x ${esc(tyre.size||"Size not entered")}</h3><p>${status!=="Requested"?`<strong>Ordered:</strong> ${esc(tyre.brand||"")} | ${esc(tyre.supplier||"")} | ${money(tyre.cost)}`:"Awaiting Service Manager order details."}</p>${tyre.deliveredAt?`<p><strong>Delivered:</strong> ${fmt(tyre.deliveredAt)}${tyre.deliveredBy?` by ${esc(tyre.deliveredBy)}`:""}</p>`:""}${tyre.fittedAt?`<p><strong>Fitted:</strong> ${fmt(tyre.fittedAt)}${tyre.fittedBy?` by ${esc(tyre.fittedBy)}`:""}</p>`:""}<span class="wai081-status ${fitted?"delivered":delivered?"delivered":ordered?"ordered":""}">${fitted?"🔧 Fitted":delivered?"🔵 Delivered":ordered?"🟢 Ordered":"🟡 Requested"}</span>${ordered?`<div class="wai081-actions"><button onclick="WAI081.markTyresDelivered('${esc(job.id)}','${esc(tyre.id)}','Technician')">✅ Tyres Delivered</button></div>`:delivered?`<div class="wai081-actions"><button onclick="WAI081.markTyresFitted('${esc(job.id)}','${esc(tyre.id)}')">🔧 Tyres Fitted</button></div>`:""}</div>`}).join(""):"<div class='job-card'><p>No tyres requested for this job.</p></div>";
   }
 
   function tyreSummaryHtml(job){
@@ -319,7 +336,7 @@
   }
 
   function renderReport(){
-    installReport();const rows=allTyres();const ordered=rows.filter(row=>["Ordered","Delivered"].includes(tyreStatus(row.tyre)));const delivered=rows.filter(row=>tyreStatus(row.tyre)==="Delivered");
+    installReport();const rows=allTyres();const ordered=rows.filter(row=>["Ordered","Delivered","Fitted"].includes(tyreStatus(row.tyre)));const delivered=rows.filter(row=>["Delivered","Fitted"].includes(tyreStatus(row.tyre)));
     const tyreQty=rows.reduce((sum,row)=>sum+Number(row.tyre.quantity||1),0);
     const spend=ordered.reduce((sum,row)=>sum+Number(row.tyre.cost||0),0);const average=ordered.length?spend/ordered.length:0;
     const suppliers={};const brands={};const sizes={};
@@ -353,6 +370,6 @@
   }
   function boot(){installStyles();installRequestModal();installOrderModal();normaliseExistingJobs();wrapJobCards();wrapOpenJob();wrapCoreRender();renderAfterChange()}
 
-  window.WAI081={openRequestForm,openOrderForm,markTyresDelivered,render:renderAll,allTyres};
+  window.WAI081={openRequestForm,openOrderForm,markTyresDelivered,markTyresFitted,render:renderAll,allTyres};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
 })();
