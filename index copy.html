@@ -3,12 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Workshop AI OS — WAI-096 Customer CRM</title>
+  <title>Workshop AI OS — WAI-087 Workshop Control Centre</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="wai093-vhc.css">
-  <link rel="stylesheet" href="wai094-intelligence.css">
-  <link rel="stylesheet" href="wai095-workshop-intelligence.css">
-  <link rel="stylesheet" href="wai096-crm.css">
 </head>
 
 <body>
@@ -21,7 +17,7 @@
     <div>
       <h1><span>WORKSHOP</span> <strong>AI</strong></h1>
       <p class="tagline">Revolutionising workshops</p>
-      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Version WAI-096 · Customer CRM</p>
+      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Version WAI-087 · Workshop Control Centre</p>
     </div>
   </div>
   <div class="role-pill">Service Manager</div>
@@ -41,7 +37,6 @@
     <button class="tab" data-screen="techniciansScreen">Technicians</button>
     <button class="tab" data-screen="targetsScreen">Targets</button>
     <button class="tab" data-screen="vehicleIntelligenceScreen">Vehicle Intelligence</button>
-    <button class="tab" data-screen="crmScreen">Customer CRM</button>
   </nav>
 
   <section id="commandScreen" class="screen active">
@@ -925,26 +920,6 @@
     </div>
   </section>
 
-
-  <section id="crmScreen" class="screen">
-    <div class="crm-hero">
-      <div><span class="crm-eyebrow">WAI-096 · CUSTOMER RELATIONSHIP MANAGEMENT</span><h2>Customer CRM</h2><p>Customers, households, vehicle passports, maintenance intelligence and data quality—kept separate from workshop operations.</p></div>
-      <div class="crm-hero-actions"><button class="primary" id="crmNewCustomerBtn">+ New Customer</button><button class="secondary" id="crmDataIntegrityBtn">Data Integrity</button></div>
-    </div>
-    <div id="crmStats" class="stats"></div>
-    <div class="crm-toolbar card">
-      <input id="crmSearch" placeholder="Search name, registration, phone, email, postcode or customer ID">
-      <select id="crmFilter"><option value="all">All customers</option><option value="due">Maintenance due</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="gold">Gold loyalty</option></select>
-      <button id="crmRefresh" class="secondary">Refresh</button>
-    </div>
-    <div class="crm-layout">
-      <aside class="card crm-list-panel"><div class="crm-panel-title"><h2>Customers</h2><span id="crmResultCount" class="muted"></span></div><div id="crmCustomerList" class="crm-customer-list"></div></aside>
-      <div id="crmWorkspace" class="crm-workspace">
-        <div class="card crm-empty"><h2>Select a customer</h2><p class="muted">Open a customer to view health, vehicles, maintenance, communications and history.</p></div>
-      </div>
-    </div>
-  </section>
-
 </main>
 
 <div id="modal" class="modal hidden">
@@ -955,7 +930,6 @@
   </div>
 </div>
 <script src="script.js"></script>
-<script src="unified-queue-engine.js"></script>
 <script src="unified-capacity-engine.js"></script>
 <script src="coach-fix.js"></script>
 <script src="garage-health-fix.js"></script>
@@ -967,10 +941,5 @@
 <script src="parts-tyre-intelligence.js"></script>
 <script src="technician-league-intelligence-wai092.js"></script>
 <script src="wai0922-workflow.js"></script>
-<script src="wai093-vhc.js"></script>
-<script src="wai094-intelligence.js"></script>
-<script src="wai095-workshop-intelligence.js"></script>
-<script src="wai096-crm.js"></script>
-<script src="wai0962-customer-recognition.js"></script>
 </body>
 </html>

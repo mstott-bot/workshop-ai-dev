@@ -14,7 +14,6 @@
   const REPORTS = [
     {id:"workshop", category:"Performance", icon:"📈", title:"Workshop Performance", description:"Jobs, labour hours, efficiency, productivity and labour value."},
     {id:"technicians", category:"Performance", icon:"👨‍🔧", title:"Technician Performance", description:"Technician scorecards with jobs, completed labour hours, efficiency and job mix."},
-    {id:"vhc", category:"Performance", icon:"📋", title:"Vehicle Health Check Performance", description:"VHC completion by technician, retail-job coverage and amber/red work identified."},
     {id:"jobs", category:"Performance", icon:"✅", title:"Jobs Completed", description:"Daily, weekly and monthly jobs including and excluding MOTs."},
     {id:"labour", category:"Performance", icon:"⏱", title:"Completed Labour Hours", description:"Completed sold labour hours by technician and workshop."},
     {id:"productivity", category:"Performance", icon:"⚡", title:"Productivity & Efficiency", description:"Actual clocked productive time, available capacity and sold-hours efficiency."},
@@ -676,9 +675,10 @@
 
   function renderApprovals(){
     const list=approvalJobs();
-    const outstanding=typeof window.getUnifiedWorkshopQueue==="function"
-      ? window.getUnifiedWorkshopQueue("authorisations").filter(job=>list.includes(job))
-      : list.filter(job=>String(job.status||"").toLowerCase().includes("awaiting")&&(String(job.status||"").toLowerCase().includes("approval")||String(job.status||"").toLowerCase().includes("authorisation")));
+    const outstanding=list.filter(job=>
+      String(job.auth||"").toLowerCase().includes("awaiting")||
+      String(job.status||"").toLowerCase().includes("approval")
+    );
     const approved=list.filter(job=>job.customerApprovalAt||String(job.auth||"").toLowerCase().includes("approved"));
     const declined=list.filter(job=>job.customerDeclinedAt||String(job.auth||"").toLowerCase().includes("declined"));
     const responseHours=approved
@@ -767,9 +767,7 @@
       const status=typeof normalisePartStatus==="function"?normalisePartStatus(part.status,part):String(part.status||"");
       return !["Received","Fitted"].includes(status);
     }).length;
-    const approvals=typeof window.getUnifiedWorkshopQueue==="function"
-      ? window.getUnifiedWorkshopQueue("authorisations").length
-      : approvalJobs().filter(job=>String(job.status||"").toLowerCase().includes("awaiting")&&(String(job.status||"").toLowerCase().includes("approval")||String(job.status||"").toLowerCase().includes("authorisation"))).length;
+    const approvals=approvalJobs().filter(job=>String(job.auth||"").toLowerCase().includes("awaiting")).length;
     const carry=jobs.filter(job=>normalDate(job.bookingDate)<isoLocal(new Date())&&!completed(job)).length;
 
     let score=100;
@@ -810,22 +808,10 @@
     });
   }
 
-
-  function renderVHCReport(){
-    if(typeof window.renderVHCIntelligenceReport!=="function"){
-      setOutput({title:"Vehicle Health Check Performance",output:insight("VHC module unavailable","The WAI-093 VHC module has not loaded.","bad")});
-      return;
-    }
-    window.renderVHCIntelligenceReport({
-      selectedTechnician,range,inRange,jobDate,completed,percent,reportCard,insight,table,setReport:setOutput
-    });
-  }
-
   function renderActiveReport(){
     const renderers={
       workshop:renderWorkshopPerformance,
       technicians:renderTechnicians,
-      vhc:renderVHCReport,
       jobs:renderJobsCompleted,
       labour:renderLabour,
       productivity:renderProductivity,
