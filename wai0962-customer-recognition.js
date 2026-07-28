@@ -79,7 +79,7 @@ window.openJob=function(id){
  if(el&&!el.querySelector('.active-customer-recognition'))el.insertAdjacentHTML('beforeend',`<div class="active-customer-recognition">${badge(m)}${m.notes?`<p><strong>Customer care note:</strong> ${esc(m.notes)}</p>`:''}</div>`);
 };
 
-function readyJobs(){return (window.jobs||[]).filter(j=>String(j.status||'').toLowerCase().includes('ready')&&!String(j.status||'').toLowerCase().includes('collected'))}
+function readyJobs(){return typeof window.getUnifiedWorkshopQueue==='function'?window.getUnifiedWorkshopQueue('readyForCollection'):(window.jobs||[]).filter(j=>String(j.status||'').toLowerCase().includes('ready')&&!String(j.status||'').toLowerCase().includes('collected'))}
 window.markReadyCustomerContacted=function(id){
  const j=jobs.find(x=>x.id===id);if(!j)return;
  j.readyCustomerContactedAt=new Date().toISOString();

@@ -1,0 +1,57 @@
+/* WAI-099.1 Finance Centre — additive styles */
+.finance-hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;background:linear-gradient(135deg,#102438,#173d5b);border:1px solid #2f5572;border-radius:18px;padding:24px;margin-bottom:18px;color:#fff}.finance-eyebrow{font-size:12px;letter-spacing:.12em;color:#67d6ff;font-weight:800}.finance-hero h2{font-size:30px;margin:6px 0}.finance-hero p{max-width:760px;color:#c9d7e4;margin:0}.finance-actions{display:flex;gap:10px;flex-wrap:wrap}.finance-subnav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.finance-subnav button{border:1px solid #39566e;background:#172f43;color:#d8e8f4;padding:10px 15px;border-radius:10px;cursor:pointer;font-weight:700}.finance-subnav button.active{background:#1d8fc2;color:#fff;border-color:#39b8ed}.finance-panel{display:none}.finance-panel.active{display:block}.finance-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:16px}.finance-kpi{background:#142a3c;border:1px solid #294960;border-radius:14px;padding:16px}.finance-kpi .label{font-size:12px;color:#9fb3c8;text-transform:uppercase;letter-spacing:.04em}.finance-kpi .value{font-size:24px;font-weight:900;margin-top:7px;color:#fff}.finance-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.45fr);gap:16px}.finance-card{background:#102638;border:1px solid #294960;border-radius:16px;padding:18px;color:#eaf5fb}.finance-card h3{margin:0 0 14px}.finance-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.finance-toolbar input,.finance-toolbar select,.invoice-form input,.invoice-form select,.invoice-form textarea,.invoice-table input,.invoice-table select{background:#0c1f2e;border:1px solid #38566d;color:#fff;border-radius:8px;padding:9px}.finance-toolbar input{flex:1;min-width:220px}.invoice-register{width:100%;border-collapse:collapse;font-size:13px}.invoice-register th,.invoice-register td{padding:10px;border-bottom:1px solid #284557;text-align:left}.invoice-register th{color:#9fc5da;font-size:11px;text-transform:uppercase}.invoice-register tr:hover{background:#173246}.invoice-status{display:inline-flex;padding:4px 8px;border-radius:999px;font-weight:800;font-size:11px}.status-draft{background:#65591b;color:#fff1a6}.status-finalised{background:#174c70;color:#a9e3ff}.status-paid{background:#175537;color:#b8ffd8}.status-part-paid{background:#704817;color:#ffe0a4}.status-credited{background:#6b2228;color:#ffc1c5}.status-archived{background:#414852;color:#dfe4ea}.invoice-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.invoice-form .span-2{grid-column:span 2}.invoice-form .span-4{grid-column:1/-1}.invoice-form label{display:flex;flex-direction:column;gap:5px;color:#a9c0cf;font-size:12px;font-weight:700}.invoice-table-wrap{overflow:auto;margin-top:16px}.invoice-table{width:100%;min-width:1180px;border-collapse:collapse}.invoice-table th,.invoice-table td{border-bottom:1px solid #294758;padding:7px;vertical-align:top}.invoice-table th{font-size:11px;color:#a6c5d7;text-align:left;text-transform:uppercase}.invoice-table input,.invoice-table select{width:100%;min-width:75px}.invoice-table .desc{min-width:210px}.invoice-line-profit{font-weight:800;color:#7be7a9;white-space:nowrap}.invoice-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px}.invoice-summary>div{background:#0d2130;border:1px solid #2a4658;border-radius:10px;padding:12px}.invoice-summary span{display:block;color:#9fb8c8;font-size:11px;text-transform:uppercase}.invoice-summary strong{display:block;font-size:19px;margin-top:5px}.invoice-summary .grand{border-color:#2da7df}.invoice-summary .profit{border-color:#2c9c63}.invoice-footer-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.finance-btn{border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer}.finance-btn.primary{background:#1d9ad0;color:white}.finance-btn.secondary{background:#29465b;color:white}.finance-btn.success{background:#227a4c;color:white}.finance-btn.warn{background:#8b5a20;color:white}.finance-btn.danger{background:#8a3037;color:white}.finance-btn:disabled{opacity:.45;cursor:not-allowed}.audit-list{display:grid;gap:9px}.audit-item{border-left:3px solid #319fcf;padding:8px 10px;background:#0d2130;border-radius:0 8px 8px 0}.audit-item strong{display:block}.audit-item small{color:#9fb3c8}.finance-empty{text-align:center;padding:38px;color:#9fb3c8}.finance-note{padding:10px 12px;border-radius:10px;background:#2f3d1d;border:1px solid #657c2e;color:#eaffb2;margin-bottom:14px}.finance-lock{padding:10px 12px;border-radius:10px;background:#482727;border:1px solid #8b4747;color:#ffd4d4;margin-bottom:14px}.print-sheet{display:none}
+@media(max-width:900px){.finance-grid{grid-template-columns:1fr}.invoice-form{grid-template-columns:1fr 1fr}.invoice-form .span-4{grid-column:1/-1}.finance-hero{flex-direction:column}}
+@media(max-width:600px){.invoice-form{grid-template-columns:1fr}.invoice-form .span-2,.invoice-form .span-4{grid-column:1}.finance-hero h2{font-size:25px}}
+@media print{body.finance-printing>*:not(#financePrintSheet){display:none!important}body.finance-printing #financePrintSheet{display:block!important;color:#111;background:#fff;font:12px Arial,sans-serif;padding:20mm}#financePrintSheet .print-header{display:flex;justify-content:space-between;border-bottom:3px solid #111;padding-bottom:12px;margin-bottom:18px}#financePrintSheet h1{margin:0;font-size:27px}#financePrintSheet .print-meta{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:20px}#financePrintSheet table{width:100%;border-collapse:collapse;margin:18px 0}#financePrintSheet th,#financePrintSheet td{padding:8px;border-bottom:1px solid #aaa;text-align:left}#financePrintSheet th{background:#eee}#financePrintSheet .num{text-align:right}#financePrintSheet .print-totals{margin-left:auto;width:310px}#financePrintSheet .print-totals div{display:flex;justify-content:space-between;padding:5px 0}#financePrintSheet .print-total{font-size:17px;font-weight:bold;border-top:2px solid #111;margin-top:5px;padding-top:9px!important}}
+
+/* WAI-099.1a quick-entry additions */
+.quick-invoice-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px;padding:11px;background:#0d2130;border:1px solid #2c5269;border-radius:12px}.quick-invoice-bar>strong{margin-right:4px}.quick-invoice-bar>span{margin-left:auto;color:#91adbd;font-size:12px}.finance-btn.quick{background:#21506b;color:#fff;padding:8px 11px}.finance-btn.quick:hover{background:#28759a}.invoice-table input:focus,.invoice-table select:focus{outline:2px solid #36b9ee;border-color:transparent}.linked-live-badge{display:inline-flex;background:#175537;color:#b8ffd8;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}
+
+/* WAI-101.1 Finance Centre usability corrections */
+#financeRecentInvoices,#invoiceRegisterBody{background:#102638!important;color:#eaf5fb!important}
+#financeRecentInvoices tr,#invoiceRegisterBody tr{background:#102638!important;color:#eaf5fb!important}
+#financeRecentInvoices tr:nth-child(even),#invoiceRegisterBody tr:nth-child(even){background:#132d41!important}
+#financeRecentInvoices td,#invoiceRegisterBody td{color:#eaf5fb!important;background:transparent!important}
+#financeRecentInvoices td strong,#invoiceRegisterBody td strong{color:#fff!important}
+#financeRecentInvoices td small,#invoiceRegisterBody td small{color:#a9c0cf!important}
+#financeRecentInvoices tr:hover,#invoiceRegisterBody tr:hover{background:#1b4059!important}
+.invoice-register tbody tr{cursor:pointer}
+.invoice-table input,.invoice-table select{box-sizing:border-box;transition:border-color .12s ease,box-shadow .12s ease}
+.invoice-table input:focus,.invoice-table select:focus{outline:none!important;border-color:#36b9ee!important;box-shadow:0 0 0 2px rgba(54,185,238,.22)}
+.invoice-table td[data-line-net]{color:#fff;font-weight:800;white-space:nowrap}
+.invoice-table .vat-select{min-width:132px}
+
+/* WAI-101.2 invoice register workflow */
+.invoice-register-row{cursor:pointer;transition:background .15s ease,box-shadow .15s ease}
+.invoice-register-row:hover,.invoice-register-row:focus{background:rgba(42,180,255,.16)!important;outline:2px solid rgba(42,180,255,.45);outline-offset:-2px}
+.row-delete-estimate{display:block;margin-top:6px;border:1px solid rgba(255,105,105,.55);background:rgba(155,20,30,.34);color:#ffd8d8;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:800;cursor:pointer}
+.row-delete-estimate:hover{background:rgba(190,25,36,.62)}
+.invoice-status.status-estimate{background:#7c5b00;color:#fff3bf}
+.invoice-status.status-invoice-issued{background:#075f88;color:#d8f4ff}
+
+/* WAI-101.3 Finance workflow, labour costing and daily profit */
+.invoice-workflow-header{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}.invoice-workflow-header>div{background:#0d2130;border:1px solid #2a4b60;border-radius:11px;padding:11px}.invoice-workflow-header span{display:block;color:#9fb8c8;font-size:11px;text-transform:uppercase;margin-bottom:6px}.invoice-workflow-header strong{font-size:15px}.discount-cell{display:flex;gap:4px}.discount-cell select{max-width:58px}.daily-profit-card{margin-bottom:16px}.daily-profit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.daily-profit-grid>div{background:#0d2130;border:1px solid #2a4658;border-radius:10px;padding:12px}.daily-profit-grid span{display:block;color:#9fb8c8;font-size:11px;text-transform:uppercase}.daily-profit-grid strong{display:block;font-size:20px;margin-top:5px}.daily-profit-grid .profit-highlight{border-color:#2c9c63;background:#123527}.technician-cost-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:18px}.technician-cost-grid label{display:flex;flex-direction:column;gap:5px;color:#a9c0cf;font-size:12px;font-weight:700}.technician-cost-grid input{background:#0c1f2e;border:1px solid #38566d;color:#fff;border-radius:8px;padding:9px}.finance-card h4{margin:22px 0 10px;color:#cfe9f7}.status-invoice-issued{background:#075f88;color:#d8f4ff}.status-estimate{background:#7c5b00;color:#fff3bf}@media(max-width:800px){.invoice-workflow-header{grid-template-columns:1fr 1fr}}
+
+
+/* WAI-101.4 trusted calculations and full recent-invoice browsing */
+.recent-invoices-scroll{max-height:520px;overflow-y:auto;overflow-x:auto;scrollbar-gutter:stable;border:1px solid #294960;border-radius:12px}
+.recent-invoices-scroll .invoice-register{margin-top:0}
+.recent-invoices-scroll .invoice-register thead th{position:sticky;top:0;z-index:3;background:#142f43;box-shadow:0 1px 0 #38566d}
+.recent-invoices-scroll .invoice-register-row:last-child td{border-bottom:0}
+@media(max-width:700px){.recent-invoices-scroll{max-height:440px}}
+
+/* WAI-101.6 calculation visibility and reconciliation */
+.invoice-table td.calculated-cell{
+  min-width:110px;
+  background:#0a1b28;
+  border-left:1px solid #35576c;
+  color:#ffffff!important;
+  font-weight:900;
+  text-align:right;
+  vertical-align:middle;
+  white-space:nowrap;
+}
+.invoice-table td.line-net{color:#dff6ff!important}
+.invoice-table td.invoice-line-profit{color:#7be7a9!important}
+.invoice-table td.invoice-line-profit small{color:#a9c8b6;font-weight:700}
+.invoice-table th:nth-last-child(3),.invoice-table th:nth-last-child(2){text-align:right}

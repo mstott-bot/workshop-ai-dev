@@ -14,6 +14,7 @@
   const REPORTS = [
     {id:"workshop", category:"Performance", icon:"📈", title:"Workshop Performance", description:"Jobs, labour hours, efficiency, productivity and labour value."},
     {id:"technicians", category:"Performance", icon:"👨‍🔧", title:"Technician Performance", description:"Technician scorecards with jobs, completed labour hours, efficiency and job mix."},
+    {id:"technicianCostPerJob", category:"Financial", icon:"💼", title:"Technician Cost per Job", description:"Each technician’s labour cost to the business divided by completed jobs, excluding MOT jobs."},
     {id:"vhc", category:"Performance", icon:"📋", title:"Vehicle Health Check Performance", description:"VHC completion by technician, retail-job coverage and amber/red work identified."},
     {id:"jobs", category:"Performance", icon:"✅", title:"Jobs Completed", description:"Daily, weekly and monthly jobs including and excluding MOTs."},
     {id:"labour", category:"Performance", icon:"⏱", title:"Completed Labour Hours", description:"Completed sold labour hours by technician and workshop."},
@@ -25,7 +26,9 @@
     {id:"carryover", category:"Operations", icon:"⚠️", title:"Carry-over Jobs", description:"Open jobs from earlier dates and the hours tied up in them."},
     {id:"mot", category:"MOT", icon:"🚗", title:"MOT Performance", description:"MOT volume, results and MOT-inclusive versus non-MOT workload."},
     {id:"approvals", category:"Customers", icon:"📞", title:"Customer Approval Performance", description:"Outstanding approvals, completed approvals and average response times."},
-    {id:"garageHealth", category:"Management", icon:"🏆", title:"Garage Health", description:"Operational health summary and the largest current risks."}
+    {id:"garageHealth", category:"Management", icon:"🏆", title:"Garage Health", description:"Operational health summary and the largest current risks."},
+    {id:"repeatRepairs", category:"Management", icon:"🔁", title:"Repeat Repair Intelligence", description:"Repeat repairs by technician, job, root cause, lost hours and month-on-month trend."},
+    {id:"monthlyTechnicianReview", category:"Management", icon:"📝", title:"Monthly Technician Performance Review", description:"Printable individual monthly review with productivity, efficiency, first-time fix, jobs excluding MOTs, cost per job and league position."}
   ];
 
   const CATEGORIES=["All","Performance","Financial","Operations","MOT","Customers","Management"];
@@ -432,6 +435,80 @@
     });
   }
 
+
+  function financeTechnicianCosts(){
+    try{
+      const finance=JSON.parse(localStorage.getItem("wai0991FinanceSettings")||"{}");
+      const review=technicianHourlyCosts();
+      return {...review,...(finance.technicianCosts||{})};
+    }catch(error){
+      return technicianHourlyCosts();
+    }
+  }
+
+  function renderTechnicianCostPerJob(){
+    const selectedRange=range();
+    const costs=financeTechnicianCosts();
+    const techniciansToShow=selectedTechnician()==="All"?getTechs():[selectedTechnician()];
+    const rows=techniciansToShow.map(technician=>{
+      const techJobs=jobsForSelectedRange(selectedRange,{completedOnly:true})
+        .filter(job=>job.technician===technician&&!isMotJob(job));
+      const actualHours=techJobs.reduce((sum,job)=>sum+actualClocked(job),0);
+      const hourlyCost=safeNumber(costs[technician]);
+      const totalCost=actualHours*hourlyCost;
+      const costPerJob=techJobs.length?totalCost/techJobs.length:0;
+      return {technician,techJobs,actualHours,hourlyCost,totalCost,costPerJob};
+    }).sort((a,b)=>a.costPerJob-b.costPerJob);
+
+    const activeRows=rows.filter(row=>row.techJobs.length>0);
+    const totalJobs=activeRows.reduce((sum,row)=>sum+row.techJobs.length,0);
+    const totalCost=activeRows.reduce((sum,row)=>sum+row.totalCost,0);
+    const workshopAverage=totalJobs?totalCost/totalJobs:0;
+    const best=activeRows[0];
+
+    const summaryRows=rows.map(row=>`<tr>
+      <td><strong>${escapeHtml(row.technician)}</strong></td>
+      <td>${row.techJobs.length}</td>
+      <td>${hours(row.actualHours)}</td>
+      <td>${moneyExact(row.hourlyCost)}</td>
+      <td>${moneyExact(row.totalCost)}</td>
+      <td><strong>${moneyExact(row.costPerJob)}</strong></td>
+    </tr>`);
+
+    const detailRows=[];
+    rows.forEach(row=>row.techJobs
+      .slice()
+      .sort((a,b)=>jobDate(b)-jobDate(a))
+      .forEach(job=>{
+        const jobHours=actualClocked(job);
+        detailRows.push(`<tr>
+          <td>${escapeHtml(row.technician)}</td>
+          <td>${normalDate(job.completedAt||job.finishedAt||job.bookingDate||job.createdAt)}</td>
+          <td>${escapeHtml(job.reg||"—")}</td>
+          <td>${escapeHtml(job.jobNo||"—")}</td>
+          <td>${escapeHtml(job.type||"—")}</td>
+          <td>${hours(jobHours)}</td>
+          <td>${moneyExact(jobHours*row.hourlyCost)}</td>
+        </tr>`);
+      }));
+
+    setOutput({
+      title:"Technician Cost per Job",
+      summary:[
+        reportCard("Jobs",totalJobs,"Completed Jobs ex MOT"),
+        reportCard("Cost",moneyExact(totalCost),"Technician Cost to Business"),
+        reportCard("Average",moneyExact(workshopAverage),"Workshop Cost per Job"),
+        reportCard("Technicians",activeRows.length,"Technicians with Completed Jobs")
+      ].join(""),
+      insightHtml:best
+        ? insight("Lowest Cost per Completed Job",`${best.technician} recorded the lowest labour cost per completed non-MOT job at ${moneyExact(best.costPerJob)} across ${best.techJobs.length} job(s).`,"good")
+        : insight("No matching completed jobs","No completed non-MOT jobs were found for the selected period and technician filter.","warn"),
+      output:`<div class="job-card"><p><strong>Calculation:</strong> technician’s actual clocked hours × individual hourly employment cost ÷ completed jobs. MOT jobs are excluded from both the job count and labour cost.</p></div>
+        <h3>Technician Summary</h3>${table(["Technician","Jobs Completed ex MOT","Actual Labour Hours","Hourly Cost","Total Cost to Business","Average Cost per Job"],summaryRows)}
+        <h3>Completed Job Detail</h3>${detailRows.length?table(["Technician","Completed","Registration","Job Number","Job Type","Actual Hours","Cost to Business"],detailRows):'<div class="job-card"><p>No matching job detail.</p></div>'}`
+    });
+  }
+
   function renderJobsCompleted(){
     const list=completedJobs();
     const mots=list.filter(isMotJob);
@@ -811,6 +888,279 @@
   }
 
 
+  /* WAI-100 Repeat Repair Intelligence */
+  const REPEAT_REPAIRS_KEY="workshopAIRepeatRepairsV1";
+  function manualRepeatRepairs(){
+    try{return JSON.parse(localStorage.getItem(REPEAT_REPAIRS_KEY)||"[]");}catch(error){return [];}
+  }
+  function confirmedJobRepeatRepairs(){
+    return jobs.filter(job=>job.ftf?.reviewStatus==="Confirmed Repeat Repair").map(job=>{
+      const previous=jobs.find(candidate=>String(candidate.id)===String(job.ftf?.previousJobId));
+      const technician=previous?.technician||job.ftf?.originalTechnician||job.technician||"Unassigned";
+      return {
+        id:`FTF-${job.id}`,source:"First Time Fix Centre",currentJobId:job.id,previousJobId:previous?.id||job.ftf?.previousJobId||"",
+        registration:job.reg||previous?.reg||"",technician,currentTechnician:job.technician||"Unassigned",
+        originalDate:normalDate(previous?.completedAt||previous?.finishedAt||previous?.bookingDate||previous?.createdAt),
+        returnDate:normalDate(job.bookingDate||job.createdAt||job.ftf?.confirmedAt),
+        originalJob:previous?.workRequired||previous?.complaint||previous?.jobDescription||"No description",
+        complaint:job.workRequired||job.complaint||job.jobDescription||"No description",
+        rootCause:job.ftf?.rootCause||"To be investigated",outcome:job.ftf?.outcome||"Under review",
+        lostHours:safeNumber(job.ftf?.lostHours),cost:safeNumber(job.ftf?.cost),notes:job.ftf?.notes||"",
+        investigationStatus:job.ftf?.investigationStatus||"Open",createdAt:job.ftf?.confirmedAt||job.createdAt
+      };
+    });
+  }
+  function repeatRepairs(){
+    const confirmed=confirmedJobRepeatRepairs();
+    const confirmedCurrentIds=new Set(confirmed.map(r=>String(r.currentJobId)));
+    const manual=manualRepeatRepairs().filter(r=>!r.currentJobId||!confirmedCurrentIds.has(String(r.currentJobId)));
+    return [...confirmed,...manual];
+  }
+  function saveRepeatRepairs(records){
+    localStorage.setItem(REPEAT_REPAIRS_KEY,JSON.stringify(records));
+  }
+  function repeatDate(record){
+    return new Date((record.returnDate||record.createdAt||"")+"T12:00:00");
+  }
+  function repeatRecordsForRange(selectedRange=range()){
+    const tech=selectedTechnician();
+    return repeatRepairs().filter(record=>{
+      if(tech!=="All"&&record.technician!==tech) return false;
+      return inRange(repeatDate(record),selectedRange);
+    });
+  }
+  function repeatMetrics(selectedRange=range()){
+    const records=repeatRecordsForRange(selectedRange);
+    const completedCount=jobsForSelectedRange(selectedRange,{completedOnly:true}).length;
+    const lostHours=records.reduce((sum,r)=>sum+safeNumber(r.lostHours),0);
+    const cost=records.reduce((sum,r)=>sum+safeNumber(r.cost),0);
+    const repeatRate=completedCount?records.length/completedCount*100:0;
+    const firstTimeFix=completedCount?Math.max(0,100-repeatRate):100;
+    return {records,completedCount,lostHours,cost,repeatRate,firstTimeFix};
+  }
+  function monthKey(value){
+    const d=value instanceof Date?value:new Date(value);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+  }
+  function monthLabel(key){
+    const [y,m]=key.split("-").map(Number);
+    return new Date(y,m-1,1).toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+  }
+  function repeatMonthRows(){
+    const now=new Date();
+    const rows=[];
+    for(let offset=11;offset>=0;offset--){
+      const start=new Date(now.getFullYear(),now.getMonth()-offset,1);
+      const end=new Date(now.getFullYear(),now.getMonth()-offset+1,0,23,59,59,999);
+      const metrics=repeatMetrics({start,end});
+      rows.push({key:monthKey(start),label:monthLabel(monthKey(start)),...metrics});
+    }
+    return rows;
+  }
+  function repeatTechnicianRows(records){
+    const map={};
+    records.forEach(record=>{
+      const name=record.technician||"Unassigned";
+      map[name] ||= {technician:name,count:0,lostHours:0,cost:0,jobs:[]};
+      map[name].count++;
+      map[name].lostHours+=safeNumber(record.lostHours);
+      map[name].cost+=safeNumber(record.cost);
+      map[name].jobs.push(record);
+    });
+    return Object.values(map).sort((a,b)=>b.count-a.count||b.lostHours-a.lostHours);
+  }
+  function repeatRootCauseRows(records){
+    const map={};
+    records.forEach(r=>{const key=r.rootCause||"Not classified";map[key]=(map[key]||0)+1;});
+    return Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  }
+  function repeatDays(record){
+    const start=new Date((record.originalDate||record.returnDate||"")+"T12:00:00");
+    const end=new Date((record.returnDate||"")+"T12:00:00");
+    if(Number.isNaN(start.getTime())||Number.isNaN(end.getTime())) return "—";
+    return Math.max(0,Math.round((end-start)/86400000));
+  }
+  function repeatRepairForm(){
+    const techOptions=getTechs().map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+    return `<div class="repeat-entry-panel">
+      <div class="repeat-entry-heading"><div><h3>Record Repeat Repair</h3><p class="muted">Record the return once. It will feed the technician, root-cause and monthly reports automatically.</p></div><button type="button" class="secondary" onclick="toggleRepeatRepairForm()">+ Add Repeat Repair</button></div>
+      <form id="repeatRepairEntryForm" class="repeat-repair-form" hidden onsubmit="saveRepeatRepairEntry(event)">
+        <label>Registration<input id="repeatRegistration" required placeholder="AB12 CDE" oninput="this.value=this.value.toUpperCase()"></label>
+        <label>Technician<select id="repeatTechnician" required><option value="">Select technician</option>${techOptions}</select></label>
+        <label>Original Repair Date<input id="repeatOriginalDate" type="date" required></label>
+        <label>Return Date<input id="repeatReturnDate" type="date" required value="${isoLocal(new Date())}"></label>
+        <label class="wide">Original Job / Repair<input id="repeatOriginalJob" required placeholder="Example: Front brake discs and pads"></label>
+        <label class="wide">Repeat Complaint<input id="repeatComplaint" required placeholder="What did the customer report on return?"></label>
+        <label>Root Cause<select id="repeatRootCause" required>
+          <option value="">Select root cause</option><option>Incorrect diagnosis</option><option>Part failure</option><option>Incorrect fitting</option><option>Part not replaced</option><option>Additional fault</option><option>Customer concern only</option><option>Software issue</option><option>Quality control missed</option><option>Road test missed</option><option>Manufacturer defect</option><option>Other</option>
+        </select></label>
+        <label>Outcome<select id="repeatOutcome"><option>Warranty</option><option>Chargeable</option><option>Goodwill</option><option>Under review</option></select></label>
+        <label>Lost Labour Hours<input id="repeatLostHours" type="number" min="0" step="0.1" value="0"></label>
+        <label>Cost to Business (£)<input id="repeatCost" type="number" min="0" step="0.01" value="0"></label>
+        <label class="wide">Manager Notes<textarea id="repeatManagerNotes" placeholder="Root-cause findings and corrective action"></textarea></label>
+        <div class="button-row wide"><button type="submit" class="primary">Save Repeat Repair</button><button type="button" class="secondary" onclick="toggleRepeatRepairForm(false)">Cancel</button></div>
+      </form>
+    </div>`;
+  }
+  function renderRepeatRepairs(){
+    const metrics=repeatMetrics();
+    const records=metrics.records;
+    const techRows=repeatTechnicianRows(records);
+    const causes=repeatRootCauseRows(records);
+    const months=repeatMonthRows();
+    const current=months.at(-1);
+    const previous=months.at(-2);
+    const change=previous&&previous.records.length?((current.records.length-previous.records.length)/previous.records.length)*100:null;
+    const topTech=techRows[0];
+    const topCause=causes[0];
+    const register=records.slice().sort((a,b)=>String(b.returnDate).localeCompare(String(a.returnDate)));
+
+    const technicianTable=table(["Rank","Technician","Repeat Repairs","Lost Hours","Cost","Jobs"],techRows.map((row,index)=>`<tr>
+      <td>${index+1}</td><td><strong>${escapeHtml(row.technician)}</strong></td><td>${row.count}</td><td>${hours(row.lostHours)}</td><td>${moneyExact(row.cost)}</td><td>${escapeHtml(row.jobs.map(j=>`${j.registration}: ${j.originalJob}`).join(" • "))}</td></tr>`));
+    const monthlyTable=table(["Month","Repeat Repairs","First-Time Fix","Lost Hours","Cost","Change"],months.map((row,index)=>{
+      const prior=months[index-1];
+      const delta=prior&&prior.records.length?((row.records.length-prior.records.length)/prior.records.length)*100:null;
+      return `<tr><td>${row.label}</td><td>${row.records.length}</td><td>${percent(row.firstTimeFix)}</td><td>${hours(row.lostHours)}</td><td>${moneyExact(row.cost)}</td><td>${delta===null?"—":`${delta>0?"▲":delta<0?"▼":"■"} ${Math.abs(delta).toFixed(0)}%`}</td></tr>`;
+    }));
+    const registerTable=register.length?table(["Return","Registration","Original Technician","Return Technician","Original Job","Complaint","Root Cause","Days","Lost Hours","Cost","Source","Action"],register.map(r=>`<tr>
+      <td>${escapeHtml(r.returnDate||"")}</td><td><strong>${escapeHtml(r.registration||"")}</strong></td><td>${escapeHtml(r.technician||"")}</td><td>${escapeHtml(r.currentTechnician||r.technician||"")}</td><td>${escapeHtml(r.originalJob||"")}</td><td>${escapeHtml(r.complaint||"")}</td><td>${escapeHtml(r.rootCause||"")}</td><td>${repeatDays(r)}</td><td>${hours(r.lostHours)}</td><td>${moneyExact(r.cost)}</td><td>${escapeHtml(r.source||"Manual record")}</td><td>${String(r.id).startsWith("FTF-")?"Managed in FTF Centre":`<button class="secondary" onclick="deleteRepeatRepair('${r.id}')">Remove</button>`}</td></tr>`)):`<div class="job-card good"><p>No repeat repairs recorded for this period.</p></div>`;
+    const causeTable=causes.length?table(["Root Cause","Cases","Share"],causes.map(([cause,count])=>`<tr><td>${escapeHtml(cause)}</td><td>${count}</td><td>${records.length?((count/records.length)*100).toFixed(0):0}%</td></tr>`)):`<p>No root-cause data in this period.</p>`;
+
+    setOutput({
+      title:"Repeat Repair Intelligence",
+      summary:[
+        reportCard("Repeats",records.length,"Repeat Repairs",records.length?"bad":"good"),
+        reportCard("FTF",percent(metrics.firstTimeFix),"First-Time Fix",metrics.firstTimeFix>=97?"good":metrics.firstTimeFix>=94?"warn":"bad"),
+        reportCard("Rate",metrics.repeatRate.toFixed(1)+"%","Repeat Rate"),
+        reportCard("Hours",hours(metrics.lostHours),"Lost Labour"),
+        reportCard("Cost",moneyExact(metrics.cost),"Cost to Business"),
+        reportCard("Change",change===null?"—":`${change>0?"▲":change<0?"▼":"■"} ${Math.abs(change).toFixed(0)}%`,"vs Last Month",change>0?"bad":change<0?"good":"")
+      ].join(""),
+      insightHtml:insight(
+        topTech?`${topTech.technician} has the most repeat repairs (${topTech.count})`:"No repeat repair trend yet",
+        topTech?`The leading root cause is ${topCause?topCause[0]:"not classified"}. Review the job register and corrective actions before the next workshop meeting.`:"Record repeat repairs to start monthly quality comparison.",
+        records.length?"warn":"good"
+      ),
+      output:`${repeatRepairForm()}<div class="repeat-report-section"><h3>Technician Comparison</h3>${technicianTable}</div><div class="repeat-report-section"><h3>12-Month Comparison</h3>${monthlyTable}</div><div class="repeat-report-section"><h3>Root Cause Analysis</h3>${causeTable}</div><div class="repeat-report-section"><h3>Repeat Repair Register</h3>${registerTable}</div>`
+    });
+  }
+
+  window.toggleRepeatRepairForm=function(force){
+    const form=el("repeatRepairEntryForm");
+    if(!form)return;
+    form.hidden=typeof force==="boolean"?!force:!form.hidden;
+    if(!form.hidden) el("repeatRegistration")?.focus();
+  };
+  window.saveRepeatRepairEntry=function(event){
+    event.preventDefault();
+    const record={
+      id:`RR-${Date.now()}`,registration:el("repeatRegistration").value.trim().toUpperCase(),technician:el("repeatTechnician").value,
+      originalDate:el("repeatOriginalDate").value,returnDate:el("repeatReturnDate").value,originalJob:el("repeatOriginalJob").value.trim(),
+      complaint:el("repeatComplaint").value.trim(),rootCause:el("repeatRootCause").value,outcome:el("repeatOutcome").value,
+      lostHours:safeNumber(el("repeatLostHours").value),cost:safeNumber(el("repeatCost").value),notes:el("repeatManagerNotes").value.trim(),createdAt:new Date().toISOString()
+    };
+    if(!record.registration||!record.technician||!record.originalDate||!record.returnDate||!record.originalJob||!record.complaint||!record.rootCause){alert("Complete the required repeat repair fields.");return;}
+    const records=repeatRepairs();records.push(record);saveRepeatRepairs(records);renderAll();
+  };
+  window.deleteRepeatRepair=function(id){
+    if(String(id).startsWith("FTF-")){alert("This confirmed repeat is controlled by the First Time Fix Centre. Change its review status there so every report stays consistent.");return;}
+    if(!confirm("Remove this repeat repair record?"))return;
+    saveRepeatRepairs(manualRepeatRepairs().filter(r=>r.id!==id));renderAll();
+  };
+
+
+  /* WAI-101 Monthly Technician Performance Review */
+  const TECH_REVIEW_COST_KEY="workshopAITechnicianHourlyCostsV1";
+  const TECH_REVIEW_NOTES_KEY="workshopAITechnicianMonthlyReviewNotesV1";
+  function technicianHourlyCosts(){try{return JSON.parse(localStorage.getItem(TECH_REVIEW_COST_KEY)||"{}");}catch(error){return {};}}
+  function monthlyReviewNotes(){try{return JSON.parse(localStorage.getItem(TECH_REVIEW_NOTES_KEY)||"{}");}catch(error){return {};}}
+  function selectedReviewTechnician(){
+    const selected=selectedTechnician();
+    return selected!=="All"?selected:(getTechs()[0]||"Unassigned");
+  }
+  function completedJobsForTech(technician,selectedRange){
+    return jobsForSelectedRange(selectedRange,{completedOnly:true}).filter(job=>job.technician===technician);
+  }
+  function technicianMonthlyMetrics(technician,selectedRange){
+    const techJobs=completedJobsForTech(technician,selectedRange);
+    const nonMotJobs=techJobs.filter(job=>!isMotJob(job));
+    const sold=nonMotJobs.reduce((sum,job)=>sum+soldHours(job),0);
+    const actual=nonMotJobs.reduce((sum,job)=>sum+actualClocked(job),0);
+    const available=availabilityHoursForRange(selectedRange,technician);
+    const productivity=available>0?actual/available*100:null;
+    const efficiency=actual>0?sold/actual*100:null;
+    const repeats=repeatRepairs().filter(record=>record.technician===technician&&inRange(repeatDate(record),selectedRange));
+    const firstTimeFix=nonMotJobs.length?Math.max(0,(nonMotJobs.length-repeats.length)/nonMotJobs.length*100):100;
+    const hourlyCost=safeNumber(technicianHourlyCosts()[technician]);
+    const totalLabourCost=actual*hourlyCost;
+    const costPerJob=nonMotJobs.length?totalLabourCost/nonMotJobs.length:0;
+    const repeatCost=repeats.reduce((sum,r)=>sum+safeNumber(r.cost),0);
+    return {technician,techJobs,nonMotJobs,sold,actual,available,productivity,efficiency,repeats,firstTimeFix,hourlyCost,totalLabourCost,costPerJob,repeatCost};
+  }
+  function monthlyLeague(selectedRange){
+    return getTechs().map(name=>technicianMonthlyMetrics(name,selectedRange)).sort((a,b)=>{
+      const scoreA=(a.productivity||0)*.30+(a.efficiency||0)*.30+a.firstTimeFix*.30+Math.min(100,a.nonMotJobs.length*2)*.10;
+      const scoreB=(b.productivity||0)*.30+(b.efficiency||0)*.30+b.firstTimeFix*.30+Math.min(100,b.nonMotJobs.length*2)*.10;
+      a.reviewScore=scoreA;b.reviewScore=scoreB;return scoreB-scoreA;
+    });
+  }
+  function reviewKey(technician,selectedRange){return `${technician}|${monthKey(selectedRange.start)}`;}
+  function renderMonthlyTechnicianReview(){
+    const selectedRange=range();
+    const technician=selectedReviewTechnician();
+    const current=technicianMonthlyMetrics(technician,selectedRange);
+    const previousRange={start:new Date(selectedRange.start.getFullYear(),selectedRange.start.getMonth()-1,1),end:new Date(selectedRange.start.getFullYear(),selectedRange.start.getMonth(),0,23,59,59,999)};
+    const previous=technicianMonthlyMetrics(technician,previousRange);
+    const league=monthlyLeague(selectedRange);
+    const position=Math.max(1,league.findIndex(row=>row.technician===technician)+1);
+    const key=reviewKey(technician,selectedRange);
+    const notes=monthlyReviewNotes()[key]||{};
+    const trend=(value,prior,inverse=false)=>{
+      const diff=safeNumber(value)-safeNumber(prior); if(Math.abs(diff)<0.05)return "■ No change";
+      const improved=inverse?diff<0:diff>0; return `${diff>0?"▲":"▼"} ${Math.abs(diff).toFixed(1)}${improved?" improvement":""}`;
+    };
+    const repeatRows=current.repeats.map(r=>`<tr><td>${escapeHtml(r.registration)}</td><td>${escapeHtml(r.originalJob)}</td><td>${escapeHtml(r.returnDate)}</td><td>${escapeHtml(r.rootCause)}</td><td>${hours(r.lostHours)}</td><td>${moneyExact(r.cost)}</td></tr>`);
+    const leagueRows=league.map((row,index)=>`<tr class="${row.technician===technician?'selected-review-tech':''}"><td>${index+1}</td><td>${escapeHtml(row.technician)}</td><td>${percent(row.productivity)}</td><td>${percent(row.efficiency)}</td><td>${percent(row.firstTimeFix)}</td><td>${row.nonMotJobs.length}</td><td>${moneyExact(row.costPerJob)}</td></tr>`);
+    const monthName=selectedRange.start.toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+    setOutput({
+      title:`Monthly Technician Performance Review — ${technician}`,
+      summary:[
+        reportCard("Position",`${position} of ${league.length}`,"League Position",position===1?"good":""),
+        reportCard("Productivity",percent(current.productivity),"Productivity",current.productivity>=93?"good":current.productivity<85?"bad":"warn"),
+        reportCard("Efficiency",percent(current.efficiency),"Efficiency",current.efficiency>=100?"good":current.efficiency<85?"bad":"warn"),
+        reportCard("FTF",percent(current.firstTimeFix),"First-Time Fix",current.firstTimeFix>=97?"good":current.firstTimeFix<94?"bad":"warn"),
+        reportCard("Jobs",current.nonMotJobs.length,"Jobs ex MOT"),
+        reportCard("Cost",moneyExact(current.costPerJob),"Labour Cost per Job")
+      ].join(""),
+      insightHtml:insight(`${technician} — ${monthName}`,`Overall league position ${position} of ${league.length}. ${current.repeats.length} confirmed repeat repair${current.repeats.length===1?"":"s"}; MOTs are excluded from job and cost-per-job calculations.`,current.repeats.length?"warn":"good"),
+      output:`<div class="monthly-review-sheet">
+        <div class="monthly-review-header"><div><h2>${escapeHtml(technician)}</h2><p>Individual Monthly Performance Review · ${monthName}</p></div><div><strong>Workshop AI</strong><br>Review date: ${new Date().toLocaleDateString("en-GB")}</div></div>
+        <div class="review-actions no-print"><label>True hourly employment cost (£)<input id="monthlyReviewHourlyCost" type="number" min="0" step="0.01" value="${current.hourlyCost.toFixed(2)}"></label><button onclick="saveMonthlyReviewCost('${escapeHtml(technician)}')">Save Cost</button><button onclick="window.print()">Print Individual Review</button></div>
+        <h3>Monthly KPI Scorecard</h3>${table(["Measure","This Month","Previous Month","Movement"],[
+          `<tr><td>Productivity</td><td>${percent(current.productivity)}</td><td>${percent(previous.productivity)}</td><td>${trend(current.productivity,previous.productivity)}</td></tr>`,
+          `<tr><td>Efficiency</td><td>${percent(current.efficiency)}</td><td>${percent(previous.efficiency)}</td><td>${trend(current.efficiency,previous.efficiency)}</td></tr>`,
+          `<tr><td>First-Time Fix</td><td>${percent(current.firstTimeFix)}</td><td>${percent(previous.firstTimeFix)}</td><td>${trend(current.firstTimeFix,previous.firstTimeFix)}</td></tr>`,
+          `<tr><td>Jobs completed excluding MOTs</td><td>${current.nonMotJobs.length}</td><td>${previous.nonMotJobs.length}</td><td>${trend(current.nonMotJobs.length,previous.nonMotJobs.length)}</td></tr>`,
+          `<tr><td>Labour cost per job</td><td>${moneyExact(current.costPerJob)}</td><td>${moneyExact(previous.costPerJob)}</td><td>${trend(current.costPerJob,previous.costPerJob,true)}</td></tr>`,
+          `<tr><td>Confirmed repeat repairs</td><td>${current.repeats.length}</td><td>${previous.repeats.length}</td><td>${trend(current.repeats.length,previous.repeats.length,true)}</td></tr>`
+        ])}
+        <h3>League Table Comparison</h3>${table(["Position","Technician","Productivity","Efficiency","First-Time Fix","Jobs ex MOT","Cost per Job"],leagueRows)}
+        <h3>Confirmed Repeat Repair Detail</h3>${repeatRows.length?table(["Registration","Original Job","Return Date","Root Cause","Lost Hours","Cost"],repeatRows):'<div class="job-card good"><p>No confirmed repeat repairs attributed to this technician in this month.</p></div>'}
+        <h3>Monthly Review Discussion</h3><div class="review-notes-grid">
+          <label>Strengths<textarea id="reviewStrengths">${escapeHtml(notes.strengths||"")}</textarea></label>
+          <label>Areas to improve<textarea id="reviewImprovements">${escapeHtml(notes.improvements||"")}</textarea></label>
+          <label>Training / support required<textarea id="reviewTraining">${escapeHtml(notes.training||"")}</textarea></label>
+          <label>Targets and actions for next month<textarea id="reviewActions">${escapeHtml(notes.actions||"")}</textarea></label>
+          <label class="wide">Technician comments<textarea id="reviewTechnicianComments">${escapeHtml(notes.technicianComments||"")}</textarea></label>
+        </div><div class="button-row no-print"><button onclick="saveMonthlyReviewNotes('${escapeHtml(technician)}')">Save Review Notes</button></div>
+        <div class="review-signatures"><div>Technician signature<br><span></span></div><div>Service Manager signature<br><span></span></div><div>Date<br><span></span></div></div>
+      </div>`
+    });
+  }
+  window.saveMonthlyReviewCost=function(technician){const costs=technicianHourlyCosts();costs[technician]=safeNumber(el("monthlyReviewHourlyCost")?.value);localStorage.setItem(TECH_REVIEW_COST_KEY,JSON.stringify(costs));renderAll();};
+  window.saveMonthlyReviewNotes=function(technician){const notes=monthlyReviewNotes(),key=reviewKey(technician,range());notes[key]={strengths:el("reviewStrengths")?.value||"",improvements:el("reviewImprovements")?.value||"",training:el("reviewTraining")?.value||"",actions:el("reviewActions")?.value||"",technicianComments:el("reviewTechnicianComments")?.value||"",savedAt:new Date().toISOString()};localStorage.setItem(TECH_REVIEW_NOTES_KEY,JSON.stringify(notes));alert("Monthly review notes saved.");};
+
+
   function renderVHCReport(){
     if(typeof window.renderVHCIntelligenceReport!=="function"){
       setOutput({title:"Vehicle Health Check Performance",output:insight("VHC module unavailable","The WAI-093 VHC module has not loaded.","bad")});
@@ -825,6 +1175,7 @@
     const renderers={
       workshop:renderWorkshopPerformance,
       technicians:renderTechnicians,
+      technicianCostPerJob:renderTechnicianCostPerJob,
       vhc:renderVHCReport,
       jobs:renderJobsCompleted,
       labour:renderLabour,
@@ -836,7 +1187,9 @@
       approvals:renderApprovals,
       revenue:renderRevenue,
       carryover:renderCarryover,
-      garageHealth:renderGarageHealth
+      garageHealth:renderGarageHealth,
+      repeatRepairs:renderRepeatRepairs,
+      monthlyTechnicianReview:renderMonthlyTechnicianReview
     };
     (renderers[activeReport]||renderWorkshopPerformance)();
   }

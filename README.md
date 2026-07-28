@@ -1,26 +1,14 @@
-# Workshop AI — WAI-096.5
+# Workshop AI WAI-101.2 — Finance Centre Workflow Completion
 
-## Unified Operational Queue Engine
+Changes:
+- Recent Invoice and Invoice Register rows now open on click or keyboard Enter.
+- Draft terminology replaced by Estimate throughout; existing Draft data migrates automatically.
+- New Estimate button and Estimate count.
+- Estimate can be deleted from the row or invoice editor, with reason and confirmation.
+- Deleted job-linked estimates are not recreated automatically on refresh.
+- Estimate is converted using the Issue Invoice action, producing Invoice Issued status.
+- Issued/part-paid/paid invoices can be fully credited with a mandatory reason.
+- Issued invoices cannot be deleted.
+- Status is action-driven rather than manually changed in a drop-down.
 
-This build corrects the false **1 Awaiting Approval** shown in Management Action, Workshop Performance Centre and Garage Health when Mission Control correctly shows zero.
-
-### Authorisation counting rule
-A job is counted only when it is:
-
-- an unfinished Retail job; and
-- currently in an Awaiting Customer Approval / Awaiting Authorisation workflow state, or explicitly flagged as awaiting authorisation.
-
-A new Retail job is no longer counted merely because its authorisation dropdown contains the default “Awaiting Customer Approval” value.
-
-### Shared screens
-The unified authorisation queue now feeds:
-
-- Command Centre
-- Management Action
-- Workshop Performance Centre
-- Garage Health report
-- Workshop Control Centre
-- Mission Control and daily recommendations
-- Customer Approval Performance report
-
-The new `unified-queue-engine.js` is additive and does not change technician timer, parts, VHC, CRM or collection workflows.
+Keep the previous stable ZIP as a backup while testing.

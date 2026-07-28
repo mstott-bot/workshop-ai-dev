@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Workshop AI OS — WAI-096 Customer CRM</title>
+  <title>Workshop AI OS — WAI-099.1 Finance Centre</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="wai093-vhc.css">
   <link rel="stylesheet" href="wai094-intelligence.css">
   <link rel="stylesheet" href="wai095-workshop-intelligence.css">
   <link rel="stylesheet" href="wai096-crm.css">
+  <link rel="stylesheet" href="finance-centre.css">
 </head>
 
 <body>
@@ -21,7 +22,7 @@
     <div>
       <h1><span>WORKSHOP</span> <strong>AI</strong></h1>
       <p class="tagline">Revolutionising workshops</p>
-      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Version WAI-096 · Customer CRM</p>
+      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Version WAI-099.1 · Finance Centre Foundation</p>
     </div>
   </div>
   <div class="role-pill">Service Manager</div>
@@ -42,6 +43,7 @@
     <button class="tab" data-screen="targetsScreen">Targets</button>
     <button class="tab" data-screen="vehicleIntelligenceScreen">Vehicle Intelligence</button>
     <button class="tab" data-screen="crmScreen">Customer CRM</button>
+    <button class="tab" data-screen="financeCentreScreen">Finance Centre</button>
   </nav>
 
   <section id="commandScreen" class="screen active">
@@ -945,6 +947,32 @@
     </div>
   </section>
 
+
+  <section id="financeCentreScreen" class="screen">
+    <div class="finance-hero">
+      <div><span class="finance-eyebrow">WAI-100 · CRM → JOB → LIVE INVOICE</span><h2>Finance Centre</h2><p>A fast live invoice is created automatically from every workshop job. Customer, vehicle, labour, parts, oil and MOT flow through once, without duplicate typing.</p></div>
+      <div class="finance-actions"><button class="finance-btn primary" id="financeNewInvoiceBtn">+ New Estimate</button><button class="finance-btn secondary" id="financeSettingsBtn">Finance Settings</button></div>
+    </div>
+    <div class="finance-subnav">
+      <button class="active" data-finance-panel="financeDashboard">Dashboard</button>
+      <button data-finance-panel="invoiceRegister">Invoice Register</button>
+      <button data-finance-panel="invoiceBuilder">Invoice Builder</button>
+      <button data-finance-panel="financeSettings">Settings</button>
+    </div>
+
+    <div id="financeDashboard" class="finance-panel active">
+      <div id="financeKpis" class="finance-kpis"></div>
+      <div class="finance-card"><h3>Recent invoices</h3><div class="invoice-table-wrap recent-invoices-scroll"><table class="invoice-register"><thead><tr><th>Invoice</th><th>Customer / Vehicle</th><th>Technician</th><th>Net ex VAT</th><th>Total inc VAT</th><th>Status</th></tr></thead><tbody id="financeRecentInvoices"></tbody></table></div></div>
+    </div>
+
+    <div id="invoiceRegister" class="finance-panel">
+      <div class="finance-card"><h3>Invoice Register</h3><div class="finance-toolbar"><input id="financeSearch" placeholder="Search invoice, registration, customer, job or technician"><select id="financeStatusFilter"><option value="all">All statuses</option><option>Estimate</option><option>Invoice Issued</option><option>Part Paid</option><option>Paid</option><option>Credited</option><option>Archived</option></select></div><div class="invoice-table-wrap"><table class="invoice-register"><thead><tr><th>Invoice</th><th>Customer / Vehicle</th><th>Technician</th><th>Net ex VAT</th><th>Total inc VAT</th><th>Status</th></tr></thead><tbody id="invoiceRegisterBody"></tbody></table></div></div>
+    </div>
+
+    <div id="invoiceBuilder" class="finance-panel"><div id="invoiceBuilderHost"></div></div>
+    <div id="financeSettings" class="finance-panel"><div id="financeSettingsHost"></div></div>
+  </section>
+
 </main>
 
 <div id="modal" class="modal hidden">
@@ -972,5 +1000,7 @@
 <script src="wai095-workshop-intelligence.js"></script>
 <script src="wai096-crm.js"></script>
 <script src="wai0962-customer-recognition.js"></script>
+<script src="finance-centre.js"></script>
+<div id="financePrintSheet" class="print-sheet"></div>
 </body>
 </html>
