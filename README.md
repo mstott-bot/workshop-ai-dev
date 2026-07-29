@@ -1,3 +1,7 @@
+# Workshop AI — WAI-105.0 Desktop & Tablet Responsive Standardisation
+
+Adds responsive form and modal rules for workshop computers and tablets, including a corrected Record Repeat Repair layout. Application logic is unchanged.
+
 # Workshop AI WAI-101.2 — Finance Centre Workflow Completion
 
 Changes:

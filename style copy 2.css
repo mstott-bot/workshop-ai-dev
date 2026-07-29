@@ -1,0 +1,528 @@
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0f1720;color:#17202a}.app-header{background:#09111a;color:white;padding:18px;border-bottom:1px solid #263747}.app-header h1{margin:0;font-size:28px}.app-header p{margin:4px 0 0;color:#c9d3dd}.container{max-width:1400px;margin:0 auto;padding:14px}.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}.tab{padding:13px;border:0;border-radius:12px;background:#233142;color:#dfe8f2;font-weight:bold}.tab.active{background:#0b6efd;color:white}.screen{display:none}.screen.active{display:block}.card,.hero{background:#ffffff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.25)}.hero{display:flex;justify-content:space-between;gap:14px;align-items:center;border:2px solid #0b6efd}h2{margin-top:0}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}label{display:block;font-weight:bold;margin-bottom:12px}input,select,textarea{width:100%;margin-top:6px;padding:12px;border:1px solid #c8d0d8;border-radius:10px;font-size:16px}textarea{min-height:90px}.primary,.secondary{width:100%;padding:14px;border:0;border-radius:12px;font-weight:bold;font-size:16px;margin-top:8px}.primary{background:#0b6efd;color:white}.secondary{background:#e7edf4;color:#101820}.button-row{display:flex;gap:10px}.job-list,.coach-list{display:grid;gap:10px}.job-card,.coach-card{border:1px solid #d8e0e8;border-left:6px solid #0b6efd;border-radius:14px;padding:12px;background:#fbfdff}.job-card h3,.coach-card h3{margin:0 0 6px}.job-card p,.coach-card p{margin:4px 0}.job-card button{margin-top:8px;margin-right:6px;padding:10px;border:0;border-radius:9px;background:#101820;color:white}.muted{color:#5f6b76}.hours-warning,.timer-box{background:#fff3cd;border:1px solid #ffe69c;padding:10px;border-radius:10px}.voice-section{border:1px solid #e0e6ed;border-radius:12px;padding:12px;margin-bottom:12px}pre{white-space:pre-wrap;background:#f8fafc;border:1px solid #d8e0e8;border-radius:10px;padding:12px}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}.stat{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.2)}.stat strong{display:block;font-size:24px}.health-score{font-size:36px;font-weight:bold;background:#f0f4f8;border-radius:16px;padding:18px;text-align:center;min-width:260px}.health-score span{font-size:14px;font-weight:normal}.good{border-left-color:#198754}.warn{border-left-color:#ffc107}.bad{border-left-color:#dc3545}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;background:white}th,td{border-bottom:1px solid #d8e0e8;padding:10px;text-align:left;white-space:nowrap}th{background:#101820;color:white}.board-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.board-column{background:#f8fafc;border-radius:12px;border:1px solid #d8e0e8;padding:10px}.board-column h3{margin-top:0}.board-job{background:white;border-radius:10px;padding:10px;margin-bottom:8px;border-left:5px solid #0b6efd;box-shadow:0 1px 4px rgba(0,0,0,.06)}.progress{height:10px;background:#e7edf4;border-radius:999px;overflow:hidden;margin-top:8px}.bar{height:100%;background:#0b6efd}.bar.good{background:#198754}.bar.warn{background:#ffc107}.bar.bad{background:#dc3545}.timeline{border-left:4px solid #0b6efd;margin-left:12px;padding-left:18px}.timeline-item{position:relative;background:#fbfdff;border:1px solid #d8e0e8;border-radius:14px;padding:12px;margin-bottom:10px}.timeline-item:before{content:"";position:absolute;left:-29px;top:16px;width:16px;height:16px;background:#0b6efd;border-radius:50%;box-shadow:0 0 0 4px #d9eaff}.timeline-item strong{display:block}.timeline-item small{color:#5f6b76}.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}.modal.hidden{display:none}.modal-card{background:white;border-radius:18px;padding:18px;max-width:850px;width:100%;max-height:85vh;overflow:auto}.modal-close{float:right;border:0;background:#101820;color:white;border-radius:50%;width:36px;height:36px;font-size:22px}@media(max-width:950px){.board-grid,.stats{grid-template-columns:1fr 1fr}.tabs{grid-template-columns:1fr 1fr}.hero{display:block}.health-score{margin-top:12px}}@media(max-width:700px){.tabs,.grid,.stats,.board-grid{grid-template-columns:1fr}.button-row{flex-direction:column}.app-header h1{font-size:22px}.health-score{font-size:28px;min-width:0}}
+.clockoff-panel{background:#eef6ff;border:1px solid #b8dcff;border-radius:14px;padding:12px;margin:12px 0}
+.clockoff-panel h3{margin:0 0 8px}
+
+.report-preview{white-space:pre-wrap;background:#f8fafc;border:1px solid #d8e0e8;border-radius:10px;padding:10px;margin-top:8px;max-height:240px;overflow:auto}
+.badge-new{display:inline-block;background:#dc3545;color:white;border-radius:999px;padding:4px 9px;font-size:12px;font-weight:bold;margin-left:6px}
+
+/* Workshop AI v2.0 branding and layout */
+.app-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  background:linear-gradient(135deg,#07111d,#0b2340);
+  color:white;
+  padding:18px;
+  border-bottom:1px solid #263747;
+}
+.brand-lockup{display:flex;align-items:center;gap:14px}
+.logo-mark{width:66px;height:66px;border-radius:18px;background:linear-gradient(135deg,#0b6efd,#073b85);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 10px 24px rgba(11,110,253,.35);flex-shrink:0}
+.logo-mark .gear{font-size:44px;color:white}
+.logo-mark .wrench{position:absolute;font-size:24px;right:8px;bottom:7px;transform:rotate(-18deg)}
+.app-header h1{letter-spacing:.5px;margin:0;font-size:34px}
+.app-header h1 strong{color:#2d8cff}
+.tagline{text-transform:uppercase;letter-spacing:2.5px;color:#d4dde8!important;font-size:14px;margin-top:2px!important}
+.role-pill{background:#ffffff18;border:1px solid #ffffff33;border-radius:999px;padding:10px 14px;font-weight:bold;color:#fff;white-space:nowrap}
+.tabs{grid-template-columns:repeat(9,1fr)}
+.tech-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tech-actions button{width:auto;margin-left:6px}
+@media(max-width:1200px){.tabs{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:700px){.app-header{align-items:flex-start;flex-direction:column}.tabs{grid-template-columns:1fr}.logo-mark{width:56px;height:56px}.logo-mark .gear{font-size:36px}.logo-mark .wrench{font-size:20px}.app-header h1{font-size:25px}.tagline{font-size:11px;letter-spacing:1.6px}}
+
+.job-info-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin:12px 0;
+}
+.job-info-grid div{
+  background:#f0f4f8;
+  border-radius:12px;
+  padding:10px;
+}
+.job-info-grid strong{
+  display:block;
+  font-size:12px;
+  color:#5f6b76;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+}
+.job-info-grid span{
+  display:block;
+  font-size:18px;
+  font-weight:bold;
+  margin-top:4px;
+}
+.special-instructions{
+  background:#fff3cd;
+  border:1px solid #ffe69c;
+  border-radius:12px;
+  padding:12px;
+  margin:10px 0;
+}
+.special-instructions p{margin:6px 0 0}
+@media(max-width:700px){.job-info-grid{grid-template-columns:1fr}}
+
+.planner-bar{
+  height:12px;
+  background:#e7edf4;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:8px;
+}
+.planner-fill{
+  height:100%;
+  background:#198754;
+}
+.planner-fill.warn{background:#ffc107}
+.planner-fill.bad{background:#dc3545}
+.capacity-label{
+  display:inline-block;
+  border-radius:999px;
+  padding:4px 10px;
+  font-weight:bold;
+  margin-top:6px;
+}
+.capacity-good{background:#d1e7dd;color:#0f5132}
+.capacity-warn{background:#fff3cd;color:#664d03}
+.capacity-bad{background:#f8d7da;color:#842029}
+
+.board-column.drag-over{outline:3px dashed #0b6efd;outline-offset:4px}
+.board-job{cursor:grab}
+.board-job:active{cursor:grabbing}
+.parts-status-pill{display:inline-block;border-radius:999px;padding:4px 10px;font-weight:bold;background:#e7edf4;margin-top:6px}
+.parts-request-card{border-left-color:#6f42c1}
+
+.future-day-card{border-left-color:#20c997}
+
+.part-grid{
+  display:grid;
+  grid-template-columns:2fr .7fr 1fr 1fr;
+  gap:8px;
+}
+.part-pill{
+  display:inline-block;
+  border-radius:999px;
+  padding:5px 10px;
+  font-weight:bold;
+  margin:4px 4px 4px 0;
+  background:#e7edf4;
+}
+.part-pill.requested{background:#fff3cd;color:#664d03}
+.part-pill.ordered{background:#cff4fc;color:#055160}
+.part-pill.delivered{background:#d1e7dd;color:#0f5132}
+.part-pill.fitted{background:#dbeafe;color:#1e40af}
+.parts-request-card{border-left-color:#6f42c1}
+.parts-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.parts-actions button{width:auto}
+@media(max-width:700px){.part-grid{grid-template-columns:1fr}}
+
+/* Workshop AI v4: Parts Required alert panel */
+.service-parts-alert{border-left:6px solid #dc3545;background:#fff5f5}
+.service-parts-alert.clear{border-left-color:#198754;background:#f3fff8}
+.parts-alert-count{display:inline-block;background:#dc3545;color:white;border-radius:999px;padding:4px 10px;font-weight:bold;margin-left:8px}
+.parts-alert-list{display:grid;gap:8px;margin-top:10px}
+.parts-alert-item{background:white;border:1px solid #f1b0b7;border-radius:12px;padding:10px}
+.parts-alert-item strong{display:block}
+
+/* Workshop AI OS v4.1 Sprint 3 — Garage Health Drill-down */
+.gh-tabs{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.gh-tab{border:0;border-radius:999px;padding:10px 14px;background:#e7edf4;color:#101820;font-weight:bold;cursor:pointer}
+.gh-tab.active{background:#0b6efd;color:#fff}
+.gh-modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.gh-impact{font-size:18px;font-weight:bold}
+.gh-potential{background:#f0f4f8;border-radius:14px;padding:14px;margin-top:10px;border-left:6px solid #0b6efd}
+.gh-action{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.gh-action strong:last-child{font-size:20px}
+.health-score{cursor:pointer;transition:transform .15s ease, box-shadow .15s ease}
+.health-score:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(11,110,253,.22)}
+@media(max-width:700px){.gh-modal-grid{grid-template-columns:1fr}.gh-action{display:block}}
+
+
+/* WAI-020 Technician Activity Tracking */
+.activity-buttons{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+}
+.activity-buttons button{
+  width:100%;
+}
+.activity-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:12px;
+}
+.activity-pill{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  margin:2px 4px 2px 0;
+}
+
+/* Workshop AI OS v5.0 — WAI-100.1 Workshop Coach Mission Control */
+.coach-command-card{border-left:6px solid #0b6efd;background:linear-gradient(180deg,#ffffff,#f8fbff)}
+.coach-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.coach-mission-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:10px 0}
+.coach-score{font-size:34px;font-weight:900;line-height:1}
+.coach-one-thing{border-left:6px solid #6f42c1;background:#f7f2ff;border-radius:14px;padding:14px;margin:12px 0}
+.coach-one-thing h3{margin-top:0}
+.coach-priority-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.coach-priority-row strong:last-child{white-space:nowrap;font-size:18px}
+.coach-win-list{display:grid;gap:8px}
+.coach-win{background:#f3fff8;border:1px solid #b7e4c7;border-radius:12px;padding:10px}
+@media(max-width:700px){.coach-priority-row{display:block}}
+
+
+/* Workshop AI OS v5.3 — Vehicle Intelligence */
+.vehicle-intelligence-card{border-left-color:#20c997}
+.vehicle-intelligence-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:10px 0}
+.vehicle-intelligence-meta div{background:#f0f4f8;border-radius:12px;padding:9px}
+.vehicle-intelligence-meta strong{display:block;font-size:12px;color:#5f6b76;text-transform:uppercase;letter-spacing:.6px}
+.vehicle-intelligence-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.vehicle-intelligence-actions button{width:auto}
+.history-badge{display:inline-block;border-radius:999px;padding:4px 9px;font-weight:bold;margin-left:6px;background:#e7edf4;color:#101820;font-size:12px}
+.history-badge.open{background:#fff3cd;color:#664d03}
+.history-badge.complete{background:#d1e7dd;color:#0f5132}
+.history-badge.parts{background:#f8d7da;color:#842029}
+.history-report-preview{white-space:pre-wrap;max-height:170px;overflow:auto;background:#f8fafc;border:1px solid #d8e0e8;border-radius:10px;padding:10px;margin-top:8px}
+
+
+/* Workshop AI OS v5.5 — Technician received parts workflow */
+.part-pill.received{background:#d1e7dd;color:#0f5132}
+.part-pill.partial-delivery{background:#fff3cd;color:#664d03}
+.part-pill.incorrect-parts{background:#f8d7da;color:#842029}
+.parts-request-card.bad{border-left-color:#dc3545}
+
+/* Workshop AI OS v5.7 — Action Centre 2.0 */
+.action-centre-v2{border-left:6px solid #198754;background:#f8fff9}
+.action-centre-v2:not(.clear){border-left-color:#0b6efd;background:#ffffff}
+.action-tiles .stat.good{border-left:6px solid #198754;background:#f3fff8;color:#0f5132}
+.action-tiles .stat.bad{border-left:6px solid #dc3545;background:#fff5f5;color:#842029}
+.action-centre-sections{gap:8px}
+.action-section{border-radius:12px;padding:12px;border:1px solid #d8e0e8;background:#fff}
+.action-section.good{border-color:#badbcc;background:#f3fff8;color:#0f5132}
+.action-section.bad{border-color:#f1b0b7;background:#fff5f5;color:#842029}
+.action-section-none{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.action-section-none span{font-weight:bold}
+.action-section .parts-alert-count{margin-left:8px}
+.action-section.good .parts-alert-count{background:#198754}
+.action-section.bad .parts-alert-count{background:#dc3545}
+.action-section .board-job{background:#fff;color:#17202a}
+.action-section.good .board-job{border-left-color:#198754}
+.action-section.bad .board-job{border-left-color:#dc3545}
+
+/* WAI-065.3A Parts Dashboard */
+#partsOrderFormCard.hidden{display:none}
+#partsOrderFormCard{border:2px solid rgba(53,132,228,.35)}
+#partsScreen .parts-request-card p{margin:.35rem 0}
+#partsScreen .parts-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+.part-pill.back-order{background:#7f1d1d;color:#fff}
+.part-pill.delivered{background:#166534;color:#fff}
+
+
+/* WAI-066A Workshop Intelligence */
+#workshopIntelligenceReportList{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+#workshopIntelligenceReportList .job-card{
+  display:flex;
+  flex-direction:column;
+}
+#workshopIntelligenceReportList .job-card button{
+  margin-top:auto;
+}
+#workshopIntelligenceSummary{
+  grid-template-columns:repeat(6,minmax(0,1fr));
+}
+@media(max-width:1100px){
+  #workshopIntelligenceReportList{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #workshopIntelligenceSummary{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  #workshopIntelligenceReportList,
+  #workshopIntelligenceSummary{grid-template-columns:1fr}
+}
+
+
+/* WAI-066B Workshop Intelligence polish */
+.intelligence-extra-filters{margin-top:12px}
+.intelligence-categories{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:12px 0 16px;
+}
+.intelligence-categories button{
+  border:0;
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:bold;
+  cursor:pointer;
+  background:#e7edf4;
+  color:#101820;
+}
+.intelligence-categories button.active{
+  background:#0b6efd;
+  color:#fff;
+}
+.intelligence-card-title{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+.intelligence-card-title h3{margin:0}
+.intelligence-star{
+  width:auto!important;
+  min-width:44px;
+  margin:0!important;
+  padding:6px 10px!important;
+  background:#fff3cd!important;
+  color:#664d03!important;
+  font-size:20px;
+}
+.intelligence-category-label{
+  display:inline-block;
+  align-self:flex-start;
+  border-radius:999px;
+  padding:4px 9px;
+  background:#eef6ff;
+  color:#0b4f9c;
+  font-size:12px;
+  font-weight:bold;
+}
+.intelligence-report-heading{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.intelligence-favourite-button{
+  width:auto;
+  min-width:150px;
+}
+.intelligence-favourite-button.active{
+  background:#fff3cd;
+  color:#664d03;
+}
+.intelligence-comparison-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.intelligence-comparison-grid div{
+  background:#fff;
+  border-radius:10px;
+  padding:10px;
+}
+.intelligence-comparison-grid strong,
+.intelligence-comparison-grid span{
+  display:block;
+}
+#workshopIntelligenceFavourites{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+@media(max-width:1100px){
+  #workshopIntelligenceFavourites{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .intelligence-comparison-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  #workshopIntelligenceFavourites,
+  .intelligence-comparison-grid{grid-template-columns:1fr}
+  .intelligence-report-heading{display:block}
+  .intelligence-favourite-button{width:100%}
+}
+@media print{
+  body.printing-workshop-intelligence .app-header,
+  body.printing-workshop-intelligence .tabs,
+  body.printing-workshop-intelligence #reportsInterfaceScreen > .card:not(#workshopIntelligencePrintable),
+  body.printing-workshop-intelligence #reportsInterfaceScreen > section,
+  body.printing-workshop-intelligence #reportsCompletedWriteups{
+    display:none!important;
+  }
+  body.printing-workshop-intelligence .screen{
+    display:none!important;
+  }
+  body.printing-workshop-intelligence #reportsInterfaceScreen{
+    display:block!important;
+  }
+  body.printing-workshop-intelligence #workshopIntelligencePrintable{
+    box-shadow:none;
+    border:0;
+    margin:0;
+    padding:0;
+  }
+  body.printing-workshop-intelligence .intelligence-favourite-button{
+    display:none!important;
+  }
+  body.printing-workshop-intelligence{
+    background:#fff;
+  }
+}
+
+/* =====================================================================
+   Workshop AI OS — WAI-080.1 Command Centre
+   Presentation-only layer. Existing workshop screens and logic unchanged.
+   ===================================================================== */
+.wai80-command-centre{display:grid;gap:14px;margin-bottom:14px}
+.wai80-status-banner{display:flex;align-items:center;justify-content:space-between;gap:18px;border-radius:20px;padding:22px;color:#fff;box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.wai80-status-banner h2{font-size:30px;margin:5px 0 7px}
+.wai80-status-banner p{margin:0;color:rgba(255,255,255,.88)}
+.wai80-status-on-track{background:linear-gradient(135deg,#0f5132,#198754)}
+.wai80-status-attention{background:linear-gradient(135deg,#7a4b00,#c88700)}
+.wai80-status-critical{background:linear-gradient(135deg,#842029,#dc3545)}
+.wai80-eyebrow{display:block;font-size:12px;font-weight:900;letter-spacing:1.7px;opacity:.78}
+.wai80-health-ring{width:132px;height:132px;border-radius:50%;border:10px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;flex-shrink:0}
+.wai80-health-ring strong{font-size:34px;line-height:1}.wai80-health-ring span{font-size:12px;margin-top:5px}
+.wai80-panel{margin-bottom:0}
+.wai80-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}.wai80-section-heading h2{margin:3px 0 0}
+.wai80-kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.wai80-kpi{border:1px solid #d8e0e8;border-radius:14px;padding:14px;background:#fbfdff;min-height:105px}
+.wai80-kpi strong{display:block;font-size:26px;margin:7px 0 4px}.wai80-kpi span{font-size:13px;color:#5f6b76}.wai80-kpi small{display:block;margin-top:4px;color:#5f6b76}
+.wai80-two-column{display:grid;grid-template-columns:1.55fr 1fr;gap:14px}
+.wai80-performance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.wai80-performance-card{border-radius:14px;padding:14px;background:#f0f4f8;border-left:6px solid #0b6efd}.wai80-performance-card strong{display:block;font-size:24px;margin-top:6px}.wai80-performance-card small{display:block;margin-top:4px;color:#5f6b76}
+.wai80-priority-list{display:grid;gap:9px}.wai80-priority{border-radius:12px;padding:12px;border-left:6px solid #0b6efd;background:#f8fafc}.wai80-priority strong{display:block}.wai80-priority p{margin:5px 0 0}.wai80-priority.bad{border-left-color:#dc3545;background:#fff5f5}.wai80-priority.warn{border-left-color:#ffc107;background:#fff9e8}.wai80-priority.good{border-left-color:#198754;background:#f3fff8}
+.wai80-quick-access{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:0}.wai80-quick-access h2{margin:3px 0 0}.wai80-quick-buttons{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}.wai80-quick-buttons button{width:auto;margin:0;padding:12px 16px}
+.wai80-existing-dashboard{background:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.2);overflow:hidden}.wai80-existing-dashboard>summary{cursor:pointer;padding:16px;font-weight:900;color:#0b4f9c;background:#eef6ff}.wai80-existing-dashboard[open]>summary{border-bottom:1px solid #d8e0e8}.wai80-existing-dashboard>.hero,.wai80-existing-dashboard>.card{margin:14px}
+@media(max-width:1100px){.wai80-kpi-grid{grid-template-columns:repeat(3,1fr)}.wai80-two-column{grid-template-columns:1fr}.wai80-performance-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.wai80-status-banner,.wai80-quick-access{display:block}.wai80-health-ring{margin-top:16px;width:110px;height:110px}.wai80-kpi-grid,.wai80-performance-grid{grid-template-columns:1fr 1fr}.wai80-quick-buttons{display:grid;margin-top:14px}.wai80-quick-buttons button{width:100%}}
+@media(max-width:440px){.wai80-kpi-grid,.wai80-performance-grid{grid-template-columns:1fr}.wai80-status-banner h2{font-size:24px}}
+
+/* WAI-084 MOT Intelligence */
+.mot-hero{margin-bottom:18px}.mot-heading-row{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.mot-filter{min-width:170px}.mot-board{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}.mot-job-card{border:1px solid #28435d;border-left:5px solid #5e7d99;border-radius:12px;padding:16px;background:#10283a}.mot-job-card h3{font-size:28px;margin:8px 0}.mot-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.mot-stage-pill{display:inline-block;padding:6px 9px;border-radius:999px;background:#18384f;font-size:12px;font-weight:700}.mot-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.mot-actions button{margin:0}.mot-note{padding:10px;border-radius:8px;background:#0a1d2a;border:1px solid #28435d}.mot-two-column{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.mot-testing{border-left-color:#2fa7ff}.mot-passed,.mot-ready{border-left-color:#31c48d}.mot-advisory,.mot-retest{border-left-color:#f6c453}.mot-failed{border-left-color:#ef5b67}.mot-repair{border-left-color:#ba7cff}@media(max-width:900px){.mot-two-column{grid-template-columns:1fr}.mot-heading-row{display:block}.mot-filter{display:block;margin-top:12px}}
+
+/* WAI-084.2 MOT Intelligence polish */
+.mot-hero{background:#17344a;border-color:#3d647f}
+.mot-board{gap:16px}
+.mot-job-card{position:relative;background:linear-gradient(180deg,#24465d 0%,#1b394e 100%);border-color:#52738a;box-shadow:0 8px 22px rgba(0,0,0,.2);color:#f4f8fb;overflow:hidden}
+.mot-job-card:before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:#7692a8}
+.mot-job-card h3{color:#fff;letter-spacing:.5px}
+.mot-job-card p,.mot-job-card label{color:#d9e5ed}
+.mot-job-card strong{color:#fff}
+.mot-job-card select{background:#f7fafc;color:#142737;border:1px solid #9bb1c0}
+.mot-stage-pill{background:#eef5f9;color:#173044;border:1px solid #b8cad6}
+.mot-note{background:#153146;border-color:#52738a;color:#fff}
+.mot-actions button{background:#294d65;border-color:#6f8fa4;color:#fff}
+.mot-actions button:hover{background:#355f7b}
+.mot-booked:before{background:#58a6ff}.mot-testing:before{background:#9b7cff}.mot-passed:before,.mot-ready:before{background:#31c48d}.mot-advisory:before,.mot-retest:before{background:#f6c453}.mot-failed:before{background:#ef5b67}.mot-repair:before{background:#ff9f43}
+.technician-mot-controls{margin:16px 0;padding:16px;border:1px solid #496c84;border-radius:12px;background:#17364b}
+.technician-mot-controls h3{margin:0 0 5px;color:#fff}.technician-mot-controls p{margin:0 0 12px;color:#c8d8e3}
+.technician-mot-stage{display:inline-block;margin-bottom:12px;padding:6px 10px;border-radius:999px;background:#eef5f9;color:#173044;font-weight:800}
+.technician-mot-actions{display:flex;flex-wrap:wrap;gap:8px}
+.technician-mot-actions button{margin:0;min-width:145px}
+
+/* WAI-085.1 — MOT Intelligence visual polish */
+.app-header{
+  background:linear-gradient(135deg,#1e3b53 0%,#173149 55%,#224a68 100%);
+  border-bottom-color:#4f7088;
+  box-shadow:0 8px 24px rgba(7,17,29,.18);
+}
+.role-pill{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.28)}
+.tab{
+  background:#36536b;
+  color:#f4f8fb;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 3px 10px rgba(5,17,29,.12);
+  transition:background .15s ease,transform .15s ease,box-shadow .15s ease;
+}
+.tab:hover{background:#466984;transform:translateY(-1px);box-shadow:0 6px 14px rgba(5,17,29,.18)}
+.tab.active{background:linear-gradient(135deg,#1677ff,#0b62d6);box-shadow:0 7px 18px rgba(11,110,253,.3)}
+
+#motIntelligenceScreen .mot-hero{
+  background:linear-gradient(135deg,#eef7ff 0%,#ffffff 68%);
+  border:1px solid #b8d8f5;
+  box-shadow:0 8px 22px rgba(35,85,125,.14);
+  color:#173044;
+}
+#motIntelligenceScreen .mot-hero p{color:#50697c}
+#motIntelligenceScreen .mot-new-booking{
+  width:auto;
+  min-width:210px;
+  padding:14px 20px;
+  margin:0;
+  background:linear-gradient(135deg,#1677ff,#0b62d6);
+  color:#fff;
+  border:0;
+  box-shadow:0 8px 18px rgba(11,110,253,.25);
+  cursor:pointer;
+}
+#motIntelligenceScreen .mot-new-booking:hover{transform:translateY(-1px);box-shadow:0 11px 22px rgba(11,110,253,.32)}
+
+#motIntelligenceScreen #motKpiCards .stat{border:1px solid #dce7ef;box-shadow:0 5px 15px rgba(31,67,94,.1)}
+#motIntelligenceScreen #motKpiCards .mot-kpi-icon{display:block;font-size:21px;margin-bottom:5px}
+#motIntelligenceScreen #motKpiCards .stat strong{color:#122a3c}
+
+#motIntelligenceScreen .mot-job-card{
+  background:linear-gradient(180deg,#ffffff 0%,#f5f9fc 100%);
+  border-color:#c6d7e3;
+  box-shadow:0 7px 20px rgba(31,67,94,.13);
+  color:#183247;
+}
+#motIntelligenceScreen .mot-job-card h3{font-size:31px;color:#112a3d;margin:9px 0 4px}
+#motIntelligenceScreen .mot-job-card p,
+#motIntelligenceScreen .mot-job-card label{color:#405b6f}
+#motIntelligenceScreen .mot-job-card strong{color:#173044}
+#motIntelligenceScreen .mot-stage-pill{background:#e9f2f8;color:#173044;border-color:#bfd0dc}
+#motIntelligenceScreen .mot-note{background:#eef5fa;border-color:#c6d7e3;color:#173044}
+#motIntelligenceScreen .mot-actions button{background:#e5edf3;border:1px solid #b9cbd8;color:#173044;font-weight:700}
+#motIntelligenceScreen .mot-actions button:hover{background:#d4e3ed}
+#motIntelligenceScreen .mot-job-card select{background:#fff;color:#142737;border-color:#aebfcb}
+#motIntelligenceScreen .mot-booked{border-top:5px solid #58a6ff}
+#motIntelligenceScreen .mot-testing{border-top:5px solid #7b61ff}
+#motIntelligenceScreen .mot-passed,
+#motIntelligenceScreen .mot-ready{border-top:5px solid #24a875}
+#motIntelligenceScreen .mot-advisory,
+#motIntelligenceScreen .mot-retest{border-top:5px solid #e5ad21}
+#motIntelligenceScreen .mot-failed{border-top:5px solid #dc4453}
+#motIntelligenceScreen .mot-repair{border-top:5px solid #f08a2a}
+
+@media(max-width:700px){
+  #motIntelligenceScreen .mot-new-booking{width:100%;margin-top:12px}
+}
+
+/* WAI-085.3 MOT technician workflow */
+.technician-mot-panel{margin-top:18px;border:2px solid #2f80ed;background:#f7fbff}
+.technician-mot-panel.hidden{display:none}
+.mot-clock-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.mot-clock-stat{background:#fff;border:1px solid #d7e3f4;border-radius:12px;padding:12px}
+.mot-clock-stat strong{display:block;font-size:1.25rem}
+.mot-detail-panel{margin-top:14px;padding:14px;background:#fff;border:1px solid #d7e3f4;border-radius:12px}
+.mot-detail-panel textarea{min-height:90px}
+.mot-alert-note{border-left:5px solid #ef4444;padding:10px;background:#fff4f4;margin:10px 0}
+.mot-alert-note.advisory{border-left-color:#f59e0b;background:#fff9eb}
+
+/* WAI-086 Service Manager Action Queue */
+.manager-action-badge{margin-left:7px;min-width:21px;height:21px;padding:0 6px;border-radius:999px;align-items:center;justify-content:center;background:#dc2626;color:#fff;font-size:12px;font-weight:800;vertical-align:middle}
+.manager-action-heading{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.manager-total-badge{display:inline-flex;min-width:30px;height:30px;padding:0 8px;border-radius:999px;align-items:center;justify-content:center;background:#dc2626;color:#fff;font-size:15px;vertical-align:middle}
+.manager-action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}
+.manager-action-section{border:1px solid #dbe4ee;border-radius:14px;padding:14px;background:#f8fafc}
+.manager-action-section h3{margin:0 0 12px;display:flex;align-items:center;gap:7px}
+.manager-action-card{background:#fff;border:1px solid #dbe4ee;border-left:6px solid #64748b;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 4px 14px rgba(15,23,42,.06)}
+.manager-action-card.bad{border-left-color:#dc2626}.manager-action-card.warn{border-left-color:#f59e0b}.manager-action-card.good{border-left-color:#16a34a}
+.manager-action-card:last-child{margin-bottom:0}.manager-action-card p{margin:7px 0;color:#334155}
+.manager-action-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.manager-action-reg{display:block;font-size:22px;line-height:1.15;margin-top:4px;color:#0f172a}
+.manager-action-age{white-space:nowrap;border-radius:999px;background:#e2e8f0;padding:5px 9px;font-size:12px;font-weight:800;color:#334155}
+.manager-action-card.bad .manager-action-age{background:#fee2e2;color:#991b1b}.manager-action-card.warn .manager-action-age{background:#fef3c7;color:#92400e}
+.manager-ready-list{margin-top:18px;border:1px solid #bbf7d0;border-radius:12px;padding:12px;background:#f0fdf4}.manager-ready-list summary{font-weight:800;cursor:pointer}
+@media(max-width:850px){.manager-action-grid{grid-template-columns:1fr}.manager-action-top{flex-direction:column}.manager-action-age{align-self:flex-start}}
+
+/* WAI-087 Workshop Control Centre */
+.targets-control-centre{max-width:1440px;margin:0 auto}.targets-hero{display:flex;justify-content:space-between;gap:24px;align-items:center;padding:28px 30px;background:linear-gradient(135deg,#f8fbff,#eef5ff);border:1px solid #d7e5fa}.targets-hero h2{font-size:30px;margin:4px 0 8px}.targets-eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;color:#2767d8}.targets-hero-actions{display:flex;gap:10px;flex-wrap:wrap}.targets-headline-grid{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:14px;margin:16px 0}.targets-headline-card{background:#fff;border:1px solid #e1e7f0;border-radius:18px;padding:18px;box-shadow:0 8px 24px rgba(24,39,75,.08)}.targets-headline-card span{display:block;color:#697386;font-size:13px;margin-bottom:8px}.targets-headline-card strong{font-size:27px;color:#162033}.targets-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,.85fr);gap:16px;align-items:start}.targets-main-column,.targets-side-column{display:grid;gap:16px}.targets-side-column{position:sticky;top:12px}.targets-module{padding:24px;border:1px solid #e1e7f0}.targets-module-heading{display:flex;gap:13px;align-items:flex-start;margin-bottom:18px}.targets-module-heading h2{margin:0 0 4px}.targets-icon{width:40px;height:40px;border-radius:12px;background:#edf4ff;display:grid;place-items:center;font-size:20px;flex:0 0 auto}.targets-form-grid{gap:16px}.targets-form-grid label{font-weight:700;color:#273247}.targets-form-grid input{margin-top:7px;background:#fbfcfe;border:1px solid #d9e1ec;border-radius:12px;padding:13px 14px;font-size:16px}.targets-form-grid input:focus{outline:none;border-color:#2d72e8;box-shadow:0 0 0 3px rgba(45,114,232,.12)}.rate-retail{border-left:4px solid #2d72e8;padding-left:12px}.rate-warranty{border-left:4px solid #8b5cf6;padding-left:12px}.rate-internal{border-left:4px solid #14a36f;padding-left:12px}.target-projection-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}.target-projection{padding:13px;border-radius:13px;background:#f6f8fb;border:1px solid #e3e8ef}.target-projection span{display:block;font-size:12px;color:#697386}.target-projection strong{display:block;font-size:18px;margin-top:4px}.targets-review-card,.targets-preview-card{padding:22px}.targets-review-list{display:grid;gap:10px}.targets-review-item{border-radius:13px;padding:13px 14px;border-left:5px solid #2d72e8;background:#f6f8fb}.targets-review-item.good{border-left-color:#1f9d68;background:#eefaf5}.targets-review-item.warn{border-left-color:#e79b18;background:#fff8e9}.targets-review-item.bad{border-left-color:#d64545;background:#fff0f0}.targets-review-item strong{display:block;margin-bottom:4px}.targets-preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.targets-preview-tile{background:#f6f8fb;border:1px solid #e2e7ef;border-radius:14px;padding:14px;text-align:center}.targets-preview-tile strong{display:block;font-size:22px;color:#172033}.targets-preview-tile span{font-size:12px;color:#697386}.targets-save-panel{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:16px;padding:24px 28px;border:1px solid #cfe0fa;background:linear-gradient(135deg,#f7faff,#eef5ff)}.targets-save-button{min-width:280px;padding:15px 24px;font-size:16px}.targets-capacity-meter{height:8px;border-radius:999px;background:#e8edf4;overflow:hidden;margin-top:8px}.targets-capacity-meter i{display:block;height:100%;background:#2d72e8;border-radius:999px}.targets-capacity-meter i.warn{background:#e79b18}.targets-capacity-meter i.bad{background:#d64545}@media(max-width:1050px){.targets-layout{grid-template-columns:1fr}.targets-side-column{position:static}.targets-headline-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:700px){.targets-hero,.targets-save-panel{align-items:stretch;flex-direction:column}.targets-headline-grid{grid-template-columns:1fr 1fr}.target-projection-strip{grid-template-columns:1fr 1fr}.targets-save-button{min-width:0;width:100%}}
+
+/* WAI-087.1 KPI scorecard correction and period selector */
+.scorecard-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:14px}
+.scorecard-heading h2{margin-bottom:4px}
+.scorecard-period{min-width:190px;margin:0}
+.scorecard-period select{margin-top:6px}
+.kpi-status-line{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:8px;color:#475569;font-size:.92rem}
+.kpi-data-warning{border-left:5px solid #f59e0b;background:#fffbeb;padding:12px 14px;border-radius:12px;margin-bottom:12px}
+
+/* WAI-092 Technician League Intelligence */
+.wai092-shell{display:grid;gap:16px}.wai092-heading{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;flex-wrap:wrap}.wai092-heading h3{margin:0 0 4px;font-size:1.2rem}.wai092-heading p{margin:0;color:#64748b}.wai092-heading label{min-width:150px;font-weight:800}.wai092-heading select{margin-top:5px}.wai092-movers{display:grid;grid-template-columns:1fr 1fr;gap:12px}.wai092-mover{border:1px solid #dbe4ee;border-left:6px solid #64748b;border-radius:14px;padding:14px;background:#f8fafc}.wai092-mover.good{border-left-color:#16a34a;background:#f0fdf4}.wai092-mover.bad{border-left-color:#dc2626;background:#fff7f7}.wai092-mover>span,.wai092-mover>strong{display:block}.wai092-mover>strong{font-size:1.2rem;margin:4px 0}.wai092-mover p{margin:4px 0}.wai092-mover small{color:#64748b}.wai092-table-wrap{overflow:auto}.wai092-table{width:100%;border-collapse:collapse;min-width:760px}.wai092-table.detailed{min-width:1180px}.wai092-table th,.wai092-table td{padding:11px 10px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:middle}.wai092-table th{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b;background:#f8fafc;position:sticky;top:0}.wai092-table td small{display:block;color:#64748b;font-size:.72rem}.wai092-trend{display:inline-flex;margin-left:6px;font-weight:900}.wai092-trend.up,.wai092-rank.up{color:#15803d}.wai092-trend.down,.wai092-rank.down{color:#dc2626}.wai092-trend.flat,.wai092-rank.flat{color:#64748b}.wai092-rank{font-weight:900;white-space:nowrap}.wai092-badge{display:inline-flex;margin-left:7px;padding:2px 6px;border-radius:999px;background:#fff7d6;color:#8a5a00;font-size:.68rem;font-weight:900}.wai092-streak{white-space:nowrap;font-weight:800}.league-na{color:#94a3b8}.wai092-section-title{margin-top:8px}.wai092-section-title h3{margin:0 0 3px}.wai092-section-title p{margin:0;color:#64748b}.wai092-record-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:12px}.wai092-record{border:1px solid #dbe4ee;border-radius:14px;padding:15px;background:#fff;box-shadow:0 5px 15px rgba(15,23,42,.05)}.wai092-record h4{margin:0 0 10px;font-size:1.08rem}.wai092-record div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #eef2f7}.wai092-record div:last-child{border-bottom:0}.wai092-record span{color:#475569}.wai092-hall{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.wai092-hall article{border:1px solid #e6d9a8;background:linear-gradient(180deg,#fffdf4,#fff);border-radius:15px;padding:16px;text-align:center}.wai092-hall article>span{font-size:1.7rem}.wai092-hall h4{margin:5px 0;color:#6b4f00}.wai092-hall strong{display:block;font-size:1.1rem}.wai092-hall p{font-size:1.35rem;font-weight:900;margin:5px 0}.wai092-hall small{color:#64748b}.wai092-shell.compact .wai092-heading h3{display:none}.wai092-shell.compact .wai092-heading p{font-weight:700}.wai092-shell.compact .wai092-mover{padding:11px 13px}
+@media(max-width:760px){.wai092-movers{grid-template-columns:1fr}.wai092-heading{align-items:stretch}.wai092-heading label{width:100%}}

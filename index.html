@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Workshop AI OS — WAI-099.1 Finance Centre</title>
+  <title>Workshop AI OS — WAI-104.0 Customer Portal</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="wai093-vhc.css">
   <link rel="stylesheet" href="wai094-intelligence.css">
   <link rel="stylesheet" href="wai095-workshop-intelligence.css">
   <link rel="stylesheet" href="wai096-crm.css">
   <link rel="stylesheet" href="finance-centre.css">
+  <link rel="stylesheet" href="customer-portal.css">
+  <link rel="stylesheet" href="ui-responsive.css">
 </head>
 
 <body>
@@ -22,7 +24,7 @@
     <div>
       <h1><span>WORKSHOP</span> <strong>AI</strong></h1>
       <p class="tagline">Revolutionising workshops</p>
-      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Version WAI-099.1 · Finance Centre Foundation</p>
+      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Version WAI-104.0 · Customer Portal Foundation</p>
     </div>
   </div>
   <div class="role-pill">Service Manager</div>
@@ -43,6 +45,7 @@
     <button class="tab" data-screen="targetsScreen">Targets</button>
     <button class="tab" data-screen="vehicleIntelligenceScreen">Vehicle Intelligence</button>
     <button class="tab" data-screen="crmScreen">Customer CRM</button>
+    <button class="tab" data-screen="customerPortalScreen">Customer Portal</button>
     <button class="tab" data-screen="financeCentreScreen">Finance Centre</button>
   </nav>
 
@@ -543,7 +546,10 @@
           <input id="partsOrderSupplierOther" placeholder="Enter supplier name">
         </label>
         <label>Part Required
-          <input id="partsOrderPartNumber" placeholder="Example: Front brake pads">
+          <input id="partsOrderPartNumber" list="partsOrderKnownNumbers" placeholder="Example: 03L129620" autocomplete="off" required>
+          <datalist id="partsOrderKnownNumbers"></datalist>
+          <small class="muted">Required. The exact part number is used to identify the part and compare its cost history.</small>
+          <div id="partsOrderPriceAlert"></div>
         </label>
         <label>Order Number
           <input id="partsOrderReference" placeholder="Supplier order number">
@@ -679,13 +685,13 @@
       <div id="workshopIntelligenceReportList" class="job-list"></div>
     </div>
 
-    <div id="workshopIntelligencePrintable" class="card">
+    <div id="workshopIntelligencePrintable" class="card intelligence-report-hidden">
       <div class="intelligence-report-heading">
         <div>
           <h2 id="workshopIntelligenceTitle">Workshop Performance</h2>
           <p id="workshopIntelligencePeriodLabel" class="muted"></p>
         </div>
-        <button id="toggleFavouriteWorkshopIntelligence" class="secondary intelligence-favourite-button">☆ Favourite</button>
+        <div class="intelligence-report-actions"><button id="toggleFavouriteWorkshopIntelligence" class="secondary intelligence-favourite-button">☆ Favourite</button><button id="closeWorkshopIntelligenceReport" class="secondary">Close Report</button></div>
       </div>
       <div id="workshopIntelligenceComparison" class="coach-list"></div>
       <div id="workshopIntelligenceSummary" class="stats"></div>
@@ -933,16 +939,87 @@
       <div><span class="crm-eyebrow">WAI-096 · CUSTOMER RELATIONSHIP MANAGEMENT</span><h2>Customer CRM</h2><p>Customers, households, vehicle passports, maintenance intelligence and data quality—kept separate from workshop operations.</p></div>
       <div class="crm-hero-actions"><button class="primary" id="crmNewCustomerBtn">+ New Customer</button><button class="secondary" id="crmDataIntegrityBtn">Data Integrity</button></div>
     </div>
-    <div id="crmStats" class="stats"></div>
-    <div class="crm-toolbar card">
-      <input id="crmSearch" placeholder="Search name, registration, phone, email, postcode or customer ID">
-      <select id="crmFilter"><option value="all">All customers</option><option value="due">Maintenance due</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="gold">Gold loyalty</option></select>
-      <button id="crmRefresh" class="secondary">Refresh</button>
+    <div class="crm-main-tabs"><button id="crmCustomersTab" class="secondary active">Customer Database</button><button id="crmProspectsTab" class="secondary">Prospect Centre</button></div>
+    <div id="crmCustomerArea">
+      <div id="crmStats" class="stats"></div>
+      <div class="crm-toolbar card">
+        <input id="crmSearch" placeholder="Search name, registration, phone, email, postcode or customer ID">
+        <select id="crmFilter"><option value="all">All customers</option><option value="due">Maintenance due</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="gold">Gold loyalty</option></select>
+        <button id="crmRefresh" class="secondary">Refresh</button>
+      </div>
+      <div class="crm-layout">
+        <aside class="card crm-list-panel"><div class="crm-panel-title"><h2>Customers</h2><span id="crmResultCount" class="muted"></span></div><div id="crmCustomerList" class="crm-customer-list"></div></aside>
+        <div id="crmWorkspace" class="crm-workspace">
+          <div class="card crm-empty"><h2>Select a customer</h2><p class="muted">Open a customer to view health, vehicles, maintenance, communications and history.</p></div>
+        </div>
+      </div>
     </div>
-    <div class="crm-layout">
-      <aside class="card crm-list-panel"><div class="crm-panel-title"><h2>Customers</h2><span id="crmResultCount" class="muted"></span></div><div id="crmCustomerList" class="crm-customer-list"></div></aside>
-      <div id="crmWorkspace" class="crm-workspace">
-        <div class="card crm-empty"><h2>Select a customer</h2><p class="muted">Open a customer to view health, vehicles, maintenance, communications and history.</p></div>
+    <div id="crmProspectArea" class="hidden"></div>
+  </section>
+
+
+  <section id="customerPortalScreen" class="screen">
+    <div class="portal-shell">
+      <div class="portal-hero">
+        <div>
+          <span class="portal-eyebrow">WAI-104.0 · READ-ONLY CUSTOMER PORTAL</span>
+          <h2>Customer Portal &amp; Digital Vehicle Record</h2>
+          <p>Give customers a clear view of their vehicle, current visit and completed history. No authorisation, payment or booking actions are included.</p>
+        </div>
+        <div class="portal-mode-badge">Read only</div>
+      </div>
+
+      <div class="portal-admin card">
+        <div>
+          <h3>Portal Publisher</h3>
+          <p class="muted">Select a vehicle, choose what is visible and create a customer access code for this browser-based build.</p>
+        </div>
+        <div class="portal-admin-grid">
+          <label>Find vehicle
+            <input id="portalVehicleSearch" placeholder="Registration, customer, phone or job number">
+          </label>
+          <label>Vehicle
+            <select id="portalVehicleSelect"><option value="">Select a vehicle</option></select>
+          </label>
+          <label>Customer access code
+            <div class="portal-code-row"><input id="portalAccessCode" readonly placeholder="Generate code"><button id="portalGenerateCode" type="button">Generate</button></div>
+          </label>
+        </div>
+        <div class="portal-visibility">
+          <label><input type="checkbox" id="portalShowCurrent" checked> Current visit</label>
+          <label><input type="checkbox" id="portalShowHistory" checked> Completed history</label>
+          <label><input type="checkbox" id="portalShowVhc" checked> VHC results</label>
+          <label><input type="checkbox" id="portalShowMedia" checked> Photos &amp; videos</label>
+          <label><input type="checkbox" id="portalShowDocuments" checked> Documents &amp; invoices</label>
+          <label><input type="checkbox" id="portalShowWarranty" checked> Parts &amp; warranty</label>
+          <label><input type="checkbox" id="portalShowRecommendations" checked> Advisories &amp; future maintenance</label>
+        </div>
+        <div class="portal-actions">
+          <button id="portalSaveSettings" type="button">Save portal</button>
+          <button id="portalCopyAccess" type="button" class="secondary">Copy access details</button>
+          <button id="portalOpenPreview" type="button" class="secondary">Open customer preview</button>
+        </div>
+        <p class="portal-security-note">This stage is a local working prototype. Production access will use a secure database, customer authentication and expiring links.</p>
+      </div>
+
+      <div id="portalCustomerPreview" class="portal-customer hidden">
+        <div class="portal-customer-header">
+          <div>
+            <span class="portal-eyebrow">YOUR DIGITAL VEHICLE RECORD</span>
+            <h2 id="portalVehicleTitle">Your vehicle</h2>
+            <p id="portalCustomerGreeting"></p>
+          </div>
+          <button id="portalClosePreview" class="secondary" type="button">Back to publisher</button>
+        </div>
+        <div id="portalVehicleToday" class="portal-today-grid"></div>
+        <div id="portalCurrentVisit"></div>
+        <div id="portalVehicleTimeline"></div>
+        <div id="portalVehicleDetails"></div>
+      </div>
+
+      <div id="portalEmptyState" class="card portal-empty">
+        <h3>Select a vehicle to create its portal</h3>
+        <p class="muted">The portal will use existing Workshop AI job history, technician write-ups, VHC information, parts records and finance documents.</p>
       </div>
     </div>
   </section>
@@ -957,6 +1034,7 @@
       <button class="active" data-finance-panel="financeDashboard">Dashboard</button>
       <button data-finance-panel="invoiceRegister">Invoice Register</button>
       <button data-finance-panel="invoiceBuilder">Invoice Builder</button>
+      <button data-finance-panel="partsDifferenceReport">Parts Differences</button>
       <button data-finance-panel="financeSettings">Settings</button>
     </div>
 
@@ -970,6 +1048,7 @@
     </div>
 
     <div id="invoiceBuilder" class="finance-panel"><div id="invoiceBuilderHost"></div></div>
+    <div id="partsDifferenceReport" class="finance-panel"><div id="partsDifferenceReportHost"></div></div>
     <div id="financeSettings" class="finance-panel"><div id="financeSettingsHost"></div></div>
   </section>
 
@@ -983,6 +1062,7 @@
   </div>
 </div>
 <script src="script.js"></script>
+<script src="unified-productivity-engine.js"></script>
 <script src="unified-queue-engine.js"></script>
 <script src="unified-capacity-engine.js"></script>
 <script src="coach-fix.js"></script>
@@ -997,10 +1077,13 @@
 <script src="wai0922-workflow.js"></script>
 <script src="wai093-vhc.js"></script>
 <script src="wai094-intelligence.js"></script>
-<script src="wai095-workshop-intelligence.js"></script>
 <script src="wai096-crm.js"></script>
 <script src="wai0962-customer-recognition.js"></script>
 <script src="finance-centre.js"></script>
+<script src="operational-gp.js"></script>
+<script src="customer-portal.js"></script>
+<script src="wai095-workshop-intelligence.js"></script>
+<script src="wai1022-parts-fix.js"></script>
 <div id="financePrintSheet" class="print-sheet"></div>
 </body>
 </html>
