@@ -52,7 +52,8 @@ window.card=function(job,open=true,manager=false){
    <p><strong>Priority:</strong> ${esc(job.priority||'Not set')} | <strong>Status:</strong> ${esc(job.status||'Not set')}</p>
    <p><strong>Type:</strong> ${esc(job.type)} | <strong>Allowed:</strong> ${esc(job.hours)} hrs | <strong>Actual:</strong> ${(job.actualHours||0).toFixed(2)} hrs | <strong>Efficiency:</strong> ${pct(eff)}</p>
    ${m.preferred?`<p><strong>Preferred contact:</strong> ${esc(m.preferred)}</p>`:''}
-   <div class="job-card-actions"><button onclick="amendHours('${job.id}')">Add Hours</button><button onclick="reassignTech('${job.id}')">Reassign Technician</button><button onclick="managerComment('${job.id}')">Manager Comment</button><button onclick="deleteWorkshopJob('${job.id}')">Delete Job</button><button onclick="showTimelineModal('${job.id}')">Timeline</button>${open?`<button onclick="openJob('${job.id}')">Start / Continue Job</button>`:''}</div>
+   <p class="job-booking-date"><strong>Booked:</strong> ${typeof dateLabel==='function'?dateLabel(String(job.bookingDate||todayISO()).slice(0,10)):esc(job.bookingDate||'Not set')}</p>
+   <div class="job-card-actions">${!completed(job)?`<button class="move-booking-action" type="button" onclick="openMoveBooking('${job.id}')">📅 Move Booking</button>${String(job.status||'').toLowerCase().includes('waiting to start')?`<button class="no-show-action" type="button" onclick="openNoShowMove('${job.id}')">Customer No Show — Move Tomorrow</button>`:''}`:''}<button onclick="amendHours('${job.id}')">Add Hours</button><button onclick="reassignTech('${job.id}')">Reassign Technician</button><button onclick="managerComment('${job.id}')">Manager Comment</button><button onclick="deleteWorkshopJob('${job.id}')">Delete Job</button><button onclick="showTimelineModal('${job.id}')">Timeline</button>${open?`<button onclick="openJob('${job.id}')">Start / Continue Job</button>`:''}</div>
  </div>`;
 };
 

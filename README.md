@@ -16,3 +16,6 @@ Changes:
 - Status is action-driven rather than manually changed in a drop-down.
 
 Keep the previous stable ZIP as a backup while testing.
+
+## WAI-105.5 — Smart Booking Move & Capacity Planner
+Jobs can now be moved directly from the Service Manager diary or Future Bookings. The move retains the complete job record, checks workshop and technician capacity, and writes a permanent audit trail.

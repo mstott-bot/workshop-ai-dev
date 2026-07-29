@@ -71,3 +71,64 @@
 .part-diff-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-weight:800;white-space:nowrap}.part-diff-badge.same{background:#244b3a;color:#bff7d5}.part-diff-badge.increase{background:#5a2630;color:#ffd0d6}.part-diff-badge.decrease{background:#173f58;color:#bfeaff}
 .part-history-row td{background:#101a29!important;padding:0!important}.part-history-panel{padding:18px 22px;color:#e8f1fb}.part-history-panel h4{margin:0 0 12px;color:#fff}.part-history-grid{display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:8px}.part-history-item{background:#1a2a3d;border:1px solid #32465f;border-radius:10px;padding:10px}.part-history-item span{display:block;color:#aebed0;font-size:11px}.part-history-item strong{display:block;margin-top:3px;color:#fff}.part-history-table{width:100%;margin-top:14px;border-collapse:collapse}.part-history-table th,.part-history-table td{padding:9px;border-bottom:1px solid #304158;text-align:left;background:transparent!important;color:#e8f1fb!important}.part-row-toggle{background:#2b6dd8;color:white;border:0;border-radius:8px;padding:7px 10px;cursor:pointer;font-weight:700}
 @media(max-width:900px){.parts-intel-summary{grid-template-columns:repeat(2,1fr)}.part-history-grid{grid-template-columns:repeat(2,1fr)}}
+
+
+/* WAI-105.4 Operational GP visibility and Workshop AI blue table styling */
+#operationalGpReport .invoice-table-wrap{
+  border:1px solid #315b78;
+  border-radius:12px;
+  background:#0d2233;
+  overflow:auto;
+}
+#operationalGpReport .operational-gp-table{
+  width:100%;
+  min-width:760px;
+  margin:0;
+  border-collapse:separate;
+  border-spacing:0;
+  background:#102638!important;
+  color:#eaf5fb!important;
+}
+#operationalGpReport .operational-gp-table thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  padding:12px 10px;
+  background:linear-gradient(180deg,#197fb3 0%,#126894 100%)!important;
+  color:#ffffff!important;
+  border-bottom:1px solid #55c6f4!important;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.035em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+#operationalGpReport .operational-gp-table thead th:first-child{border-top-left-radius:10px}
+#operationalGpReport .operational-gp-table thead th:last-child{border-top-right-radius:10px}
+#operationalGpReport .operational-gp-table tbody tr,
+#operationalGpReport .operational-gp-table tbody td{
+  background:#102638!important;
+  color:#eaf5fb!important;
+}
+#operationalGpReport .operational-gp-table tbody tr:nth-child(even),
+#operationalGpReport .operational-gp-table tbody tr:nth-child(even) td{
+  background:#153249!important;
+}
+#operationalGpReport .operational-gp-table tbody tr:hover,
+#operationalGpReport .operational-gp-table tbody tr:hover td{
+  background:#1c4864!important;
+}
+#operationalGpReport .operational-gp-table td{
+  padding:11px 10px;
+  border-bottom:1px solid #294d65!important;
+  white-space:nowrap;
+}
+#operationalGpReport .operational-gp-table td strong{color:#ffffff!important}
+#operationalGpReport .operational-gp-table th:not(:first-child),
+#operationalGpReport .operational-gp-table td:not(:first-child){text-align:right}
+#operationalGpReport .operational-gp-table tbody tr:last-child td{border-bottom:0!important}
+@media(max-width:900px){
+  #operationalGpReport .operational-gp-table{min-width:700px}
+  #operationalGpReport .operational-gp-table th,
+  #operationalGpReport .operational-gp-table td{padding:10px 8px}
+}

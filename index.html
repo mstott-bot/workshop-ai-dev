@@ -4,14 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workshop AI OS — WAI-104.0 Customer Portal</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=105.5.3" />
   <link rel="stylesheet" href="wai093-vhc.css">
   <link rel="stylesheet" href="wai094-intelligence.css">
   <link rel="stylesheet" href="wai095-workshop-intelligence.css">
   <link rel="stylesheet" href="wai096-crm.css">
   <link rel="stylesheet" href="finance-centre.css">
   <link rel="stylesheet" href="customer-portal.css">
-  <link rel="stylesheet" href="ui-responsive.css">
+  <link rel="stylesheet" href="ui-responsive.css?v=105.5.3">
+  <link rel="stylesheet" href="staff-calendar.css?v=106.0">
 </head>
 
 <body>
@@ -24,7 +25,7 @@
     <div>
       <h1><span>WORKSHOP</span> <strong>AI</strong></h1>
       <p class="tagline">Revolutionising workshops</p>
-      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Version WAI-104.0 · Customer Portal Foundation</p>
+      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Version WAI-106.0 · Staff Calendar & Attendance</p>
     </div>
   </div>
   <div class="role-pill">Service Manager</div>
@@ -37,6 +38,7 @@
     <button class="tab" data-screen="techScreen">Technician</button>
     <button class="tab" data-screen="reportsScreen">Reports</button>
     <button class="tab" data-screen="plannerScreen">Daily Planner</button>
+    <button class="tab" data-screen="staffCalendarScreen">Calendar</button>
     <button class="tab" data-screen="partsScreen">Parts</button>
     <button class="tab" data-screen="partsTyreIntelligenceScreen">Parts &amp; Tyres</button>
     <button class="tab" data-screen="motIntelligenceScreen">MOT Intelligence</button>
@@ -516,6 +518,31 @@
   </section>
 
 
+
+
+  <section id="staffCalendarScreen" class="screen">
+    <div class="card">
+      <div class="scorecard-heading">
+        <div>
+          <h2>📅 Staff Calendar</h2>
+          <p class="muted">This calendar reads and updates the same technician availability records used by the Daily Planner. Holidays, sickness and time off immediately change workshop capacity.</p>
+        </div>
+        <button id="addTimeOffBtn" class="primary">+ Add Holiday / Time Off</button>
+      </div>
+      <div class="calendar-toolbar">
+        <button id="calendarPrevMonth" class="secondary">← Previous Month</button>
+        <h2 id="staffCalendarMonthTitle" class="calendar-month-title"></h2>
+        <button id="calendarNextMonth" class="secondary">Next Month →</button>
+        <button id="calendarToday" class="secondary">Current Month</button>
+      </div>
+      <div class="calendar-legend">
+        <span class="staff-calendar-status working">🟢 Working</span><span class="staff-calendar-status holiday">🏖 Holiday</span><span class="staff-calendar-status sick">🤒 Sick</span><span class="staff-calendar-status training">🎓 Training</span><span class="staff-calendar-status half-day">🟠 Half Day</span><span class="staff-calendar-status not-scheduled">⚫ Not Scheduled</span>
+      </div>
+      <div id="staffCalendarSummary" class="stats"></div>
+      <div id="staffCalendarGrid" class="staff-calendar-wrap"></div>
+    </div>
+  </section>
+
   <section id="partsScreen" class="screen">
     <div class="card">
       <h2>Parts Management</h2>
@@ -697,6 +724,28 @@
       <div id="workshopIntelligenceSummary" class="stats"></div>
       <div id="workshopIntelligenceInsight" class="coach-list"></div>
       <div id="workshopIntelligenceOutput" class="job-list"></div>
+    </div>
+
+
+
+    <div class="card">
+      <h2>Staff Attendance Reports</h2>
+      <p class="muted">Holiday, sickness and all time-off reporting from the same records used by the Daily Planner and Staff Calendar.</p>
+      <div class="attendance-report-tabs">
+        <button class="secondary active" data-attendance-report="all">Attendance Overview</button>
+        <button class="secondary" data-attendance-report="holiday">Holiday Report</button>
+        <button class="secondary" data-attendance-report="sick">Sick Report</button>
+        <button class="secondary" data-attendance-report="timeoff">Time Off Report</button>
+      </div>
+      <div class="attendance-toolbar">
+        <label>Report Period<select id="attendanceReportPeriod"><option value="month">This Month</option><option value="year">This Year</option><option value="previousYear">Previous Year</option><option value="custom">Custom Range</option></select></label>
+        <label>Technician<select id="attendanceReportTechnician"><option value="All">All Technicians</option></select></label>
+        <label>Start Date<input id="attendanceReportStart" type="date"></label>
+        <label>End Date<input id="attendanceReportEnd" type="date"></label>
+      </div>
+      <div class="button-row"><button id="refreshAttendanceReport" class="primary">Refresh Attendance Report</button></div>
+      <div id="attendanceReportSummary" class="attendance-kpis"></div>
+      <div id="attendanceReportOutput" class="job-list"></div>
     </div>
 
     <div class="card">
@@ -1054,6 +1103,24 @@
 
 </main>
 
+
+<div id="attendanceModal" class="attendance-modal hidden">
+  <div class="attendance-modal-card">
+    <h2>Add / Edit Holiday or Time Off</h2>
+    <p class="muted">Saving here updates Daily Planner capacity immediately.</p>
+    <div class="grid">
+      <label>Technician<select id="attendanceTechnician"></select></label>
+      <label>Status<select id="attendanceStatus"><option>Working</option><option>Holiday</option><option>Sick</option><option>Training</option><option>Half Day</option><option>Overtime</option><option>Not Scheduled</option><option>Medical Appointment</option><option>Compassionate Leave</option><option>Unpaid Leave</option><option>Other Time Off</option></select></label>
+      <label>Start Date<input id="attendanceStartDate" type="date"></label>
+      <label>End Date<input id="attendanceEndDate" type="date"></label>
+      <label>Available Hours Per Day<input id="attendanceHours" type="number" min="0" step="0.25"></label>
+      <label>Note<input id="attendanceNote" placeholder="Example: Annual leave"></label>
+    </div>
+    <div class="button-row"><button id="attendanceSave" class="primary">Save to Calendar & Daily Planner</button><button id="attendanceClear" class="secondary">Return to Default Working</button><button id="attendanceCancel" class="secondary">Cancel</button></div>
+    <button id="attendanceClose" class="modal-close" aria-label="Close">×</button>
+  </div>
+</div>
+
 <div id="modal" class="modal hidden">
   <div class="modal-card">
     <button id="closeModal" class="modal-close">×</button>
@@ -1061,7 +1128,7 @@
     <div id="modalTimeline" class="timeline"></div>
   </div>
 </div>
-<script src="script.js"></script>
+<script src="script.js?v=105.5.3"></script>
 <script src="unified-productivity-engine.js"></script>
 <script src="unified-queue-engine.js"></script>
 <script src="unified-capacity-engine.js"></script>
@@ -1078,12 +1145,13 @@
 <script src="wai093-vhc.js"></script>
 <script src="wai094-intelligence.js"></script>
 <script src="wai096-crm.js"></script>
-<script src="wai0962-customer-recognition.js"></script>
+<script src="wai0962-customer-recognition.js?v=105.5.3"></script>
 <script src="finance-centre.js"></script>
 <script src="operational-gp.js"></script>
 <script src="customer-portal.js"></script>
 <script src="wai095-workshop-intelligence.js"></script>
 <script src="wai1022-parts-fix.js"></script>
+<script src="staff-calendar.js?v=106.0"></script>
 <div id="financePrintSheet" class="print-sheet"></div>
 </body>
 </html>
