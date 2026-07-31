@@ -1664,7 +1664,149 @@ document.querySelectorAll("#targetsScreen input").forEach(input=>input.addEventL
 if($("copyPreviousTargets"))$("copyPreviousTargets").addEventListener("click",()=>{const previous=JSON.parse(localStorage.getItem("workshopAITargetsPreviousMonth")||"null");if(!previous){alert("No previous month target snapshot is available yet.");return}applyTargetsToInputs(previous)});
 if($("resetTargetsDraft"))$("resetTargetsDraft").addEventListener("click",()=>{loadTargetsInputs();renderKpiTargetsPreview()});
 if($("saveTargets")) $("saveTargets").addEventListener("click",()=>{saveCurrentTargetsSnapshot();targets={...targets,...targetsDraft()};addRateHistoryEntry(targets.rateEffectiveDate,targets.retailRate,targets.warrantyRate,targets.internalRate);saveTargetsStore();renderKpiTargetsPreview();render();alert("Workshop settings updated successfully")});
-$("copyReport").addEventListener("click",()=>{navigator.clipboard.writeText($("generatedReport").textContent);alert("Report copied")});let recognition;if("webkitSpeechRecognition"in window){recognition=new webkitSpeechRecognition();recognition.continuous=false;recognition.interimResults=false;recognition.lang="en-GB";recognition.onresult=e=>{const text=e.results[0][0].transcript;if(activeVoiceTarget){const box=$(activeVoiceTarget);box.value=(box.value+" "+text).trim()}}}document.querySelectorAll(".voiceBtn").forEach(btn=>btn.addEventListener("click",()=>{activeVoiceTarget=btn.dataset.target;if(!recognition){alert("Voice recognition is not supported in this browser.");return}recognition.start()}));$("techFilter").addEventListener("change",renderTech);
+$("copyReport").addEventListener("click",()=>{navigator.clipboard.writeText($("generatedReport").textContent);alert("Report copied")});/* WAI-108.3 Continuous Technician Dictation Mode */
+let recognition=null;
+let voiceIsListening=false;
+let voiceIsStarting=false;
+let voiceSessionActive=false;
+let voiceManualStop=false;
+let voiceRestartTimer=null;
+let voiceInactivityTimer=null;
+let voiceResultSegments=new Map();
+let voiceSegmentCounter=0;
+let voiceInterimText="";
+let voiceLastError="";
+let voicePermissionChecked=false;
+const VOICE_LONG_SILENCE_MS=25000;
+const VOICE_RESTART_DELAY_MS=350;
+const VOICE_TERM_RULES=[
+  [/\bknox sensor\b/gi,"NOx sensor"],[/\bnox sensor\b/gi,"NOx sensor"],[/\bd p f\b/gi,"DPF"],[/\be g r\b/gi,"EGR"],[/\be m l\b/gi,"EML"],[/\ba b s\b/gi,"ABS"],[/\bd s g\b/gi,"DSG"],[/\bad blue\b/gi,"AdBlue"],[/\bdual mass fly wheel\b/gi,"dual-mass flywheel"],[/\bdual mass flywheel\b/gi,"dual-mass flywheel"],[/\bc v boot\b/gi,"CV boot"],[/\bc v joint\b/gi,"CV joint"],[/\bnear side\b/gi,"nearside"],[/\boff side\b/gi,"offside"],[/\bnear-side\b/gi,"nearside"],[/\boff-side\b/gi,"offside"],[/\brocker cover gasket\b/gi,"rocker-cover gasket"],[/\btrack rod end\b/gi,"track-rod end"],[/\blower arm\b/gi,"lower suspension arm"],[/\banti roll bar\b/gi,"anti-roll bar"],[/\bwheel baring\b/gi,"wheel bearing"],[/\bbreak pads\b/gi,"brake pads"],[/\bbreak discs\b/gi,"brake discs"],[/\bbreak caliper\b/gi,"brake caliper"]
+];
+function speechRecognitionConstructor(){return window.SpeechRecognition||window.webkitSpeechRecognition||null}
+function normaliseVoiceWords(text){
+  let out=String(text||"").replace(/[\u2018\u2019]/g,"'").replace(/\s+/g," ").trim();
+  VOICE_TERM_RULES.forEach(([rule,replacement])=>{out=out.replace(rule,replacement)});
+  out=out.replace(/\b(?:um+|uh+|erm+|er+)\b[,.]?\s*/gi,"");
+  out=out.replace(/\b([a-z][a-z'-]{1,})\s+\1\b/gi,"$1");
+  return out.replace(/\s+([,.;!?])/g,"$1").replace(/([,.;!?])(?=[A-Za-z])/g,"$1 ").replace(/\s+/g," ").trim();
+}
+function phraseKey(text){return normaliseVoiceWords(text).toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
+function dedupeVoiceSegments(segments){
+  const accepted=[];
+  segments.map(normaliseVoiceWords).filter(Boolean).forEach(segment=>{
+    const key=phraseKey(segment);if(!key)return;
+    const duplicate=accepted.some(existing=>{const old=phraseKey(existing);return key===old||(Math.min(key.length,old.length)>18&&(key.includes(old)||old.includes(key)))});
+    if(!duplicate)accepted.push(segment);
+  });
+  return accepted;
+}
+function polishVoiceWriteUp(text){
+  let out=dedupeVoiceSegments(String(text||"").split(/(?<=[.!?])\s+|\n+/)).join(" ");
+  out=normaliseVoiceWords(out);if(!out)return "";
+  out=out.charAt(0).toUpperCase()+out.slice(1);if(!/[.!?]$/.test(out))out+=".";
+  return out.replace(/\s+/g," ").trim();
+}
+function ensureVoiceModal(){
+  if($("voiceWriteupModal"))return;
+  const modal=document.createElement("div");modal.id="voiceWriteupModal";modal.className="voice-writeup-modal";modal.innerHTML=`<div class="voice-writeup-card" role="dialog" aria-modal="true" aria-labelledby="voiceWriteupTitle"><div class="voice-writeup-header"><div><span class="voice-kicker">WAI-108.3 · Continuous Dictation</span><h3 id="voiceWriteupTitle">Record job-card notes</h3></div><button type="button" class="voice-close" id="voiceCloseBtn" aria-label="Close">×</button></div><div class="voice-status" id="voiceStatus"><span class="voice-status-dot"></span><strong id="voiceStatusText">Ready to record</strong></div><p class="voice-help" id="voiceHelp">Speak naturally and pause when needed. Workshop AI will keep listening until you press Stop, or after 25 seconds of complete silence.</p><div class="voice-live-box" id="voiceLiveBox">Your transcript will appear here.</div><label class="voice-preview-label" for="voicePreviewText">Cleaned write-up</label><textarea id="voicePreviewText" class="voice-preview" placeholder="The cleaned transcript will appear here."></textarea><div class="voice-actions"><button type="button" class="secondary" id="voiceRecordAgainBtn">🎤 Start Recording</button><button type="button" class="secondary" id="voiceStopBtn" disabled>■ Stop</button><button type="button" class="primary" id="voiceAcceptBtn" disabled>✓ Accept & Add</button><button type="button" class="secondary" id="voiceDictationBtn">⌨ Use Device Dictation</button><button type="button" class="secondary" id="voiceCancelBtn">Cancel</button></div><p class="voice-safety">Voice only adds written notes. It cannot change job status or labour timers.</p></div>`;
+  document.body.appendChild(modal);
+  $("voiceCloseBtn").onclick=closeVoiceWriteup;$("voiceCancelBtn").onclick=closeVoiceWriteup;$("voiceRecordAgainBtn").onclick=startVoiceCapture;$("voiceStopBtn").onclick=stopVoiceCapture;$("voiceAcceptBtn").onclick=acceptVoiceWriteup;$("voiceDictationBtn").onclick=useDeviceDictation;
+  modal.addEventListener("click",e=>{if(e.target===modal)closeVoiceWriteup()});
+}
+function setVoiceStatus(state,message){const status=$("voiceStatus");if(!status)return;status.className=`voice-status ${state||""}`;$("voiceStatusText").textContent=message}
+function collectedVoiceText(){return dedupeVoiceSegments([...voiceResultSegments.values()]).join(" ")}
+function updateVoicePreview(){
+  const finalText=collectedVoiceText();
+  const live=[finalText,normaliseVoiceWords(voiceInterimText)].filter(Boolean).join(" ");
+  $("voiceLiveBox").textContent=live||"Listening…";
+  const polished=polishVoiceWriteUp(finalText||voiceInterimText);
+  if(polished){$("voicePreviewText").value=polished;$("voiceAcceptBtn").disabled=false}
+}
+function clearVoiceTimers(){
+  if(voiceRestartTimer){clearTimeout(voiceRestartTimer);voiceRestartTimer=null}
+  if(voiceInactivityTimer){clearTimeout(voiceInactivityTimer);voiceInactivityTimer=null}
+}
+function resetVoiceInactivityTimer(){
+  if(voiceInactivityTimer)clearTimeout(voiceInactivityTimer);
+  if(!voiceSessionActive)return;
+  voiceInactivityTimer=setTimeout(()=>{
+    if(!voiceSessionActive)return;
+    voiceManualStop=true;voiceSessionActive=false;
+    setVoiceStatus("processing","Long pause detected — preparing your write-up…");
+    try{recognition?.stop()}catch(e){}
+  },VOICE_LONG_SILENCE_MS);
+}
+function openVoiceWriteup(target){
+  ensureVoiceModal();activeVoiceTarget=target;voiceResultSegments=new Map();voiceSegmentCounter=0;voiceInterimText="";voiceLastError="";voiceSessionActive=false;voiceManualStop=false;clearVoiceTimers();
+  $("voiceLiveBox").textContent="Your transcript will appear here.";$("voicePreviewText").value="";$("voiceAcceptBtn").disabled=true;$("voiceStopBtn").disabled=true;$("voiceRecordAgainBtn").disabled=false;$("voiceRecordAgainBtn").textContent="🎤 Start Recording";setVoiceStatus("","Ready to record");$("voiceWriteupModal").classList.add("open");
+}
+function closeVoiceWriteup(){voiceManualStop=true;voiceSessionActive=false;clearVoiceTimers();if(recognition&&(voiceIsListening||voiceIsStarting)){try{recognition.abort()}catch(e){}}voiceIsListening=false;voiceIsStarting=false;$("voiceWriteupModal")?.classList.remove("open")}
+async function requestVoicePermission(){
+  if(!navigator.mediaDevices?.getUserMedia)return true;
+  try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});stream.getTracks().forEach(track=>track.stop());voicePermissionChecked=true;return true}
+  catch(err){const denied=err?.name==="NotAllowedError"||err?.name==="PermissionDeniedError";setVoiceStatus("error",denied?"Microphone access is blocked. Select the padlock beside the address, allow Microphone, then reload Workshop AI.":"No working microphone could be opened on this device.");return false}
+}
+function configureRecognition(){
+  const Ctor=speechRecognitionConstructor();if(!Ctor)return null;
+  const r=new Ctor();
+  r.continuous=true;r.interimResults=true;r.maxAlternatives=1;r.lang="en-GB";
+  r.onstart=()=>{voiceIsStarting=false;voiceIsListening=true;voiceLastError="";setVoiceStatus("listening","Listening — pause naturally, press Stop when finished");$("voiceStopBtn").disabled=false;$("voiceRecordAgainBtn").disabled=true;$("voiceLiveBox").classList.add("listening");resetVoiceInactivityTimer()};
+  r.onspeechstart=()=>{setVoiceStatus("listening","Listening…");resetVoiceInactivityTimer()};
+  r.onspeechend=()=>{if(voiceSessionActive)setVoiceStatus("listening","Waiting for more speech…")};
+  r.onresult=e=>{
+    let interim="";
+    for(let i=e.resultIndex||0;i<e.results.length;i++){
+      const t=e.results[i][0]?.transcript||"";
+      if(e.results[i].isFinal){voiceResultSegments.set(voiceSegmentCounter++,t)}else interim+=` ${t}`;
+    }
+    voiceInterimText=interim.trim();updateVoicePreview();resetVoiceInactivityTimer();
+  };
+  r.onerror=e=>{
+    voiceIsStarting=false;voiceIsListening=false;voiceLastError=e.error||"unknown";
+    const messages={"not-allowed":"Microphone permission is blocked. Allow microphone access for 127.0.0.1 and reload the page.","service-not-allowed":"This browser has disabled its online speech-recognition service. Open Workshop AI in Google Chrome, or use Device Dictation below.","audio-capture":"No working microphone was found.","network":"The browser speech service could not connect. Check the internet connection and try again.","aborted":"Recording cancelled."};
+    if(e.error==="no-speech"&&voiceSessionActive){voiceLastError="";setVoiceStatus("listening","Waiting for more speech…");return}
+    if(e.error!=="aborted")setVoiceStatus("error",messages[e.error]||"Voice recognition stopped unexpectedly. Please try again.");
+    if(e.error && !["no-speech","aborted"].includes(e.error))voiceSessionActive=false;
+  };
+  r.onend=()=>{
+    voiceIsListening=false;voiceIsStarting=false;$("voiceLiveBox")?.classList.remove("listening");updateVoicePreview();
+    if(voiceSessionActive&&!voiceManualStop&&!voiceLastError){
+      setVoiceStatus("listening","Still recording — waiting for more speech…");
+      voiceRestartTimer=setTimeout(()=>startRecognitionCycle(),VOICE_RESTART_DELAY_MS);
+      return;
+    }
+    clearVoiceTimers();$("voiceStopBtn").disabled=true;$("voiceRecordAgainBtn").disabled=false;$("voiceRecordAgainBtn").textContent="🎤 Record Again";
+    if($("voicePreviewText").value)setVoiceStatus("ready","Write-up ready to review");else if(!voiceLastError)setVoiceStatus("","Ready to record");
+  };
+  return r;
+}
+function startRecognitionCycle(){
+  if(!voiceSessionActive||voiceManualStop||voiceIsListening||voiceIsStarting)return;
+  recognition=configureRecognition();voiceIsStarting=true;
+  try{recognition.start()}catch(err){voiceIsStarting=false;voiceRestartTimer=setTimeout(()=>startRecognitionCycle(),700)}
+}
+async function startVoiceCapture(){
+  if(voiceIsListening||voiceIsStarting||voiceSessionActive)return;
+  if(!window.isSecureContext){setVoiceStatus("error","Microphone recording requires HTTPS or localhost. Open Workshop AI through your local server, not directly as a file.");return}
+  if(!speechRecognitionConstructor()){setVoiceStatus("error","This browser does not provide speech recognition. Open Workshop AI in Google Chrome, or use Device Dictation below.");return}
+  voiceIsStarting=true;$("voiceRecordAgainBtn").disabled=true;setVoiceStatus("processing","Checking microphone permission…");
+  const allowed=voicePermissionChecked?true:await requestVoicePermission();
+  if(!allowed){voiceIsStarting=false;$("voiceRecordAgainBtn").disabled=false;return}
+  voiceResultSegments=new Map();voiceSegmentCounter=0;voiceInterimText="";voiceLastError="";voiceManualStop=false;voiceSessionActive=true;$("voiceLiveBox").textContent="Starting microphone…";$("voicePreviewText").value="";$("voiceAcceptBtn").disabled=true;
+  voiceIsStarting=false;setVoiceStatus("processing","Starting microphone…");startRecognitionCycle();
+}
+function stopVoiceCapture(){
+  voiceManualStop=true;voiceSessionActive=false;clearVoiceTimers();voiceInterimText="";updateVoicePreview();setVoiceStatus("processing","Processing…");
+  if(recognition&&(voiceIsListening||voiceIsStarting)){try{recognition.stop()}catch(err){voiceIsListening=false;voiceIsStarting=false}}
+  else{voiceIsListening=false;voiceIsStarting=false;$("voiceStopBtn").disabled=true;$("voiceRecordAgainBtn").disabled=false;if($("voicePreviewText").value)setVoiceStatus("ready","Write-up ready to review")}
+}
+function useDeviceDictation(){const preview=$("voicePreviewText");if(!preview)return;preview.focus();$("voiceAcceptBtn").disabled=false;setVoiceStatus("ready","Use the microphone key on your keyboard, then review and accept the text.")}
+function acceptVoiceWriteup(){
+  const cleaned=polishVoiceWriteUp($("voicePreviewText")?.value||"");if(!cleaned||!activeVoiceTarget)return;const box=$(activeVoiceTarget);if(!box)return;
+  const existing=String(box.value||"").trim();box.value=existing?`${existing}${/[.!?]$/.test(existing)?"":"."}\n${cleaned}`:cleaned;box.dispatchEvent(new Event("input",{bubbles:true}));closeVoiceWriteup();
+}
+document.querySelectorAll(".voiceBtn").forEach(btn=>{const replacement=btn.cloneNode(true);btn.parentNode.replaceChild(replacement,btn);replacement.addEventListener("click",()=>openVoiceWriteup(replacement.dataset.target))});
+$("techFilter").addEventListener("change",renderTech);
 
 /* =========================================================
    Workshop AI OS v4.1 — WAI-002 Garage Health Command Centre

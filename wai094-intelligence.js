@@ -22,7 +22,7 @@ function possibleRepeatPairs(){const days=Number(settings.repeatDays||90),ms=day
 function confirmedRepeats(){return jobs.filter(j=>j.ftf?.reviewStatus==='Confirmed Repeat Repair');}
 function vhcRows(){const map={};jobs.forEach(j=>{const t=j.technician||'Other';if(!map[t])map[t]={tech:t,jobs:0,vhcs:0,amber:0,red:0,booked:0,completed:0,opps:0,potential:0,bookedValue:0};if(isDone(j))map[t].jobs++;if(j.vhc?.status==='Completed'){map[t].vhcs++;Object.values(j.vhc.checks||{}).forEach(c=>{if(c.status==='Amber')map[t].amber++;if(c.status==='Red')map[t].red++;});}(j.vhcOpportunities||[]).forEach(o=>{if(o.active===false&&o.status!=='Completed')return;map[t].opps++;map[t].potential+=Number(o.estimatedValue||0);if(o.status==='Booked'){map[t].booked++;map[t].bookedValue+=Number(o.estimatedValue||0);}if(o.status==='Completed'){map[t].completed++;map[t].bookedValue+=Number(o.estimatedValue||0);}});});return Object.values(map).map(r=>Object.assign(r,{vhcPct:r.jobs?r.vhcs/r.jobs*100:0,oppsPerJob:r.jobs?r.opps/r.jobs:0,conversion:r.opps?(r.booked+r.completed)/r.opps*100:0}));}
 function allOps(){const list=[];jobs.forEach(j=>(j.vhcOpportunities||[]).forEach(o=>list.push({job:j,op:o})));return list;}
-function inject(){const manager=document.getElementById('managerScreen');if(manager&&!document.getElementById('wai094ControlCard')){const card=document.createElement('div');card.id='wai094ControlCard';card.className='card wai094-hero';card.innerHTML=`<div><p class="wai094-eyebrow">WAI-094 · LIVE MANAGEMENT INTELLIGENCE</p><h2>Workshop Control Centre</h2><p class="muted">One live view of jobs overrunning, VHC follow-ups, repeat-repair investigations, parts and authorisations.</p></div><button class="primary" onclick="openWAI094ControlCentre()">Open Control Centre <span id="wai094AttentionBadge" class="wai094-badge">0</span></button>`;manager.insertBefore(card,manager.firstChild);}
+function inject(){const manager=document.getElementById('managerScreen');if(manager&&!document.getElementById('wai094ControlCard')){const card=document.createElement('div');card.id='wai094ControlCard';card.className='card wai094-hero';card.innerHTML=`<div><p class="wai094-eyebrow">WAI-109.0 · WORKSHOP CONTROL CENTRE 2.0</p><h2>Workshop Control Centre</h2><p class="muted">One live view of workshop health, performance, financials, customer flow and action queues.</p></div><button class="primary" onclick="openWAI094ControlCentre()">Open Control Centre <span id="wai094AttentionBadge" class="wai094-badge">0</span></button>`;manager.insertBefore(card,manager.firstChild);}
  const reports=document.getElementById('reportsInterfaceScreen');if(reports&&!document.getElementById('wai094ReportLaunchers')){const card=document.createElement('div');card.id='wai094ReportLaunchers';card.className='card';card.innerHTML=`<h2>WAI-094 Intelligence Reports</h2><p class="muted">Open the new management reports without changing the existing Reports Interface.</p><div class="button-row"><button onclick="openWAI094Report('vhc')">VHC Performance</button><button onclick="openWAI094Report('overrun')">Labour Overruns</button><button onclick="openWAI094Report('ftf')">First Time Fix</button></div>`;const printable=document.getElementById('workshopIntelligencePrintable');reports.insertBefore(card,printable||reports.lastChild);}}
 function ensureModal(){if(document.getElementById('wai094Modal'))return;document.body.insertAdjacentHTML('beforeend',`<div id="wai094Modal" class="wai094-modal hidden"><div class="wai094-panel"><div class="wai094-head"><div><h2 id="wai094Title">Workshop Control Centre</h2><p id="wai094Subtitle" class="muted"></p></div><button class="wai094-close" onclick="closeWAI094()">×</button></div><div id="wai094Body"></div></div></div>`);}
 window.closeWAI094=()=>document.getElementById('wai094Modal')?.classList.add('hidden');
@@ -56,6 +56,70 @@ function liveControlMetrics(){
   const retailRate=Number(targets?.retailRate||70);
   return {live,today,techRows,available,clocked,sold,productivity,utilisation,remaining,idle,waitingCustomer,waitingParts,carried,dueOut,motToday,revenueOpportunity:remaining*retailRate};
 }
+function readJson(key,fallback){try{return JSON.parse(localStorage.getItem(key))??fallback}catch(e){return fallback}}
+function invoiceLineTotals(line){const qty=Math.max(0,Number(line?.qty||0)),sell=Math.max(0,Number(line?.sell||0)),cost=Math.max(0,Number(line?.cost||0));const gross=qty*sell;const discount=line?.discountType==='%'?gross*Math.max(0,Number(line?.discount||0))/100:Math.max(0,Number(line?.discount||0));return {net:Math.max(0,gross-Math.min(discount,gross)),cost:qty*cost};}
+function financialMetrics(){
+  const day=todayKey(), invoices=window.WAI099FinanceBridge?.getInvoices?.()||readJson('wai0991Invoices',[]);
+  const active=invoices.filter(i=>String(i.date||'').slice(0,10)===day&&i.status!=='Credited');
+  let labour=0,parts=0,cost=0,sales=0;
+  active.forEach(inv=>(inv.lines||[]).forEach(line=>{const x=invoiceLineTotals(line);sales+=x.net;cost+=x.cost;if(line.type==='Labour'||line.type==='MOT')labour+=x.net;else parts+=x.net;}));
+  return {labour,parts,grossProfit:sales-cost,sales,cost,invoicesReady:invoices.filter(i=>['Authorised','Invoice Ready'].includes(i.status)).length};
+}
+function tomorrowMetrics(){
+  const d=new Date();d.setDate(d.getDate()+1);const key=d.toISOString().slice(0,10);
+  const tomorrowJobs=jobs.filter(j=>String(j.bookingDate||'').slice(0,10)===key&&!isDone(j));
+  let rows=[];try{const techs=typeof getTechs==='function'?getTechs():[];rows=techs.map(t=>typeof forwardAvailabilityFor==='function'?forwardAvailabilityFor(t,key):{hours:Number(plannerSettings?.capacity||8)});}catch(e){}
+  const available=rows.length?rows.reduce((s,r)=>s+Number(r.hours||0),0):(typeof getTechs==='function'?getTechs().length*Number(plannerSettings?.capacity||8):0);
+  const booked=tomorrowJobs.reduce((s,j)=>s+allocation(j),0),spare=Math.max(0,available-booked),rate=Number(targets?.retailRate||70);
+  return {available,booked,spare,value:spare*rate,jobs:tomorrowJobs.length};
+}
+function liveEfficiencyMetrics(){
+  const key=todayKey();
+  // Include every job worked on today: completed jobs plus jobs currently clocked.
+  // Sold hours are the authorised/allocated hours; actual hours use the live timer
+  // for active jobs and stored actual hours for paused/completed jobs.
+  const workedToday=jobs.filter(j=>{
+    const booked=String(j.bookingDate||j.createdAt||'').slice(0,10)===key;
+    const completedToday=isDone(j)&&String(j.completedAt||j.finishedAt||j.bookingDate||'').slice(0,10)===key;
+    const activeToday=!!j.startedAt&&!j.finishedAt;
+    const hasTime=liveHours(j)>0;
+    return hasTime&&(booked||completedToday||activeToday);
+  });
+  const sold=workedToday.reduce((s,j)=>s+allocation(j),0);
+  const actual=workedToday.reduce((s,j)=>s+liveHours(j),0);
+  return {jobs:workedToday.length,sold,actual,efficiency:actual>0?sold/actual*100:0};
+}
+function enhancedMetrics(m){
+  const liveEfficiency=liveEfficiencyMetrics();
+  const efficiency=liveEfficiency.efficiency;
+  const monthCompleted=currentMonthCompletedJobs(),monthRepeats=currentMonthConfirmedRepeats();
+  const ftf=monthCompleted.length?Math.max(0,(monthCompleted.length-monthRepeats.length)/monthCompleted.length*100):100;
+  const ready=jobs.filter(j=>/ready for collection|repair complete/i.test(String(j.status||''))&&!j.collectedAt).length;
+  const overrunRisk=jobs.filter(j=>!isDone(j)&&j.startedAt&&allocation(j)>0&&percent(j)>=Math.min(75,settings.approachPct)&&percent(j)<100).length;
+  const fin=financialMetrics(),tomorrow=tomorrowMetrics();
+  // WAI-109.1: use the single canonical Garage Health engine shared by
+  // Command Centre, Garage Health, Coach and Reports. This prevents the
+  // Control Centre from showing a different percentage for the same data.
+  const masterHealth=typeof window.getMasterGarageHealthSnapshot==='function'
+    ? window.getMasterGarageHealthSnapshot()
+    : null;
+  const health=masterHealth&&Number.isFinite(Number(masterHealth.score))
+    ? Number(masterHealth.score)
+    : 0;
+  return {efficiency,liveEfficiency,ftf,ready,overrunRisk,fin,tomorrow,health};
+}
+
+function updateLiveEfficiencyTile(){
+  const value=document.getElementById('wai094LiveEfficiencyValue');
+  if(!value)return;
+  const metric=liveEfficiencyMetrics();
+  value.textContent=metric.efficiency.toFixed(0)+'%';
+  const button=value.closest('.wai094-tile');
+  if(button){
+    button.classList.remove('good','warn','bad');
+    button.classList.add(metric.efficiency>=95?'good':metric.efficiency>=85?'warn':'bad');
+  }
+}
 function priorityQueueHtml(m,approaching,over,ops,repeats,auth){
   const items=[];
   over.slice(0,3).forEach(j=>items.push({level:'bad',title:`${esc(j.reg||'Vehicle')} — job overrunning`,detail:`${Math.max(0,liveHours(j)-allocation(j)).toFixed(1)} hours over allocation · ${esc(j.technician||'Unassigned')}`,action:`openWAI094List('overrun')`}));
@@ -71,11 +135,17 @@ function controlHtml(){
   const approaching=approachingJobs(),over=overrunJobs(false),ops=allOps().filter(x=>!['Completed','Declined'].includes(x.op.status)),repeats=possibleRepeatPairs().filter(x=>x.current.ftf.reviewStatus==='Possible Repeat Repair');
   const parts=jobs.reduce((s,j)=>s+(j.partsRequests||[]).filter(p=>!['Delivered','Fitted','Returned','Credit Received'].includes(p.status)).length,0);
   const authList=(typeof window.getUnifiedWorkshopQueue==='function'?window.getUnifiedWorkshopQueue('authorisations'):jobs.filter(j=>!isDone(j)&&String(j.status||'').toLowerCase().includes('awaiting')&&(String(j.status||'').toLowerCase().includes('approval')||String(j.status||'').toLowerCase().includes('authorisation'))));
-  const auth=authList.length,m=liveControlMetrics();
+  const auth=authList.length,m=liveControlMetrics(),x=enhancedMetrics(m);
   const capacityState=m.remaining<=0?'bad':m.remaining<=2?'warn':'good';
-  return `<div class="wai094-section-label">Existing attention queues</div><div class="wai094-tiles">${tile('Jobs approaching time',approaching.length,`${settings.approachPct}–99% of allocation`,'warn',"openWAI094List('approaching')")}${tile('Jobs overrunning',over.length,'Manager action required','bad',"openWAI094List('overrun')")}${tile('VHC follow-ups',ops.length,money(ops.reduce((s,x)=>s+Number(x.op.estimatedValue||0),0))+' potential','info',"openWAI094Report('vhc')")}${tile('FTF investigations',repeats.length,`${settings.repeatDays}-day monitoring period`,'purple',"openWAI094Report('ftf')")}${tile('Parts / tyres outstanding',parts,'Awaiting action or delivery','',"show('partsTyreIntelligenceScreen');closeWAI094()")}${tile('Authorisations outstanding',auth,'Retail jobs awaiting approval','',"openWAI094List('authorisations')")}</div>
+  const financeOpen="show('financeCentreScreen');closeWAI094()",reportsOpen="show('reportsInterfaceScreen');closeWAI094()";
+  return `<div class="wai094-section-label">Garage Health</div><div class="wai094-tiles wai094-health-row">${tile('Garage Health',x.health+'%',x.health>=85?'Workshop performing strongly':x.health>=65?'Some areas need attention':'Urgent management focus',x.health>=85?'good':x.health>=65?'warn':'bad',reportsOpen)}</div>
+  <div class="wai094-section-label">Existing attention queues</div><div class="wai094-tiles">${tile('Jobs approaching time',approaching.length,`${settings.approachPct}–99% of allocation`,'warn',"openWAI094List('approaching')")}${tile('Jobs overrunning',over.length,'Manager action required','bad',"openWAI094List('overrun')")}${tile('VHC follow-ups',ops.length,money(ops.reduce((s,x)=>s+Number(x.op.estimatedValue||0),0))+' potential','info',"openWAI094Report('vhc')")}${tile('FTF investigations',repeats.length,`${settings.repeatDays}-day monitoring period`,'purple',"openWAI094Report('ftf')")}${tile('Parts / tyres outstanding',parts,'Awaiting action or delivery','',"show('partsTyreIntelligenceScreen');closeWAI094()")}${tile('Authorisations outstanding',auth,'Retail jobs awaiting approval','',"openWAI094List('authorisations')")}</div>
   <div class="wai094-section-label">Live workshop capacity</div><div class="wai094-tiles wai094-live-tiles">${tile('Technicians working',m.techRows.filter(r=>Number(r.hours||0)>0).length,m.techRows.length+' configured today','good',"show('techniciansScreen');closeWAI094()")}${tile('Technicians idle',m.idle,'Available for work',m.idle?'warn':'good',"show('plannerScreen');closeWAI094()")}${tile('Capacity remaining',m.remaining.toFixed(1)+' hrs',money(m.revenueOpportunity)+' retail opportunity',capacityState,"show('plannerScreen');closeWAI094()")}${tile('Live productivity',m.productivity.toFixed(0)+'%','Sold hours ÷ actual clocked time',m.productivity>=100?'good':m.productivity>=85?'warn':'bad',"show('reportsInterfaceScreen');closeWAI094()")}${tile('Live utilisation',m.utilisation.toFixed(0)+'%','Actual clocked time ÷ available hours',m.utilisation>=85?'good':m.utilisation>=70?'warn':'bad',"show('reportsInterfaceScreen');closeWAI094()")}${tile('Hours clocked',m.clocked.toFixed(1)+' hrs',m.available.toFixed(1)+' hrs available','info',"show('techScreen');closeWAI094()")}</div>
   <div class="wai094-section-label">Today’s delivery risks</div><div class="wai094-tiles">${tile('MOTs today',m.motToday,'Scheduled workshop MOT work','info',"show('motIntelligenceScreen');closeWAI094()")}${tile('Vehicles due out',m.dueOut,'Collection or promised time set','good',"show('managerScreen');closeWAI094()")}${tile('Waiting for customer',m.waitingCustomer,'Approval or customer response','warn',"openWAI094List('authorisations')")}${tile('Waiting for parts',m.waitingParts,'Live jobs affected','purple',"show('partsTyreIntelligenceScreen');closeWAI094()")}${tile('Vehicles carried over',m.carried,'Unfinished from an earlier date',m.carried?'bad':'good',"show('managerScreen');closeWAI094()")}${tile('Live jobs today',m.today.length,'Current dated workload','info',"show('managerScreen');closeWAI094()")}</div>
+  <div class="wai094-section-label">Financial performance</div><div class="wai094-tiles">${tile("Today's gross profit",money(x.fin.grossProfit),'Sales less technician and item costs',x.fin.grossProfit>=0?'good':'bad',financeOpen)}${tile("Today's labour sales",money(x.fin.labour),'Labour and MOT sales ex VAT','info',financeOpen)}${tile("Today's parts sales",money(x.fin.parts),'Parts, oil and other sales ex VAT','purple',financeOpen)}</div>
+  <div class="wai094-section-label">Technician performance</div><div class="wai094-tiles">${tile('Average efficiency','<span id="wai094LiveEfficiencyValue">'+x.efficiency.toFixed(0)+'%</span>','LIVE · sold hours ÷ actual job-clocked hours',x.efficiency>=95?'good':x.efficiency>=85?'warn':'bad',reportsOpen)}${tile('Average productivity',m.productivity.toFixed(0)+'%','Live sold hours ÷ actual job-clocked hours',m.productivity>=100?'good':m.productivity>=85?'warn':'bad',reportsOpen)}${tile('Average First Time Fix',x.ftf.toFixed(1)+'%','Current calendar month',x.ftf>=95?'good':x.ftf>=90?'warn':'bad',"openWAI094Report('ftf')")}</div>
+  <div class="wai094-section-label">Customer flow</div><div class="wai094-tiles">${tile('Cars ready for collection',x.ready,'Completed vehicles awaiting collection',x.ready?'good':'info',"show('managerScreen');closeWAI094()")}${tile('Invoices ready',x.fin.invoicesReady,'Authorised or invoice-ready documents',x.fin.invoicesReady?'warn':'good',financeOpen)}</div>
+  <div class="wai094-section-label">AI intelligence</div><div class="wai094-tiles">${tile('Overrun risk',x.overrunRisk,'Jobs at 75–99% of allocated time',x.overrunRisk?'warn':'good',"openWAI094List('approaching')")}${tile("Tomorrow's capacity",x.tomorrow.spare.toFixed(1)+' hrs',`${x.tomorrow.booked.toFixed(1)} booked · ${money(x.tomorrow.value)} opportunity`,x.tomorrow.spare>2?'good':x.tomorrow.spare>0?'warn':'bad',"show('plannerScreen');closeWAI094()")}${tile('Tomorrow’s jobs',x.tomorrow.jobs,`${x.tomorrow.available.toFixed(1)} technician hours available`,'info',"show('plannerScreen');closeWAI094()")}</div>
   <div class="card wai094-priority-card">${priorityQueueHtml(m,approaching,over,ops,repeats,authList)}</div>
   <div class="card"><h3>Control Centre Settings</h3><div class="grid"><label>Repeat-repair monitoring period<select id="wai094RepeatDays"><option value="30">30 days</option><option value="60">60 days</option><option value="90">90 days</option><option value="180">6 months</option><option value="365">12 months</option></select></label><label>Approaching-time alert<select id="wai094Approach"><option value="75">75%</option><option value="80">80%</option><option value="90">90%</option></select></label></div><button onclick="saveWAI094Settings()">Save Settings</button></div>`;
 }
@@ -104,5 +174,5 @@ window.openFTFInvestigation=function(id){const j=getJob(id);if(!j||j.ftf?.review
 window.compareFTF=function(id){const j=getJob(id),p=getJob(j?.ftf?.previousJobId);if(!j||!p)return;ensureModal();const confirmed=j.ftf?.reviewStatus==='Confirmed Repeat Repair';document.getElementById('wai094Title').textContent=`Compare Repairs — ${j.reg}`;document.getElementById('wai094Subtitle').textContent=confirmed?'Confirmed repeat repair comparison. The decision is locked for the month.':'Service Manager comparison before confirming a repeat repair.';document.getElementById('wai094Body').innerHTML=`${confirmed?'<div class="wai094-confirmed-strip">CONFIRMED REPEAT REPAIR — DECISION LOCKED ✓</div>':''}<div class="wai094-compare"><div class="card"><h3>Previous Job</h3><p><strong>Date:</strong> ${dateText(p.completedAt||p.bookingDate)}</p><p><strong>Complaint:</strong> ${esc(p.complaint||p.workRequired||'—')}</p><p><strong>Diagnosis:</strong> ${esc(p.findings||'—')}</p><p><strong>Repair:</strong> ${esc(p.repair||'—')}</p><p><strong>Parts:</strong> ${esc(p.parts||'—')}</p><p><strong>Technician:</strong> ${esc(p.technician)}</p></div><div class="card"><h3>Current Job</h3><p><strong>Date:</strong> ${dateText(j.bookingDate||j.createdAt)}</p><p><strong>Complaint:</strong> ${esc(j.complaint||j.workRequired||'—')}</p><p><strong>Findings:</strong> ${esc(j.findings||'—')}</p><p><strong>Repair:</strong> ${esc(j.repair||'—')}</p><p><strong>Parts:</strong> ${esc(j.parts||'—')}</p><p><strong>Technician:</strong> ${esc(j.technician)}</p></div></div><div class="button-row">${confirmed?`<button class="wai094-locked" disabled>Confirmed ✓</button><button onclick="openFTFInvestigation('${j.id}')">Open Investigation</button>`:`<button onclick="reviewFTF('${j.id}','confirm')">Confirm Repeat Repair</button><button onclick="reviewFTF('${j.id}','not')">Not a Repeat Repair</button>`}<button onclick="openWAI094Report('ftf')">Back</button></div>`;};
 function refresh(){inject();possibleRepeatPairs();const count=approachingJobs().length+overrunJobs(false).length+allOps().filter(x=>!['Completed','Declined'].includes(x.op.status)).length+possibleRepeatPairs().filter(x=>x.current.ftf.reviewStatus==='Possible Repeat Repair').length;const badge=document.getElementById('wai094AttentionBadge');if(badge)badge.textContent=count;}
 const oldRender=window.render;if(typeof oldRender==='function')window.render=function(){const r=oldRender.apply(this,arguments);setTimeout(refresh,0);return r;};
-document.addEventListener('DOMContentLoaded',()=>{ensureModal();refresh();scanOverruns();setInterval(scanOverruns,60000);});setTimeout(()=>{ensureModal();refresh();scanOverruns();},500);
+document.addEventListener('DOMContentLoaded',()=>{ensureModal();refresh();scanOverruns();setInterval(scanOverruns,60000);setInterval(updateLiveEfficiencyTile,3000);});setTimeout(()=>{ensureModal();refresh();scanOverruns();updateLiveEfficiencyTile();},500);
 })();
