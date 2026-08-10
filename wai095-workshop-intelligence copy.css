@@ -8,3 +8,144 @@
 .wai1019-revenue-headlines>button:hover{transform:translateY(-1px);border-color:rgba(56,189,248,.7)}
 .wai1019-revenue-headlines .held{border-color:rgba(245,158,11,.55)}
 @media(max-width:1100px){.wai1019-revenue-headlines{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+/* WAI-110.8 — polished Live Revenue Counter presentation only */
+.wai095-revenue-card{
+  background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+  border:1px solid #dfe7f1;
+  border-radius:18px;
+  box-shadow:0 10px 28px rgba(15,39,71,.08);
+  padding:22px;
+  overflow:hidden;
+}
+.wai095-revenue-card .wai095-eyebrow{color:#55708f;font-weight:800;letter-spacing:.13em}
+.wai095-revenue-card>h2{color:#0b2b50;margin:3px 0 16px;font-size:24px}
+.wai095-revenue-headlines.wai1019-revenue-headlines{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(145px,1fr));
+  gap:12px;
+  margin:0 0 14px;
+}
+.wai095-revenue-headlines.wai1019-revenue-headlines>button,
+.wai095-revenue-headlines.wai1019-revenue-headlines>div{
+  appearance:none;
+  -webkit-appearance:none;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  min-height:116px;
+  padding:16px 17px;
+  margin:0;
+  text-align:left;
+  background:#fff;
+  border:1px solid #dce6f1;
+  border-top:3px solid #2d7dd2;
+  border-radius:14px;
+  box-shadow:0 5px 14px rgba(15,39,71,.055);
+  color:#102b4e;
+  font:inherit;
+}
+.wai095-revenue-headlines.wai1019-revenue-headlines>button{cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.wai095-revenue-headlines.wai1019-revenue-headlines>button:hover{transform:translateY(-2px);box-shadow:0 9px 20px rgba(15,39,71,.10);border-color:#b9cee4}
+.wai095-revenue-headlines.wai1019-revenue-headlines>button.held{border-top-color:#e7a321;background:#fffdf8}
+.wai095-revenue-headlines.wai1019-revenue-headlines small{
+  display:block;
+  color:#294766 !important;
+  font-size:12px;
+  font-weight:750;
+  line-height:1.25;
+  margin:0 0 7px;
+}
+.wai095-revenue-headlines.wai1019-revenue-headlines strong{
+  display:block;
+  color:#0a294d !important;
+  font-size:26px;
+  line-height:1.05;
+  margin:0 0 7px;
+  letter-spacing:-.02em;
+}
+.wai095-revenue-headlines.wai1019-revenue-headlines span{
+  display:block;
+  color:#687b91 !important;
+  font-size:11px;
+  line-height:1.35;
+}
+.wai095-revenue-detail{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(145px,1fr));
+  gap:10px;
+  padding:13px;
+  background:#f4f7fb;
+  border:1px solid #e2e9f1;
+  border-radius:14px;
+}
+.wai095-revenue-detail>span{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:88px;
+  padding:13px 14px;
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:11px;
+}
+.wai095-revenue-detail>span small:first-child{color:#294766 !important;font-size:11px;font-weight:750;line-height:1.25}
+.wai095-revenue-detail>span strong{color:#0a294d !important;font-size:20px;line-height:1.1;margin:5px 0}
+.wai095-revenue-detail>span small:not(:first-child){color:#75869a !important;font-size:10px;line-height:1.3}
+.wai095-revenue-note{color:#66788d !important;margin:11px 2px 0;font-size:10.5px;line-height:1.4}
+@media(max-width:1350px){.wai095-revenue-headlines.wai1019-revenue-headlines{grid-template-columns:repeat(3,minmax(145px,1fr))}}
+@media(max-width:900px){.wai095-revenue-headlines.wai1019-revenue-headlines,.wai095-revenue-detail{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.wai095-revenue-headlines.wai1019-revenue-headlines,.wai095-revenue-detail{grid-template-columns:1fr}.wai095-revenue-card{padding:16px}}
+
+/* WAI-110.9 — Revenue Counter responsive containment fix */
+.wai095-revenue-card,
+.wai095-revenue-card *{box-sizing:border-box}
+.wai095-revenue-card{width:100%;max-width:100%;min-width:0;overflow:hidden}
+.wai095-revenue-headlines.wai1019-revenue-headlines{
+  width:100%;max-width:100%;min-width:0;
+  grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));
+}
+.wai095-revenue-headlines.wai1019-revenue-headlines>button,
+.wai095-revenue-headlines.wai1019-revenue-headlines>div{
+  width:100%;max-width:100%;min-width:0;
+  overflow:hidden;
+}
+.wai095-revenue-headlines.wai1019-revenue-headlines small,
+.wai095-revenue-headlines.wai1019-revenue-headlines strong,
+.wai095-revenue-headlines.wai1019-revenue-headlines span{
+  max-width:100%;overflow-wrap:anywhere;word-break:normal;
+}
+.wai095-revenue-detail{
+  width:100%;max-width:100%;min-width:0;
+  grid-template-columns:repeat(auto-fit,minmax(min(155px,100%),1fr));
+}
+.wai095-revenue-detail>span{width:100%;max-width:100%;min-width:0;overflow:hidden}
+@media(max-width:760px){
+  .wai095-revenue-headlines.wai1019-revenue-headlines{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .wai095-revenue-detail{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:460px){
+  .wai095-revenue-headlines.wai1019-revenue-headlines,.wai095-revenue-detail{grid-template-columns:1fr}
+}
+
+/* WAI-111.0 — hard containment fix for Revenue Watch inside split Mission Control layout */
+.wai095-two{min-width:0;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+.wai095-two>section{min-width:0;max-width:100%}
+.wai095-revenue-card{min-width:0!important;max-width:100%!important;width:auto!important;overflow:hidden!important}
+.wai095-revenue-headlines.wai1019-revenue-headlines{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  gap:10px!important;
+}
+.wai095-revenue-headlines.wai1019-revenue-headlines>button,
+.wai095-revenue-headlines.wai1019-revenue-headlines>div{
+  min-width:0!important;width:auto!important;max-width:none!important;
+  padding:14px!important;overflow:hidden!important;
+}
+.wai095-revenue-detail{grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important;min-width:0!important;max-width:100%!important}
+@media(max-width:1100px){.wai095-two{grid-template-columns:1fr}.wai095-revenue-headlines.wai1019-revenue-headlines{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:520px){.wai095-revenue-headlines.wai1019-revenue-headlines,.wai095-revenue-detail{grid-template-columns:1fr!important}}
