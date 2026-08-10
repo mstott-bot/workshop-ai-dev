@@ -329,7 +329,7 @@
 
   function installReport(){
     if(el("wai081TyreReport"))return;
-    const reports=el("reportsScreen");if(!reports)return;
+    const reports=el("reportsInterfaceScreen");if(!reports)return;
     const panel=document.createElement("div");panel.className="card";panel.id="wai081TyreReport";
     panel.innerHTML=`<h2>🛞 Tyre Ordering Report</h2><p class="muted">WAI-081 tyre requests and ordered spend.</p><div id="wai081ReportStats" class="wai081-report-grid"></div><div id="wai081SupplierReport" class="job-list"></div>`;
     reports.appendChild(panel);

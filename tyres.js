@@ -318,18 +318,16 @@
   }
 
   function installCommandKpi(){
-    const grid=el("wai80SummaryCards")||el("ownerStats");if(!grid)return;
-    let tile=el("wai081CommandKpi");
-    if(!tile){tile=document.createElement("div");tile.id="wai081CommandKpi";tile.className="stat wai081-kpi";tile.tabIndex=0;tile.setAttribute("role","button");tile.addEventListener("click",openTyreOrders);tile.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openTyreOrders()}});grid.appendChild(tile)}
-    const awaiting=allTyres().filter(row=>tyreStatus(row.tyre)==="Requested").length;
-    tile.className=`stat wai081-kpi ${awaiting?"warn":"good"}`;
-    tile.innerHTML=`<strong>${awaiting}</strong>🛞 Tyres Awaiting Order`;
+    // Command Centre tyre KPI intentionally removed. Tyre ordering remains available
+    // in the Service Manager tyre workflow and Tyre Ordering Report.
+    const existing=el("wai081CommandKpi");
+    if(existing) existing.remove();
   }
   function openTyreOrders(){switchScreen("managerScreen");setTimeout(()=>el("wai081ServiceTyreAlert")?.scrollIntoView({behavior:"smooth",block:"start"}),60)}
 
   function installReport(){
     if(el("wai081TyreReport"))return;
-    const reports=el("reportsScreen");if(!reports)return;
+    const reports=el("reportsInterfaceScreen");if(!reports)return;
     const panel=document.createElement("div");panel.className="card";panel.id="wai081TyreReport";
     panel.innerHTML=`<h2>🛞 Tyre Ordering Report</h2><p class="muted">WAI-081 tyre requests and ordered spend.</p><div id="wai081ReportStats" class="wai081-report-grid"></div><div id="wai081SupplierReport" class="job-list"></div>`;
     reports.appendChild(panel);

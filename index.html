@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workshop AI OS — WAI-104.0 Customer Portal</title>
-  <link rel="stylesheet" href="style.css?v=105.5.3" />
+  <link rel="stylesheet" href="style.css?v=110.5" />
   <link rel="stylesheet" href="wai093-vhc.css">
   <link rel="stylesheet" href="wai094-intelligence.css">
   <link rel="stylesheet" href="wai095-workshop-intelligence.css">
@@ -12,45 +12,44 @@
   <link rel="stylesheet" href="finance-centre.css">
   <link rel="stylesheet" href="customer-portal.css">
   <link rel="stylesheet" href="ui-responsive.css?v=105.5.3">
+  <link rel="stylesheet" href="media-centre.css?v=110.6">
+  <link rel="stylesheet" href="review-centre.css?v=110.7">
   <link rel="stylesheet" href="staff-calendar.css?v=106.0">
   <link rel="stylesheet" href="service-manager-pro.css?v=1070">
 </head>
 
 <body>
-<header class="app-header">
-  <div class="brand-lockup">
-    <div class="logo-mark" aria-hidden="true">
-      <span class="gear">⚙</span>
-      <span class="wrench">🔧</span>
-    </div>
-    <div>
-      <h1><span>WORKSHOP</span> <strong>AI</strong></h1>
-      <p class="tagline">Revolutionising workshops</p>
-      <p id="todayDate"></p><p style="font-size:12px;color:#9fb3c8">Version WAI-109.0 · Workshop Control Centre 2.0</p>
-    </div>
-  </div>
-  <div class="role-pill">Service Manager</div>
-</header>
-
-<main class="container">
-  <nav class="tabs">
+<header class="app-header garage-gurus-header">
+  <nav class="tabs header-tabs" aria-label="Workshop navigation">
     <button class="tab active" data-screen="commandScreen">Command Centre</button>
-    <button class="tab" data-screen="managerScreen">Service Manager</button>
-    <button class="tab" data-screen="techScreen">Technician</button>
-    <button class="tab" data-screen="reportsScreen">Reports</button>
+    <button class="tab" data-screen="managerScreen">Service Team</button>
+    <button class="tab" data-screen="techScreen">Tech Team</button>
+    <button class="tab" data-screen="reportsScreen">Team Performance</button>
     <button class="tab" data-screen="plannerScreen">Daily Planner</button>
     <button class="tab" data-screen="staffCalendarScreen">Calendar</button>
-    <button class="tab" data-screen="partsScreen">Parts</button>
+    <button class="tab" data-screen="partsScreen">Parts Manager</button>
     <button class="tab" data-screen="partsTyreIntelligenceScreen">Parts &amp; Tyres</button>
     <button class="tab" data-screen="motIntelligenceScreen">MOT Intelligence</button>
     <button class="tab" data-screen="reportsInterfaceScreen">Reports Interface</button>
-    <button class="tab" data-screen="techniciansScreen">Technicians</button>
+    <button class="tab" data-screen="techniciansScreen">Tech Team</button>
     <button class="tab" data-screen="targetsScreen">Targets</button>
     <button class="tab" data-screen="vehicleIntelligenceScreen">Vehicle Intelligence</button>
     <button class="tab" data-screen="crmScreen">Customer CRM</button>
     <button class="tab" data-screen="customerPortalScreen">Customer Portal</button>
+    <button class="tab" data-screen="mediaCentreScreen">Media Centre</button>
+    <button class="tab" data-screen="reviewCentreScreen">Review Centre</button>
     <button class="tab" data-screen="financeCentreScreen">Finance Centre</button>
   </nav>
+  <div class="brand-lockup garage-gurus-lockup">
+    <img src="garage-gurus-header.png" alt="Garage Gurus — Automotive Intelligence — Powered by AI" class="garage-gurus-logo">
+    <div class="garage-gurus-date">
+      <p id="todayDate"></p>
+      <p class="garage-gurus-version">Version WAI-110.7 · Workshop Control Centre 2.0</p>
+    </div>
+  </div>
+</header>
+
+<main class="container">
 
   <section id="commandScreen" class="screen active">
     <div id="wai80CommandCentre" class="wai80-command-centre">
@@ -149,18 +148,6 @@
     <div class="card">
       <h2>AI Workshop Coach</h2>
       <div id="ownerCoach" class="coach-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>End of Day Briefing</h2>
-      <pre id="endOfDayBriefing">No briefing yet.</pre>
-      <button id="copyBriefing" class="secondary">Copy Briefing</button>
-    </div>
-
-    <div class="card">
-      <h2>Morning Briefing / Action Required Today</h2>
-      <pre id="morningBriefing">No morning briefing yet.</pre>
-      <button id="copyMorningBriefing" class="secondary">Copy Morning Briefing</button>
     </div>
 
     <div class="card">
@@ -1075,6 +1062,142 @@
   </section>
 
 
+  <section id="mediaCentreScreen" class="screen">
+    <div class="media-centre-shell">
+      <div class="media-centre-hero">
+        <div>
+          <span class="media-eyebrow">CUSTOMER VIDEO &amp; VEHICLE MEDIA</span>
+          <h2>Media Centre</h2>
+          <p>Save vehicle videos and photos against a registration, then choose how to share them with the customer.</p>
+        </div>
+        <div class="media-hero-actions">
+          <button id="mediaAddBtn" class="primary" type="button">+ Add Vehicle Media</button>
+        </div>
+      </div>
+
+      <div class="media-kpi-grid">
+        <div class="media-kpi"><span>Saved media</span><strong id="mediaCount">0</strong></div>
+        <div class="media-kpi"><span>Vehicle videos</span><strong id="mediaVideoCount">0</strong></div>
+        <div class="media-kpi"><span>Sent / shared</span><strong id="mediaSentCount">0</strong></div>
+        <div class="media-kpi"><span>Vehicles</span><strong id="mediaVehicleCount">0</strong></div>
+      </div>
+
+      <div class="media-toolbar card">
+        <div class="media-search-wrap"><input id="mediaSearch" placeholder="Search registration, customer, title or notes"></div>
+        <select id="mediaTypeFilter"><option value="all">All media</option><option value="video">Videos</option><option value="image">Photos</option></select>
+        <select id="mediaStatusFilter"><option value="all">All statuses</option><option value="unsent">Not sent</option><option value="sent">Sent / shared</option></select>
+      </div>
+
+      <div id="mediaLibrary" class="media-library"></div>
+      <div id="mediaEmpty" class="card media-empty-state">
+        <div class="media-empty-icon">▸</div>
+        <h3>No vehicle media saved yet</h3>
+        <p>Use <strong>Add Vehicle Media</strong> to record or upload a vehicle video, link it to the customer and keep it in the Media Centre.</p>
+      </div>
+    </div>
+
+    <div id="mediaModal" class="media-modal hidden">
+      <div class="media-modal-card">
+        <button id="mediaModalClose" class="media-close" type="button">×</button>
+        <div class="media-modal-head"><span class="media-eyebrow">NEW MEDIA</span><h2>Save Vehicle Video or Photo</h2><p>Link the media to the vehicle and customer so it can be found and shared later.</p></div>
+        <div class="media-form-grid">
+          <label>Registration<input id="mediaReg" autocomplete="off" placeholder="AB12 CDE"></label>
+          <label>Customer<select id="mediaCustomer"><option value="">Select customer (optional)</option></select></label>
+          <label>Customer mobile<input id="mediaPhone" type="tel" placeholder="07..."></label>
+          <label>Customer email<input id="mediaEmail" type="email" placeholder="customer@email.co.uk"></label>
+          <label class="wide">Title<input id="mediaTitle" placeholder="Vehicle walkaround / repair update / VHC video"></label>
+          <label class="wide">Notes<textarea id="mediaNotes" rows="3" placeholder="Optional internal notes"></textarea></label>
+          <label class="wide media-file-field">Video or photo<input id="mediaFile" type="file" accept="video/*,image/*" capture="environment"><small>On a phone or tablet this can open the camera. On desktop you can choose an existing video or photo.</small></label>
+        </div>
+        <div class="media-modal-actions"><button id="mediaSaveBtn" class="primary" type="button">Save to Media Centre</button><button id="mediaCancelBtn" class="secondary" type="button">Cancel</button></div>
+      </div>
+    </div>
+
+    <div id="mediaSendModal" class="media-modal hidden">
+      <div class="media-modal-card media-send-card">
+        <button id="mediaSendClose" class="media-close" type="button">×</button>
+        <div class="media-modal-head"><span class="media-eyebrow">SEND TO CUSTOMER</span><h2 id="mediaSendTitle">Share vehicle media</h2><p id="mediaSendSub"></p></div>
+        <div class="media-form-grid">
+          <label>Mobile<input id="mediaSendPhone" type="tel"></label>
+          <label>Email<input id="mediaSendEmail" type="email"></label>
+          <label class="wide">Customer message<textarea id="mediaSendMessage" rows="5"></textarea></label>
+        </div>
+        <div class="media-send-options">
+          <button id="mediaSendTextBtn" class="media-send-option" type="button"><span class="media-send-icon">✉</span><strong>Text Customer</strong><small>Open SMS with the message ready</small></button>
+          <button id="mediaSendEmailBtn" class="media-send-option" type="button"><span class="media-send-icon">@</span><strong>Email Customer</strong><small>Open email with subject and message ready</small></button>
+          <button id="mediaShareFileBtn" class="media-send-option" type="button"><span class="media-send-icon">↗</span><strong>Share Video / Photo</strong><small>Use the device share menu when supported</small></button>
+        </div>
+        <div class="media-send-note">The static Workshop AI prototype stores the actual media on this device. Text and email can prepare the customer message; direct cloud video links will be enabled when Garage Gurus is connected to online storage.</div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="reviewCentreScreen" class="screen">
+    <div class="review-centre-shell">
+      <div class="review-hero">
+        <div>
+          <span class="review-eyebrow">CUSTOMER REVIEWS</span>
+          <h2>Review Centre</h2>
+          <p>See customers with completed workshop jobs, then send a review request by text or email using your saved review links.</p>
+        </div>
+        <div class="review-hero-actions">
+          <button id="reviewLinksBtn" class="secondary" type="button">Review Links &amp; Message</button>
+        </div>
+      </div>
+
+      <div class="review-kpi-grid">
+        <div class="review-kpi"><span>Completed jobs</span><strong id="reviewEligibleCount">0</strong></div>
+        <div class="review-kpi"><span>Requests sent</span><strong id="reviewSentCount">0</strong></div>
+        <div class="review-kpi"><span>Awaiting request</span><strong id="reviewAwaitingCount">0</strong></div>
+        <div class="review-kpi"><span>Review links</span><strong id="reviewLinkCount">0</strong></div>
+      </div>
+
+      <div class="review-toolbar card">
+        <label>Completion month<input id="reviewMonth" type="month"></label>
+        <input id="reviewSearch" placeholder="Search customer or registration">
+        <select id="reviewStatusFilter"><option value="all">All customers</option><option value="awaiting">Awaiting request</option><option value="sent">Request sent</option></select>
+      </div>
+
+      <div class="card review-list-card">
+        <div class="review-list-head"><div><span class="review-eyebrow">COMPLETED WORK</span><h3>Customers to Contact</h3></div><span class="muted">Choose Text or Email for each customer.</span></div>
+        <div class="review-table-wrap"><table class="review-table"><thead><tr><th>Completed</th><th>Customer</th><th>Vehicle</th><th>Contact</th><th>Status</th><th>Send review request</th></tr></thead><tbody id="reviewTableBody"></tbody></table></div>
+        <div id="reviewEmpty" class="review-empty hidden"><h3>No completed workshop jobs found</h3><p>Try another month or change the status filter.</p></div>
+      </div>
+    </div>
+
+    <div id="reviewSettingsModal" class="review-modal hidden">
+      <div class="review-modal-card">
+        <button id="reviewSettingsClose" class="review-close" type="button">×</button>
+        <div class="review-modal-head"><span class="review-eyebrow">REVIEW SETTINGS</span><h2>Review Links &amp; Customer Message</h2><p>Load the review pages you want included in every request. Leave any service blank if you do not use it.</p></div>
+        <div class="review-settings-grid">
+          <label>Google review link<input id="reviewGoogle" type="url" placeholder="https://..."></label>
+          <label>Trustpilot review link<input id="reviewTrustpilot" type="url" placeholder="https://..."></label>
+          <label>Facebook review link<input id="reviewFacebook" type="url" placeholder="https://..."></label>
+          <label>Other review link<input id="reviewOther" type="url" placeholder="https://..."></label>
+          <label class="wide">Standard message<textarea id="reviewMessage" rows="6"></textarea><small>Use {firstName} for the customer first name, {reg} for registration and {links} for your saved review links.</small></label>
+        </div>
+        <div class="review-modal-actions"><button id="reviewSettingsSave" class="primary" type="button">Save Review Settings</button><button id="reviewSettingsCancel" class="secondary" type="button">Cancel</button></div>
+      </div>
+    </div>
+
+    <div id="reviewSendModal" class="review-modal hidden">
+      <div class="review-modal-card review-send-card">
+        <button id="reviewSendClose" class="review-close" type="button">×</button>
+        <div class="review-modal-head"><span class="review-eyebrow">SEND REVIEW REQUEST</span><h2 id="reviewSendTitle">Customer review request</h2><p id="reviewSendSub"></p></div>
+        <div class="review-settings-grid">
+          <label>Mobile<input id="reviewSendPhone" type="tel"></label>
+          <label>Email<input id="reviewSendEmail" type="email"></label>
+          <label class="wide">Message<textarea id="reviewSendMessage" rows="7"></textarea></label>
+        </div>
+        <div class="review-send-options">
+          <button id="reviewSendText" class="review-send-option" type="button"><span>✉</span><strong>Text Customer</strong><small>Open SMS with the review request ready</small></button>
+          <button id="reviewSendEmail" class="review-send-option" type="button"><span>@</span><strong>Email Customer</strong><small>Open email with the review request ready</small></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="financeCentreScreen" class="screen">
     <div class="finance-hero">
       <div><span class="finance-eyebrow">WAI-100 · CRM → JOB → LIVE INVOICE</span><h2>Finance Centre</h2><p>A fast live invoice is created automatically from every workshop job. Customer, vehicle, labour, parts, oil and MOT flow through once, without duplicate typing.</p></div>
@@ -1150,6 +1273,8 @@
 <script src="finance-centre.js"></script>
 <script src="operational-gp.js"></script>
 <script src="customer-portal.js"></script>
+<script src="media-centre.js"></script>
+<script src="review-centre.js?v=110.7"></script>
 <script src="wai095-workshop-intelligence.js"></script>
 <script src="wai1022-parts-fix.js"></script>
 <script src="staff-calendar.js?v=106.0"></script>

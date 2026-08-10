@@ -132,3 +132,38 @@
   #operationalGpReport .operational-gp-table th,
   #operationalGpReport .operational-gp-table td{padding:10px 8px}
 }
+
+/* WAI-110.3 — Finance Settings visual polish only. Keep invoicing logic untouched. */
+#financeSettingsHost .finance-card{background:#fff;color:#102b47;border:1px solid #dfe7ef;border-radius:16px;padding:24px;box-shadow:0 8px 24px rgba(13,45,78,.07)}
+#financeSettingsHost .finance-card>h3{font-size:23px;color:#0b2340;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e8eef4}
+#financeSettingsHost .finance-card>h4{font-size:15px;color:#173653;margin:24px 0 12px;padding-top:2px}
+#financeSettingsHost .invoice-form{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+#financeSettingsHost .invoice-form label,#financeSettingsHost .technician-cost-grid label{color:#52677c;font-size:12px;font-weight:750;gap:7px}
+#financeSettingsHost .invoice-form input,#financeSettingsHost .invoice-form select,#financeSettingsHost .invoice-form textarea,#financeSettingsHost .technician-cost-grid input{background:#f9fbfd;color:#102b47;border:1px solid #ccd8e4;border-radius:9px;padding:11px 12px;min-height:42px;box-shadow:inset 0 1px 2px rgba(13,45,78,.02);font-size:14px;font-weight:600}
+#financeSettingsHost .invoice-form input:hover,#financeSettingsHost .technician-cost-grid input:hover{border-color:#aebfd0;background:#fff}
+#financeSettingsHost .invoice-form input:focus,#financeSettingsHost .invoice-form select:focus,#financeSettingsHost .invoice-form textarea:focus,#financeSettingsHost .technician-cost-grid input:focus{outline:none;border-color:#2787dd;box-shadow:0 0 0 3px rgba(39,135,221,.10);background:#fff}
+#financeSettingsHost .finance-note{position:relative;padding:11px 14px 11px 38px;border-radius:9px;background:#f5f9fd;border:1px solid #dbe7f1;color:#53697d;margin:12px 0;font-size:12px;line-height:1.45}
+#financeSettingsHost .finance-note::before{content:'i';position:absolute;left:13px;top:10px;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;background:#e6f2fd;color:#1475cc;font-weight:900;font-size:11px}
+#financeSettingsHost .technician-cost-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0 0 20px;padding:16px;border-radius:12px;background:#f8fafc;border:1px solid #e5ebf1}
+#financeSettingsHost .invoice-footer-actions{justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid #e8eef4}
+#financeSettingsHost #saveFinanceSettings{min-width:170px;background:linear-gradient(180deg,#1179db,#0867c1);color:#fff;padding:11px 18px;border-radius:9px;box-shadow:0 5px 12px rgba(11,110,205,.18)}
+@media(max-width:1000px){#financeSettingsHost .invoice-form{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){#financeSettingsHost .invoice-form{grid-template-columns:1fr}#financeSettingsHost .invoice-form .span-2{grid-column:1}}
+
+/* WAI-110.5 — improve light-surface label contrast */
+.ogp-report{background:#fff!important;color:#102b47!important;border-color:#dfe7ef!important}
+.ogp-report .finance-eyebrow,
+.ogp-report .finance-note,
+.ogp-report .finance-kpis small,
+.ogp-report h4,
+.ogp-report .invoice-register th,
+#financeSettingsHost label,
+#financeSettingsHost .technician-cost-grid label,
+#financeSettingsHost .invoice-form label,
+#financeSettingsHost .finance-eyebrow,
+#financeSettingsHost small{color:#173653!important;opacity:1!important}
+.ogp-report .finance-note{background:#f5f9fd!important;border-color:#dbe7f1!important}
+.ogp-report .finance-kpis>div{background:#f8fafc!important;border:1px solid #dfe7ef!important;border-radius:12px!important;padding:14px!important}
+.ogp-report .finance-kpis strong{color:#0b2340!important}
+.ogp-report .invoice-register th{background:#f4f7fa!important}
+.ogp-report .invoice-register td{color:#18344f!important;border-bottom-color:#e2e8f0!important}

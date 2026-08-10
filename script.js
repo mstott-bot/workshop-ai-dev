@@ -2586,13 +2586,16 @@ function patternInsight(days=7){
   return `<div class="coach-card ${cls}"><h3>Pattern Insight</h3><p>${text}</p></div>`;
 }
 function trendCards(){
+  // Headline downtime must agree with the detailed downtime/activity records below.
+  // Include every recorded clock-off activity (including neutral time such as Break),
+  // while the breakdown table still separates Lost / Productive Support / Neutral.
   const today=activityRecords(1);
   const week=activityRecords(7);
   const month=activityRecords(30);
-  const lostToday=today.filter(r=>r.category==="lost").reduce((s,r)=>s+r.duration,0);
-  const lostWeek=week.filter(r=>r.category==="lost").reduce((s,r)=>s+r.duration,0);
-  const lostMonth=month.filter(r=>r.category==="lost").reduce((s,r)=>s+r.duration,0);
-  return `<div class="stats"><div class="stat ${lostToday>1?'bad':'good'}"><strong>${hoursText(lostToday)}</strong>Lost Today</div><div class="stat ${lostWeek>5?'bad':'warn'}"><strong>${hoursText(lostWeek)}</strong>Lost 7 Days</div><div class="stat"><strong>${hoursText(lostMonth)}</strong>Lost 30 Days</div></div>`;
+  const downtimeToday=today.reduce((s,r)=>s+Number(r.duration||0),0);
+  const downtimeWeek=week.reduce((s,r)=>s+Number(r.duration||0),0);
+  const downtimeMonth=month.reduce((s,r)=>s+Number(r.duration||0),0);
+  return `<div class="stats"><div class="stat ${downtimeToday>1?'bad':'good'}"><strong>${hoursText(downtimeToday)}</strong>Downtime Today</div><div class="stat ${downtimeWeek>5?'bad':'warn'}"><strong>${hoursText(downtimeWeek)}</strong>Downtime 7 Days</div><div class="stat"><strong>${hoursText(downtimeMonth)}</strong>Downtime 30 Days</div></div>`;
 }
 function renderDowntimePatterns(){
   const html=`${trendCards()}${patternInsight(7)}<h3>This Week's Downtime Patterns</h3>${reasonPatternCards(7)}<h3>Technician Breakdown - Today</h3>${technicianDowntimeTable(1)}<h3>Technician Breakdown - This Week</h3>${technicianDowntimeTable(7)}`;

@@ -71,3 +71,17 @@
 .part-diff-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-weight:800;white-space:nowrap}.part-diff-badge.same{background:#244b3a;color:#bff7d5}.part-diff-badge.increase{background:#5a2630;color:#ffd0d6}.part-diff-badge.decrease{background:#173f58;color:#bfeaff}
 .part-history-row td{background:#101a29!important;padding:0!important}.part-history-panel{padding:18px 22px;color:#e8f1fb}.part-history-panel h4{margin:0 0 12px;color:#fff}.part-history-grid{display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:8px}.part-history-item{background:#1a2a3d;border:1px solid #32465f;border-radius:10px;padding:10px}.part-history-item span{display:block;color:#aebed0;font-size:11px}.part-history-item strong{display:block;margin-top:3px;color:#fff}.part-history-table{width:100%;margin-top:14px;border-collapse:collapse}.part-history-table th,.part-history-table td{padding:9px;border-bottom:1px solid #304158;text-align:left;background:transparent!important;color:#e8f1fb!important}.part-row-toggle{background:#2b6dd8;color:white;border:0;border-radius:8px;padding:7px 10px;cursor:pointer;font-weight:700}
 @media(max-width:900px){.parts-intel-summary{grid-template-columns:repeat(2,1fr)}.part-history-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* WAI-110.3 — Finance Settings visual polish only. */
+#financeSettingsHost .finance-card{background:#fff;color:#102b47;border:1px solid #dfe7ef;border-radius:16px;padding:24px;box-shadow:0 8px 24px rgba(13,45,78,.07)}
+#financeSettingsHost .finance-card>h3{font-size:23px;color:#0b2340;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e8eef4}
+#financeSettingsHost .finance-card>h4{font-size:15px;color:#173653;margin:24px 0 12px}
+#financeSettingsHost .invoice-form{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+#financeSettingsHost .invoice-form label,#financeSettingsHost .technician-cost-grid label{color:#52677c;font-size:12px;font-weight:750;gap:7px}
+#financeSettingsHost .invoice-form input,#financeSettingsHost .invoice-form select,#financeSettingsHost .invoice-form textarea,#financeSettingsHost .technician-cost-grid input{background:#f9fbfd;color:#102b47;border:1px solid #ccd8e4;border-radius:9px;padding:11px 12px;min-height:42px;font-size:14px;font-weight:600}
+#financeSettingsHost .invoice-form input:focus,#financeSettingsHost .technician-cost-grid input:focus{outline:none;border-color:#2787dd;box-shadow:0 0 0 3px rgba(39,135,221,.10);background:#fff}
+#financeSettingsHost .finance-note{position:relative;padding:11px 14px 11px 38px;border-radius:9px;background:#f5f9fd;border:1px solid #dbe7f1;color:#53697d;margin:12px 0;font-size:12px;line-height:1.45}
+#financeSettingsHost .finance-note::before{content:'i';position:absolute;left:13px;top:10px;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;background:#e6f2fd;color:#1475cc;font-weight:900;font-size:11px}
+#financeSettingsHost .technician-cost-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0 0 20px;padding:16px;border-radius:12px;background:#f8fafc;border:1px solid #e5ebf1}
+#financeSettingsHost .invoice-footer-actions{justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid #e8eef4}
+#financeSettingsHost #saveFinanceSettings{min-width:170px;background:linear-gradient(180deg,#1179db,#0867c1);color:#fff;padding:11px 18px;border-radius:9px}

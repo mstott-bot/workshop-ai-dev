@@ -570,3 +570,459 @@
 .voice-help{color:#64748b;line-height:1.5;margin:0 0 14px}.voice-live-box{min-height:82px;padding:14px;border:1px dashed #94a3b8;border-radius:14px;background:#f8fafc;color:#475569;line-height:1.55}.voice-live-box.listening{border-color:#e11d48;background:#fff7f8}.voice-preview-label{display:block;margin:16px 0 7px;font-weight:800;color:#1e293b}.voice-preview{width:100%;min-height:145px;resize:vertical;border:1px solid #cbd5e1;border-radius:14px;padding:14px;font:inherit;line-height:1.55;box-sizing:border-box}.voice-preview:focus{outline:3px solid rgba(37,99,235,.14);border-color:#2563eb}.voice-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.voice-actions button{min-height:44px}.voice-actions button:disabled{opacity:.45;cursor:not-allowed}.voice-safety{margin:16px 0 0;padding-top:14px;border-top:1px solid #e5e7eb;color:#64748b;font-size:12px;line-height:1.45}
 .voice-section .voiceBtn{position:relative}.voice-section .voiceBtn:before{content:"";display:inline-block;width:7px;height:7px;background:#10b981;border-radius:50%;margin-right:7px;vertical-align:1px}
 @media(max-width:600px){.voice-writeup-card{padding:18px;border-radius:16px}.voice-actions{display:grid;grid-template-columns:1fr 1fr}.voice-actions button{width:100%}.voice-writeup-header h3{font-size:21px}}
+
+/* WAI-109.4 Garage Gurus header branding */
+.garage-gurus-header{justify-content:flex-end;align-items:center;min-height:118px;padding-top:14px;padding-bottom:14px}
+.garage-gurus-lockup{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.garage-gurus-logo{display:block;width:min(390px,42vw);height:76px;object-fit:contain;object-position:right center;border-radius:0}
+.garage-gurus-date{text-align:right}
+.garage-gurus-date #todayDate{margin:2px 0 0;color:#dbe7f3;font-size:14px;font-weight:700}
+.garage-gurus-version{margin:2px 0 0;font-size:11px;color:#9fb3c8}
+@media (max-width:760px){.garage-gurus-header{min-height:100px}.garage-gurus-logo{width:min(330px,76vw);height:62px}}
+
+/* WAI-109.5 — Garage Gurus professional visual system
+   Visual-only refresh: navigation targets, IDs and application logic are unchanged. */
+:root{
+  --gg-navy:#0b1d33;
+  --gg-navy-2:#102946;
+  --gg-ink:#132238;
+  --gg-muted:#66758a;
+  --gg-line:#dce3eb;
+  --gg-surface:#ffffff;
+  --gg-bg:#f2f5f8;
+  --gg-blue:#1769e0;
+  --gg-shadow:0 8px 24px rgba(15,35,60,.08);
+}
+body{background:var(--gg-bg);color:var(--gg-ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;}
+.app-header.garage-gurus-header{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 330px;
+  gap:26px;
+  align-items:center;
+  min-height:154px;
+  padding:18px 24px;
+  background:linear-gradient(120deg,#08182b 0%,#0d2440 62%,#0b1d33 100%);
+  border-bottom:1px solid rgba(255,255,255,.10);
+  box-shadow:0 8px 28px rgba(4,17,31,.18);
+}
+.header-tabs{
+  display:grid;
+  grid-template-columns:repeat(8,minmax(94px,1fr));
+  gap:10px;
+  margin:0;
+  align-self:center;
+}
+.header-tabs .tab{
+  position:relative;
+  min-height:66px;
+  padding:12px 9px 10px;
+  border-radius:11px;
+  border:1px solid rgba(255,255,255,.19);
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.055));
+  color:#f7fbff;
+  font-size:12px;
+  line-height:1.2;
+  font-weight:750;
+  letter-spacing:.01em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 5px 15px rgba(0,0,0,.12);
+  transition:transform .15s ease,border-color .15s ease,background .15s ease;
+}
+.header-tabs .tab:hover{transform:translateY(-1px);background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.34)}
+.header-tabs .tab.active{background:linear-gradient(180deg,#24496d,#173a5d);border-color:#7d9cbb;box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 7px 17px rgba(0,0,0,.18)}
+.garage-gurus-lockup{margin-left:0;align-items:flex-end;justify-self:end;min-width:0}
+.garage-gurus-logo{width:300px;max-width:100%;height:80px;filter:drop-shadow(0 5px 12px rgba(0,0,0,.23))}
+.garage-gurus-date #todayDate{font-size:14px;color:#fff;font-weight:650;letter-spacing:.01em}
+.garage-gurus-version{color:#91a7bd;font-size:10px}
+.container{max-width:1600px;padding:26px 24px 38px}
+.card,.hero,.modal-card{border:1px solid var(--gg-line);box-shadow:var(--gg-shadow)}
+.card{border-radius:14px;padding:20px;margin-bottom:18px}
+.hero{border-radius:14px;border:1px solid var(--gg-line);padding:20px;background:#fff}
+h1,h2,h3{color:var(--gg-ink)}
+h2{font-size:24px;letter-spacing:-.02em}
+.muted{color:var(--gg-muted)}
+input,select,textarea{background:#fff;border:1px solid #cfd8e3;border-radius:9px;box-shadow:inset 0 1px 2px rgba(15,35,60,.025)}
+input:focus,select:focus,textarea:focus{outline:3px solid rgba(23,105,224,.11);border-color:#73a5e8}
+.primary{background:linear-gradient(180deg,#2378e8,#1769e0);box-shadow:0 5px 12px rgba(23,105,224,.18)}
+.secondary{background:#eef2f6;color:#213249;border:1px solid #d7e0e9}
+.stat,.wai80-kpi{box-shadow:none;border:1px solid var(--gg-line);background:#fff}
+.stat{border-radius:12px}
+table{border:1px solid var(--gg-line);border-radius:12px;overflow:hidden}
+th{background:#10243c;color:#fff;font-size:12px;letter-spacing:.02em;text-transform:none}
+td{background:#fff}
+.job-card,.coach-card,.board-column,.board-job{box-shadow:none}
+.job-card,.coach-card,.board-job{background:#fff;border-color:#dfe6ee}
+.board-column{background:#f7f9fb;border-color:#dfe6ee}
+
+/* Command Centre composition inspired by the approved Garage Gurus concept */
+.wai80-command-centre{
+  display:grid;
+  grid-template-columns:320px minmax(0,1fr);
+  gap:18px;
+}
+.wai80-command-centre > .wai80-status-banner{grid-column:1;grid-row:1}
+.wai80-command-centre > .wai80-panel:nth-of-type(2){grid-column:2;grid-row:1}
+.wai80-command-centre > .wai80-two-column,
+.wai80-command-centre > .wai80-quick-access{grid-column:1/-1}
+.wai80-status-banner{
+  min-height:255px;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center;
+  border-radius:14px;
+  padding:24px;
+  box-shadow:0 10px 24px rgba(31,44,65,.12);
+}
+.wai80-status-banner h2{font-size:22px;line-height:1.16;margin:7px 0 9px}
+.wai80-status-banner p{font-size:13px;line-height:1.45}
+.wai80-status-critical{background:linear-gradient(145deg,#df1828,#bf1021)}
+.wai80-status-attention{background:linear-gradient(145deg,#f04c24,#d9361a)}
+.wai80-status-on-track{background:linear-gradient(145deg,#159356,#087943)}
+.wai80-health-ring{width:112px;height:112px;border:9px solid rgba(255,255,255,.42);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+.wai80-health-ring strong{font-size:34px}
+.wai80-panel{border-radius:14px}
+.wai80-section-heading{margin-bottom:14px}
+.wai80-section-heading h2{font-size:23px;margin-bottom:0}
+.wai80-eyebrow{font-size:11px;font-weight:800;letter-spacing:.13em;color:#6b7890}
+.wai80-status-banner .wai80-eyebrow{color:rgba(255,255,255,.82)}
+.wai80-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.wai80-kpi{min-height:112px;padding:17px;border-radius:11px;text-align:center;display:flex;flex-direction:column;justify-content:center}
+.wai80-kpi strong{font-size:29px;color:#10243c;margin:5px 0}
+.wai80-kpi span{color:#34475d;font-weight:650}
+.wai80-kpi small{color:#7a8797}
+.wai80-two-column{grid-template-columns:1.45fr 1fr;gap:18px}
+.wai80-performance-grid{gap:12px}
+.wai80-performance-card{border:1px solid var(--gg-line);border-left:4px solid var(--gg-blue);background:#f9fbfd;border-radius:11px;padding:16px}
+.wai80-performance-card strong{color:#10243c;font-size:25px}
+.wai80-priority{background:#f9fbfd;border:1px solid #e2e8ef;border-left-width:4px}
+.wai80-quick-access{border-radius:14px;background:#fff}
+.wai80-quick-buttons button{border-radius:9px}
+.wai80-existing-dashboard{margin-top:20px;border:1px solid #dbe3ec;border-radius:12px;background:#fff;overflow:hidden}
+.wai80-existing-dashboard > summary{padding:15px 18px;background:#f7f9fb;font-weight:750;color:#33455c;cursor:pointer}
+
+/* Consistent professional cards throughout the system */
+.screen > .card,.screen > .hero,.screen .monthly-review-sheet{background:#fff}
+.progress{height:8px;background:#e7edf3}
+.timeline{border-left-color:#7aa6dd}
+.timeline-item{background:#fff;border-color:#dfe6ee}
+
+@media(max-width:1350px){
+  .app-header.garage-gurus-header{grid-template-columns:1fr 270px;padding:16px 18px}
+  .header-tabs{grid-template-columns:repeat(6,minmax(90px,1fr))}
+  .garage-gurus-logo{width:255px;height:72px}
+}
+@media(max-width:1050px){
+  .app-header.garage-gurus-header{grid-template-columns:1fr;align-items:start}
+  .garage-gurus-lockup{justify-self:start;align-items:flex-start;grid-row:1}
+  .garage-gurus-date{text-align:left}
+  .header-tabs{grid-row:2;grid-template-columns:repeat(4,1fr);width:100%}
+  .wai80-command-centre{grid-template-columns:1fr}
+  .wai80-command-centre > .wai80-status-banner,
+  .wai80-command-centre > .wai80-panel:nth-of-type(2),
+  .wai80-command-centre > .wai80-two-column,
+  .wai80-command-centre > .wai80-quick-access{grid-column:1;grid-row:auto}
+  .wai80-status-banner{min-height:210px}
+}
+@media(max-width:700px){
+  .app-header.garage-gurus-header{padding:14px;min-height:0}
+  .header-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .header-tabs .tab{min-height:54px;font-size:11px}
+  .garage-gurus-logo{width:230px;height:62px}
+  .container{padding:16px 12px 28px}
+  .wai80-kpi-grid,.wai80-performance-grid{grid-template-columns:1fr 1fr}
+  .wai80-two-column{grid-template-columns:1fr}
+}
+@media(max-width:440px){.wai80-kpi-grid,.wai80-performance-grid{grid-template-columns:1fr}}
+
+/* WAI-109.6 — Garage Gurus approved visual system. Styling only; no workflow logic changed. */
+:root{
+  --gg-navy:#071a31;
+  --gg-navy-2:#0b2340;
+  --gg-page:#f4f7fa;
+  --gg-card:#ffffff;
+  --gg-line:#dfe6ee;
+  --gg-ink:#0c2340;
+  --gg-muted:#68788b;
+}
+body{background:var(--gg-page)}
+.app-header.garage-gurus-header{
+  grid-template-columns:minmax(0,1fr) 360px;
+  min-height:172px;
+  padding:20px 22px;
+  background:linear-gradient(112deg,#06172b 0%,#09203a 58%,#06172b 100%);
+  border-bottom:1px solid #173452;
+}
+.header-tabs{grid-template-columns:repeat(8,minmax(104px,1fr));gap:10px}
+.header-tabs .tab{
+  min-height:70px;
+  border-radius:10px;
+  border:1px solid rgba(176,200,224,.38);
+  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+  font-size:12px;
+}
+.header-tabs .tab.active{background:linear-gradient(180deg,#193c60,#102f50);border-color:#8ca7c1}
+.garage-gurus-lockup{width:100%;align-items:center;justify-self:end}
+.garage-gurus-logo{
+  width:340px;
+  height:105px;
+  object-fit:contain;
+  object-position:center;
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,.28));
+}
+.garage-gurus-date{width:100%;text-align:center;margin-top:2px}
+.garage-gurus-date #todayDate{font-size:14px;font-weight:700;color:#fff}
+.garage-gurus-version{display:none}
+.container{max-width:1680px;padding:24px 20px 40px}
+
+/* Command Centre: health card + overview, then balanced professional panels */
+.wai80-command-centre{grid-template-columns:340px minmax(0,1fr);gap:18px}
+.wai80-status-banner{
+  min-height:270px;
+  border-radius:13px;
+  justify-content:center;
+  background:linear-gradient(145deg,#e31a2b,#c50e21);
+  overflow:hidden;
+  position:relative;
+}
+.wai80-status-banner::after{
+  content:"";position:absolute;inset:auto -40px -85px -40px;height:170px;
+  border:1px solid rgba(255,255,255,.16);border-radius:50%;transform:rotate(-8deg)
+}
+.wai80-status-banner > div:first-child{display:none}
+.wai80-health-ring{width:158px;height:158px;border-width:10px;position:relative;z-index:1}
+.wai80-health-ring strong{font-size:45px}
+.wai80-health-ring span{font-size:13px;font-weight:700}
+.wai80-panel{padding:22px}
+.wai80-section-heading h2{font-size:22px}
+.wai80-kpi-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.wai80-kpi{min-height:148px;border-radius:11px;padding:18px 12px}
+.wai80-kpi strong{font-size:30px}
+.wai80-kpi span{font-size:14px}
+.wai80-kpi small{font-size:12px;line-height:1.35}
+.wai80-two-column{grid-template-columns:1.25fr .95fr;gap:18px}
+.wai80-two-column > .wai80-panel{min-height:290px}
+.wai80-performance-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.wai80-performance-card{border-left-width:0;border-radius:10px;background:#fff;padding:17px}
+.wai80-priority{border-radius:10px;background:#fff}
+.wai80-quick-access{padding:18px 20px}
+.wai80-quick-access .wai80-section-heading,.wai80-quick-access>div:first-child{margin-bottom:12px}
+.card,.hero,.wai80-panel,.wai80-quick-access{box-shadow:0 5px 16px rgba(13,36,62,.075)}
+
+/* Apply the same visual language across every existing screen */
+.screen{color:var(--gg-ink)}
+.screen .card,.screen .hero,.screen .finance-card,.screen .portal-card,.screen .monthly-review-sheet{
+  border-radius:12px;border-color:var(--gg-line);background:#fff;box-shadow:0 4px 14px rgba(13,36,62,.065)
+}
+button,.primary,.secondary{border-radius:9px}
+input,select,textarea{border-radius:8px}
+
+@media(max-width:1450px){
+  .app-header.garage-gurus-header{grid-template-columns:minmax(0,1fr) 300px}
+  .header-tabs{grid-template-columns:repeat(6,minmax(92px,1fr))}
+  .garage-gurus-logo{width:285px;height:92px}
+  .wai80-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:1050px){
+  .app-header.garage-gurus-header{grid-template-columns:1fr}
+  .garage-gurus-lockup{justify-self:center;grid-row:1}
+  .garage-gurus-date{text-align:center}
+  .header-tabs{grid-row:2}
+  .wai80-command-centre{grid-template-columns:1fr}
+  .wai80-status-banner{min-height:220px}
+  .wai80-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* WAI-110.0 — Garage Gurus professional UI pass (visual only) */
+body{background:linear-gradient(180deg,#eef4fa 0,#f7f9fc 360px,#f4f7fa 100%);color:#0b1f38}
+.app-header.garage-gurus-header{position:relative;grid-template-columns:minmax(0,1fr) 330px;min-height:154px;padding:18px 24px;background:radial-gradient(circle at 76% 0%,rgba(18,99,188,.22),transparent 28%),linear-gradient(115deg,#041225 0%,#092746 54%,#06182e 100%);box-shadow:0 8px 26px rgba(4,18,37,.22)}
+.header-tabs{grid-template-columns:repeat(8,minmax(98px,1fr));gap:9px;margin:0}
+.header-tabs .tab{position:relative;min-height:72px;padding:31px 8px 10px;border:1px solid rgba(178,207,236,.28);border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.025));color:#fff;font-size:11.5px;letter-spacing:.1px;box-shadow:inset 0 1px rgba(255,255,255,.08),0 7px 18px rgba(0,0,0,.12);transition:.18s ease}
+.header-tabs .tab:hover{transform:translateY(-2px);border-color:#5eb4ff;background:linear-gradient(180deg,rgba(32,111,183,.32),rgba(255,255,255,.04))}
+.header-tabs .tab.active{border-color:#19a8ff;background:linear-gradient(180deg,#173f69,#0c2c4f);box-shadow:inset 0 0 0 1px rgba(54,182,255,.35),0 0 18px rgba(0,157,255,.18)}
+.header-tabs .tab::before{position:absolute;top:9px;left:50%;transform:translateX(-50%);font-size:17px;line-height:1;opacity:.96}
+.header-tabs .tab:nth-child(1)::before{content:'◴'}.header-tabs .tab:nth-child(2)::before{content:'♙'}.header-tabs .tab:nth-child(3)::before{content:'⚒'}.header-tabs .tab:nth-child(4)::before{content:'▥'}.header-tabs .tab:nth-child(5)::before{content:'▣'}.header-tabs .tab:nth-child(6)::before{content:'□'}.header-tabs .tab:nth-child(7)::before{content:'◆'}.header-tabs .tab:nth-child(8)::before{content:'◈'}.header-tabs .tab:nth-child(9)::before{content:'M'}.header-tabs .tab:nth-child(10)::before{content:'▤'}.header-tabs .tab:nth-child(11)::before{content:'⚙'}.header-tabs .tab:nth-child(12)::before{content:'◎'}.header-tabs .tab:nth-child(13)::before{content:'◇'}.header-tabs .tab:nth-child(14)::before{content:'◉'}.header-tabs .tab:nth-child(15)::before{content:'◌'}.header-tabs .tab:nth-child(16)::before{content:'£'}
+.garage-gurus-logo{width:310px;height:86px;object-fit:contain;filter:drop-shadow(0 7px 15px rgba(0,0,0,.35))}.garage-gurus-date #todayDate{font-size:14px;letter-spacing:.2px}.container{max-width:1660px;padding:26px 24px 46px}
+.wai80-command-centre{grid-template-columns:330px minmax(0,1fr);gap:20px}
+.wai80-status-banner{min-height:284px;border-radius:16px;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.09),transparent 35%),linear-gradient(145deg,#f01931 0%,#c90c22 58%,#a9081c 100%);box-shadow:0 12px 30px rgba(180,15,36,.18);border:1px solid rgba(151,0,20,.12)}
+.wai80-status-banner::before{content:'WORKSHOP HEALTH';position:absolute;top:22px;left:24px;font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.78)}
+.wai80-status-banner::after{height:210px;bottom:-118px;border-color:rgba(255,255,255,.18);box-shadow:0 -26px 70px rgba(255,255,255,.05)}
+.wai80-health-ring{width:168px;height:168px;border:11px solid rgba(255,255,255,.34);box-shadow:inset 0 0 24px rgba(255,255,255,.08),0 10px 30px rgba(92,0,10,.16)}
+.wai80-health-ring strong{font-size:48px}.wai80-health-ring span{font-size:13px;letter-spacing:.15px}
+.wai80-status-banner .wai80-health-ring::after{content:'LIVE PERFORMANCE';position:absolute;bottom:-54px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.75)}
+.wai80-panel,.wai80-quick-access{border:1px solid #e0e8f1!important;border-radius:16px!important;box-shadow:0 9px 26px rgba(13,45,78,.08)!important}
+.wai80-section-heading{padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid #e8eef5}.wai80-section-heading h2{font-size:21px;letter-spacing:-.25px}.wai80-eyebrow{color:#6b7d91;font-size:10px;font-weight:800;letter-spacing:1.8px}
+.wai80-kpi-grid{gap:12px}.wai80-kpi{position:relative;min-height:148px;padding:18px 14px;border:1px solid #e2e9f1;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);box-shadow:0 3px 10px rgba(20,51,83,.04);overflow:hidden}.wai80-kpi::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#1174d4,#42a5ff)}.wai80-kpi strong{color:#0a2340;font-size:31px;letter-spacing:-.6px}.wai80-kpi span{font-weight:700;color:#233c58}.wai80-kpi small{color:#77889b}
+.wai80-two-column{gap:20px}.wai80-performance-card,.wai80-priority{border:1px solid #e2e9f1!important;box-shadow:0 3px 11px rgba(20,51,83,.04)}
+.wai80-performance-card{position:relative;overflow:hidden}.wai80-performance-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#187bd6}.wai80-priority{border-left:4px solid #20a05a!important}
+.wai80-quick-access{background:linear-gradient(135deg,#fff,#f8fbff)}
+.screen .card,.screen .hero,.screen .finance-card,.screen .portal-card,.screen .monthly-review-sheet{border:1px solid #e0e8f1;box-shadow:0 7px 22px rgba(13,45,78,.07);border-radius:14px}
+.screen h2{color:#0b2340;letter-spacing:-.25px}.screen h3{color:#173653}.primary{background:linear-gradient(180deg,#1179db,#0867c1);box-shadow:0 5px 12px rgba(11,110,205,.18)}.secondary{background:#eef4fa;color:#173653;border:1px solid #d9e4ef}
+input,select,textarea{border:1px solid #d6e0ea;background:#fcfdff;box-shadow:inset 0 1px 2px rgba(12,35,64,.025)}input:focus,select:focus,textarea:focus{outline:none;border-color:#4a9de8;box-shadow:0 0 0 3px rgba(38,139,230,.11)}
+table{border-radius:10px;overflow:hidden}th{background:linear-gradient(180deg,#102d4c,#0a223b);font-size:12px;letter-spacing:.2px}td{background:#fff}tr:hover td{background:#f7fbff}
+@media(max-width:1450px){.app-header.garage-gurus-header{grid-template-columns:minmax(0,1fr) 280px}.header-tabs{grid-template-columns:repeat(6,minmax(92px,1fr))}.garage-gurus-logo{width:265px}.wai80-command-centre{grid-template-columns:300px minmax(0,1fr)}}
+
+/* WAI-110.1 — polished app UI, compact Garage Health (visual only) */
+.wai80-command-centre{grid-template-columns:300px minmax(0,1fr);gap:20px}
+.wai80-status-banner{
+  min-height:270px!important;padding:24px!important;display:flex!important;
+  align-items:flex-start!important;justify-content:space-between!important;text-align:left!important;
+  color:#0b2340!important;background:linear-gradient(145deg,#ffffff 0%,#f7fbff 100%)!important;
+  border:1px solid #dce6f0!important;border-top:4px solid #1677d2!important;
+  box-shadow:0 10px 28px rgba(12,42,72,.09)!important;overflow:hidden!important;
+}
+.wai80-status-banner::before{content:'';position:absolute;right:-55px;top:-55px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(26,126,218,.12),rgba(26,126,218,0) 68%)}
+.wai80-status-banner::after{content:''!important;position:absolute!important;right:-20px!important;bottom:-42px!important;left:auto!important;width:170px!important;height:110px!important;border:1px solid rgba(22,119,210,.13)!important;border-radius:55%!important;transform:rotate(-12deg)!important}
+.wai80-status-banner > div:first-child{display:block!important;position:relative;z-index:2;max-width:145px}
+.wai80-status-banner .wai80-eyebrow{color:#1877cf!important;font-size:9px!important;letter-spacing:1.5px!important}
+.wai80-status-banner h2{display:block!important;color:#0b2340!important;font-size:17px!important;line-height:1.25!important;margin:8px 0 8px!important}
+.wai80-status-banner p{display:block!important;color:#718197!important;font-size:11px!important;line-height:1.45!important;margin:0!important}
+.wai80-health-ring{
+  width:118px!important;height:118px!important;margin-top:2px;border:9px solid #e4edf6!important;
+  border-top-color:#1677d2!important;border-right-color:#36a0ee!important;background:#fff!important;
+  color:#0b2340!important;box-shadow:0 8px 22px rgba(16,72,123,.11)!important;position:relative;z-index:2
+}
+.wai80-health-ring strong{font-size:34px!important;color:#0b2340!important}
+.wai80-health-ring span{font-size:11px!important;color:#64758a!important;font-weight:750!important}
+.wai80-status-banner .wai80-health-ring::after{content:'LIVE SCORE'!important;bottom:-31px!important;color:#718197!important;font-size:8px!important;letter-spacing:1.3px!important}
+.wai80-status-critical{border-top-color:#e11d35!important}.wai80-status-critical .wai80-health-ring{border-top-color:#e11d35!important;border-right-color:#f05c6e!important}
+.wai80-status-attention{border-top-color:#f09a19!important}.wai80-status-attention .wai80-health-ring{border-top-color:#f09a19!important;border-right-color:#ffc15a!important}
+.wai80-status-on-track{border-top-color:#19a35b!important}.wai80-status-on-track .wai80-health-ring{border-top-color:#19a35b!important;border-right-color:#53c987!important}
+
+/* stronger, more finished information hierarchy */
+.wai80-panel{background:linear-gradient(180deg,#fff,#fbfdff)!important}
+.wai80-kpi{min-height:140px!important;transition:transform .16s ease,box-shadow .16s ease}
+.wai80-kpi:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(18,54,90,.08)}
+.wai80-kpi:nth-child(1)::before{background:#20a65a}.wai80-kpi:nth-child(2)::before{background:#1677d2}.wai80-kpi:nth-child(3)::before{background:#7b61d1}.wai80-kpi:nth-child(4)::before{background:#f09a19}.wai80-kpi:nth-child(5)::before{background:#17a2a4}.wai80-kpi:nth-child(6)::before{background:#7652c7}
+.wai80-performance-card{background:linear-gradient(180deg,#fff,#f9fbfe)!important}.wai80-performance-card strong{font-size:27px!important}
+.wai80-priority{padding:15px 16px!important;background:linear-gradient(180deg,#fff,#fbfdff)!important}
+.wai80-priority strong{color:#132f4d}.wai80-priority p{color:#6c7e91;margin-top:5px}
+.wai80-quick-access{border-top:3px solid #1677d2!important}
+.wai80-existing-dashboard > summary{background:linear-gradient(180deg,#f9fbfe,#f1f5f9);color:#2a4662}
+
+/* general app refinement */
+.screen>.card{padding:22px}.screen>.card>h2:first-child{font-size:21px;margin-bottom:6px}
+.stats{gap:14px}.stat{border:1px solid #e1e9f1;background:linear-gradient(180deg,#fff,#f9fbfd);border-radius:12px;box-shadow:0 3px 10px rgba(15,45,76,.04)}
+.job-card,.coach-card,.board-job{border-radius:12px!important;box-shadow:0 3px 12px rgba(15,45,76,.05)}
+.header-tabs .tab{font-weight:750}.header-tabs .tab.active::after{content:'';position:absolute;left:18px;right:18px;bottom:5px;height:2px;border-radius:2px;background:#36b5ff}
+
+@media(max-width:1050px){.wai80-status-banner{min-height:210px!important}.wai80-status-banner>div:first-child{max-width:55%}.wai80-health-ring{width:112px!important;height:112px!important}}
+
+/* WAI-110.2 — navigation icon correction + Settings/Workshop Control Centre polish */
+/* Icons are mapped by destination rather than position so they remain correct if tabs move. */
+.header-tabs .tab::before{font-family:Arial,"Apple Color Emoji","Segoe UI Emoji",sans-serif!important;font-size:18px!important;font-weight:400!important;line-height:1!important}
+.header-tabs .tab[data-screen="commandScreen"]::before{content:'◴'!important}
+.header-tabs .tab[data-screen="missionControlScreen"]::before{content:'⌖'!important}
+.header-tabs .tab[data-screen="managerScreen"]::before{content:'👥'!important}
+.header-tabs .tab[data-screen="techScreen"]::before{content:'🔧'!important}
+.header-tabs .tab[data-screen="reportsScreen"]::before{content:'▥'!important}
+.header-tabs .tab[data-screen="plannerScreen"]::before{content:'▣'!important}
+.header-tabs .tab[data-screen="staffCalendarScreen"]::before{content:'▦'!important}
+.header-tabs .tab[data-screen="partsScreen"]::before{content:'📦'!important}
+.header-tabs .tab[data-screen="partsTyreIntelligenceScreen"]::before{content:'◉'!important}
+.header-tabs .tab[data-screen="motIntelligenceScreen"]::before{content:'🚗'!important}
+.header-tabs .tab[data-screen="reportsInterfaceScreen"]::before{content:'▤'!important}
+.header-tabs .tab[data-screen="techniciansScreen"]::before{content:'⚙'!important}
+.header-tabs .tab[data-screen="targetsScreen"]::before{content:'◎'!important}
+.header-tabs .tab[data-screen="vehicleIntelligenceScreen"]::before{content:'🚘'!important}
+.header-tabs .tab[data-screen="crmScreen"]::before{content:'♙'!important}
+.header-tabs .tab[data-screen="customerPortalScreen"]::before{content:'◎'!important}
+.header-tabs .tab[data-screen="financeCentreScreen"]::before{content:'£'!important;font-weight:800!important}
+
+/* Settings is intentionally quieter than operational screens: grouped white modules, neutral fields. */
+#targetsScreen.targets-control-centre{max-width:1500px;margin:0 auto;padding-bottom:34px}
+#targetsScreen .targets-hero{
+  padding:24px 26px!important;border:1px solid #dfe7ef!important;border-radius:15px!important;
+  background:linear-gradient(180deg,#fff,#f9fbfd)!important;box-shadow:0 7px 22px rgba(13,45,78,.06)!important
+}
+#targetsScreen .targets-hero h2{font-size:25px!important;color:#0b2340!important}
+#targetsScreen .targets-eyebrow{color:#6f8093!important;font-size:10px!important;letter-spacing:1.7px!important}
+#targetsScreen .targets-headline-card{border-radius:13px!important;padding:16px!important;box-shadow:0 4px 14px rgba(13,45,78,.05)!important;border:1px solid #e1e8ef!important}
+#targetsScreen .targets-headline-card strong{font-size:24px!important;color:#102b47!important}
+#targetsScreen .targets-layout{gap:18px!important}
+#targetsScreen .targets-main-column,#targetsScreen .targets-side-column{gap:18px!important}
+#targetsScreen .targets-module,#targetsScreen .targets-review-card,#targetsScreen .targets-preview-card{
+  background:#fff!important;border:1px solid #e0e7ef!important;border-radius:14px!important;
+  box-shadow:0 6px 18px rgba(13,45,78,.055)!important;padding:22px!important
+}
+#targetsScreen .targets-module-heading{padding-bottom:14px;margin-bottom:18px!important;border-bottom:1px solid #edf1f5}
+#targetsScreen .targets-module-heading h2{font-size:18px!important;color:#102b47!important}
+#targetsScreen .targets-module-heading .muted{font-size:12px!important;color:#7a8999!important}
+#targetsScreen .targets-icon{width:36px!important;height:36px!important;border-radius:10px!important;background:#edf5fc!important;color:#1677d2!important;font-size:17px!important}
+#targetsScreen .targets-form-grid{gap:15px!important}
+#targetsScreen .targets-form-grid label{font-size:12px!important;font-weight:700!important;color:#506276!important;letter-spacing:.1px}
+#targetsScreen .targets-form-grid input,
+#targetsScreen .targets-form-grid select,
+#targetsScreen .targets-form-grid textarea{
+  display:block!important;width:100%!important;margin-top:7px!important;padding:11px 12px!important;min-height:42px!important;
+  background:#fff!important;color:#122c47!important;border:1px solid #ccd8e4!important;border-radius:9px!important;
+  box-shadow:inset 0 1px 2px rgba(13,45,78,.025)!important;font-size:14px!important;font-weight:600!important
+}
+#targetsScreen .targets-form-grid input:hover{border-color:#aebfd0!important}
+#targetsScreen .targets-form-grid input:focus{outline:none!important;border-color:#2787dd!important;box-shadow:0 0 0 3px rgba(39,135,221,.10)!important}
+#targetsScreen .rate-retail,#targetsScreen .rate-warranty,#targetsScreen .rate-internal{border-left:0!important;padding-left:0!important}
+#targetsScreen .target-projection{background:#f8fafc!important;border:1px solid #e3eaf1!important;border-radius:10px!important}
+#targetsScreen .targets-review-item,#targetsScreen .targets-preview-tile{border-radius:10px!important;box-shadow:none!important}
+#targetsScreen .targets-save-panel{
+  margin-top:18px!important;padding:20px 22px!important;border:1px solid #dce6ef!important;border-radius:14px!important;
+  background:#fff!important;box-shadow:0 6px 18px rgba(13,45,78,.055)!important
+}
+#targetsScreen .targets-save-panel h2{font-size:18px!important;margin-bottom:4px!important}
+#targetsScreen .targets-save-button{min-width:210px!important;width:auto!important;padding:12px 18px!important;border-radius:9px!important;font-size:14px!important}
+#targetsScreen .secondary{background:#f5f8fb!important;border:1px solid #d7e1ea!important;color:#29455f!important;box-shadow:none!important}
+
+/* WAI-110.4 — responsive Garage Gurus header lockup (visual only) */
+.app-header.garage-gurus-header{
+  grid-template-columns:minmax(0,1fr) minmax(300px,390px);
+  column-gap:24px;
+}
+.garage-gurus-lockup{
+  width:100%;
+  max-width:390px;
+  justify-self:end;
+  align-items:center;
+  padding:0 6px;
+  box-sizing:border-box;
+}
+.garage-gurus-logo{
+  display:block;
+  width:100%!important;
+  max-width:370px!important;
+  height:auto!important;
+  max-height:100px;
+  object-fit:contain;
+  object-position:center;
+  margin:0 auto;
+}
+.garage-gurus-date{
+  width:100%;
+  margin-top:5px;
+  text-align:center;
+}
+@media(max-width:1450px){
+  .app-header.garage-gurus-header{grid-template-columns:minmax(0,1fr) minmax(270px,330px)}
+  .garage-gurus-lockup{max-width:330px}
+  .garage-gurus-logo{max-width:320px!important}
+}
+@media(max-width:1120px){
+  .app-header.garage-gurus-header{grid-template-columns:1fr}
+  .garage-gurus-lockup{grid-row:1;justify-self:center;max-width:360px;margin-bottom:10px}
+  .garage-gurus-logo{max-width:350px!important}
+  .header-tabs{grid-row:2}
+}
+
+/* WAI-110.5 — larger readable Garage Gurus lockup */
+.app-header.garage-gurus-header{grid-template-columns:minmax(0,1fr) minmax(390px,500px);column-gap:28px}
+.garage-gurus-lockup{max-width:500px!important;padding:0 4px!important}
+.garage-gurus-logo{width:100%!important;max-width:480px!important;max-height:142px!important;height:auto!important;object-fit:contain!important}
+.garage-gurus-date{margin-top:3px!important}
+@media(max-width:1450px){
+ .app-header.garage-gurus-header{grid-template-columns:minmax(0,1fr) minmax(340px,420px)}
+ .garage-gurus-lockup{max-width:420px!important}
+ .garage-gurus-logo{max-width:405px!important;max-height:125px!important}
+}
+@media(max-width:1120px){
+ .app-header.garage-gurus-header{grid-template-columns:1fr}
+ .garage-gurus-lockup{max-width:440px!important}
+ .garage-gurus-logo{max-width:425px!important}
+}
+.header-tabs .tab[data-screen="mediaCentreScreen"]::before{content:'▶'!important;color:#69c9ff!important;font-size:16px!important}
