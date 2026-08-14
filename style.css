@@ -1026,3 +1026,37 @@ table{border-radius:10px;overflow:hidden}th{background:linear-gradient(180deg,#1
  .garage-gurus-logo{max-width:425px!important}
 }
 .header-tabs .tab[data-screen="mediaCentreScreen"]::before{content:'▶'!important;color:#69c9ff!important;font-size:16px!important}
+
+/* WAI-111.1 — Stock navigation icons */
+.header-tabs .tab[data-screen="partsStockScreen"]::before{content:'📦'!important;color:#69c9ff!important;font-size:18px!important}
+.header-tabs .tab[data-screen="tyreStockScreen"]::before{content:'🛞'!important;color:#69c9ff!important;font-size:18px!important}
+.header-tabs .tab[data-screen="oilStockScreen"]::before{content:'🛢️'!important;color:#69c9ff!important;font-size:18px!important}
+
+/* Garage Gurus family palette alignment — Sales AI reference */
+:root{
+  --gg-navy:#071322;
+  --gg-navy-2:#0b1a2b;
+  --gg-panel:#0e2034;
+  --gg-line:#29445f;
+  --gg-blue:#35a7ff;
+  --gg-light:#f4f8fc;
+  --gg-muted:#64748b;
+}
+body{background:linear-gradient(135deg,var(--gg-navy),var(--gg-navy-2));}
+.app-header{background:linear-gradient(135deg,#06111e,#0b1a2b);border-bottom-color:var(--gg-line);}
+.tab{background:#10243a;color:#f4f8fc;border:1px solid var(--gg-line);}
+.tab:hover{border-color:#35a7ff;box-shadow:0 0 0 1px rgba(53,167,255,.15) inset;}
+.tab.active{background:var(--gg-blue);border-color:var(--gg-blue);color:#041321;}
+.primary{background:var(--gg-blue);color:#041321;}
+.hero{border-color:var(--gg-blue);}
+.job-card,.coach-card,.board-job{border-left-color:var(--gg-blue);}
+.bar,.timeline-item:before{background:var(--gg-blue);}
+.timeline{border-left-color:var(--gg-blue);}
+.board-column.drag-over{outline-color:var(--gg-blue);}
+.gh-tab.active{background:var(--gg-blue);}
+.gh-potential{border-left-color:var(--gg-blue);}
+.coach-command-card{border-left-color:var(--gg-blue);}
+.logo-mark{background:linear-gradient(135deg,#35a7ff,#2563eb);box-shadow:0 10px 24px rgba(53,167,255,.28);}
+.app-header h1 strong{color:var(--gg-blue);}
+/* retain the light operational workspace for day-long workshop readability */
+.card,.hero,.modal-card,.stat{background:#fff;}

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workshop AI OS — WAI-104.0 Customer Portal</title>
-  <link rel="stylesheet" href="style.css?v=110.5" />
+  <link rel="stylesheet" href="style.css?v=111.1" />
   <link rel="stylesheet" href="wai093-vhc.css">
   <link rel="stylesheet" href="wai094-intelligence.css">
   <link rel="stylesheet" href="wai095-workshop-intelligence.css">
@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="review-centre.css?v=110.7">
   <link rel="stylesheet" href="staff-calendar.css?v=106.0">
   <link rel="stylesheet" href="service-manager-pro.css?v=1070">
+  <link rel="stylesheet" href="inventory-stock.css?v=111.0">
 </head>
 
 <body>
@@ -23,11 +24,14 @@
   <nav class="tabs header-tabs" aria-label="Workshop navigation">
     <button class="tab active" data-screen="commandScreen">Command Centre</button>
     <button class="tab" data-screen="managerScreen">Service Team</button>
-    <button class="tab" data-screen="techScreen">Tech Team</button>
+    <button class="tab" data-screen="techScreen">Tech View</button>
     <button class="tab" data-screen="reportsScreen">Team Performance</button>
     <button class="tab" data-screen="plannerScreen">Daily Planner</button>
     <button class="tab" data-screen="staffCalendarScreen">Calendar</button>
     <button class="tab" data-screen="partsScreen">Parts Manager</button>
+    <button class="tab" data-screen="partsStockScreen">Parts Stock</button>
+    <button class="tab" data-screen="tyreStockScreen">Tyre Stock</button>
+    <button class="tab" data-screen="oilStockScreen">Oil Stock</button>
     <button class="tab" data-screen="partsTyreIntelligenceScreen">Parts &amp; Tyres</button>
     <button class="tab" data-screen="motIntelligenceScreen">MOT Intelligence</button>
     <button class="tab" data-screen="reportsInterfaceScreen">Reports Interface</button>
@@ -44,7 +48,7 @@
     <img src="garage-gurus-header.png" alt="Garage Gurus — Automotive Intelligence — Powered by AI" class="garage-gurus-logo">
     <div class="garage-gurus-date">
       <p id="todayDate"></p>
-      <p class="garage-gurus-version">Version WAI-110.7 · Workshop Control Centre 2.0</p>
+      <p class="garage-gurus-version">Version WAI-111.1 · Workshop Control Centre 2.0</p>
     </div>
   </div>
 </header>
@@ -560,11 +564,14 @@
         <label>Other Supplier
           <input id="partsOrderSupplierOther" placeholder="Enter supplier name">
         </label>
-        <label>Part Required
+        <label>Part Number *
           <input id="partsOrderPartNumber" list="partsOrderKnownNumbers" placeholder="Example: 03L129620" autocomplete="off" required>
           <datalist id="partsOrderKnownNumbers"></datalist>
           <small class="muted">Required. The exact part number is used to identify the part and compare its cost history.</small>
           <div id="partsOrderPriceAlert"></div>
+        </label>
+        <label>Part Description *
+          <input id="partsOrderDescription" placeholder="Example: Air Filter" autocomplete="off" required>
         </label>
         <label>Order Number
           <input id="partsOrderReference" placeholder="Supplier order number">
@@ -1198,6 +1205,12 @@
     </div>
   </section>
 
+  <section id="partsStockScreen" class="screen inventory-screen"><div id="partsStockHost"></div></section>
+
+  <section id="tyreStockScreen" class="screen inventory-screen"><div id="tyreStockHost"></div></section>
+
+  <section id="oilStockScreen" class="screen inventory-screen"><div id="oilStockHost"></div></section>
+
   <section id="financeCentreScreen" class="screen">
     <div class="finance-hero">
       <div><span class="finance-eyebrow">WAI-100 · CRM → JOB → LIVE INVOICE</span><h2>Finance Centre</h2><p>A fast live invoice is created automatically from every workshop job. Customer, vehicle, labour, parts, oil and MOT flow through once, without duplicate typing.</p></div>
@@ -1271,6 +1284,7 @@
 <script src="wai096-crm.js"></script>
 <script src="wai0962-customer-recognition.js?v=105.5.3"></script>
 <script src="finance-centre.js"></script>
+<script src="inventory-stock.js?v=111.0"></script>
 <script src="operational-gp.js"></script>
 <script src="customer-portal.js"></script>
 <script src="media-centre.js"></script>

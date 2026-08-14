@@ -1055,9 +1055,12 @@ function partsCard(job,part,context="manager"){
     </div></div>`;
 }
 function openPartsOrderForm(jobId,partId){
+  // Always open the Parts Management screen first so the order form is visible,
+  // even when Order Parts is clicked from Service Team / another screen.
+  show("partsScreen");
   const job=jobs.find(x=>x.id===jobId);if(!job)return;const part=(job.partsRequests||[]).find(x=>x.id===partId);if(!part)return;
   $("partsOrderJobId").value=jobId;$("partsOrderPartId").value=partId;$("partsOrderContext").textContent=`${job.reg} — ${part.qty||1} x ${part.description||part.text}`;
-  $("partsOrderSupplier").value=part.supplier||"TPS";$("partsOrderSupplierOther").value="";$("partsOrderPartNumber").value=part.partNumber||"";$("partsOrderReference").value=part.orderReference||"";$("partsOrderCost").value=part.cost??"";$("partsOrderExpected").value=part.expectedDelivery||"";$("partsOrderBy").value=part.orderedBy||"Service Manager";$("partsOrderStatus").value=part.status==="Back Order"?"Back Order":"Ordered";$("partsOrderNotes").value=part.orderNotes||"";$("partsOrderFormCard").classList.remove("hidden");$("partsOrderFormCard").scrollIntoView({behavior:"smooth",block:"start"});
+  $("partsOrderSupplier").value=part.supplier||"TPS";$("partsOrderSupplierOther").value="";$("partsOrderPartNumber").value=part.partNumber||"";$("partsOrderDescription").value=part.description||part.text||"";$("partsOrderReference").value=part.orderReference||"";$("partsOrderCost").value=part.cost??"";$("partsOrderExpected").value=part.expectedDelivery||"";$("partsOrderBy").value=part.orderedBy||"Service Manager";$("partsOrderStatus").value=part.status==="Back Order"?"Back Order":"Ordered";$("partsOrderNotes").value=part.orderNotes||"";$("partsOrderFormCard").classList.remove("hidden");$("partsOrderFormCard").scrollIntoView({behavior:"smooth",block:"start"});
 }
 function closePartsOrderForm(){if($("partsOrderFormCard"))$("partsOrderFormCard").classList.add("hidden")}
 function savePartsOrderFromForm(){
@@ -1097,6 +1100,8 @@ function savePartsOrderFromForm(){
     part.supplier=supplier;
     part.orderedFrom=supplier;
     part.partNumber=val("partsOrderPartNumber").trim();
+    part.description=val("partsOrderDescription").trim()||part.description||part.text||"";
+    part.text=part.description;
     part.orderReference=val("partsOrderReference").trim();
     part.cost=val("partsOrderCost")===""?null:Number(val("partsOrderCost"));
     part.expectedDelivery=val("partsOrderExpected");
