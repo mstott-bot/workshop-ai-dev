@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="staff-calendar.css?v=106.0">
   <link rel="stylesheet" href="service-manager-pro.css?v=1070">
   <link rel="stylesheet" href="inventory-stock.css?v=111.0">
+  <link rel="stylesheet" href="fault-code-assistant.css?v=113.0">
 </head>
 
 <body>
@@ -48,7 +49,7 @@
     <img src="garage-gurus-header.png" alt="Garage Gurus — Automotive Intelligence — Powered by AI" class="garage-gurus-logo">
     <div class="garage-gurus-date">
       <p id="todayDate"></p>
-      <p class="garage-gurus-version">Version WAI-111.1 · Workshop Control Centre 2.0</p>
+      <p class="garage-gurus-version">Version WAI-113.0 · Workshop Control Centre 2.0</p>
     </div>
   </div>
 </header>
@@ -69,12 +70,32 @@
         </div>
       </section>
 
+
+
       <section class="card wai80-panel">
         <div class="wai80-section-heading">
           <div><span class="wai80-eyebrow">TODAY</span><h2>Workshop Summary</h2></div>
           <span id="wai80LastUpdated" class="muted"></span>
         </div>
         <div id="wai80SummaryCards" class="wai80-kpi-grid"></div>
+      </section>
+
+      <section class="card garage-guru-ask-card" id="askGarageGuruCard">
+        <div class="garage-guru-ask-head">
+          <div><span class="wai80-eyebrow">POWERED BY AI</span><h2>✨ Ask Garage Guru</h2><p>Ask a question about your live workshop performance in plain English.</p></div>
+          <span class="garage-guru-live-pill">LIVE WORKSHOP DATA</span>
+        </div>
+        <div class="garage-guru-ask-row">
+          <input id="garageGuruQuestion" type="text" placeholder="Example: Why was gross profit down this month?" autocomplete="off">
+          <button id="garageGuruAskBtn" class="primary" type="button">Ask Garage Guru</button>
+        </div>
+        <div class="garage-guru-suggestions">
+          <button type="button" data-guru-question="Why was gross profit down this month?">Why was gross profit down this month?</button>
+          <button type="button" data-guru-question="Who has the best efficiency?">Who has the best efficiency?</button>
+          <button type="button" data-guru-question="What is causing downtime?">What is causing downtime?</button>
+          <button type="button" data-guru-question="How is the workshop performing?">How is the workshop performing?</button>
+        </div>
+        <div id="garageGuruAnswer" class="garage-guru-answer" hidden></div>
       </section>
 
       <div class="wai80-two-column">
@@ -271,6 +292,29 @@
 
   <section id="techScreen" class="screen">
     <div id="technicianPartsAlert" class="card service-parts-alert clear"></div>
+
+    <div class="card fca-card">
+      <div class="fca-head">
+        <div><span class="fca-kicker">POWERED BY GARAGE GURU</span><h2>🔎 Fault Code Assistant</h2><p class="muted">Enter a diagnostic trouble code for a technician-focused explanation, common causes and sensible next checks.</p></div>
+        <span class="fca-badge">AI-ready diagnostic guidance</span>
+      </div>
+      <div class="fca-grid">
+        <label>Fault Code
+          <input id="faultCodeInput" autocomplete="off" placeholder="Example: P0401" maxlength="8">
+        </label>
+        <label>Vehicle / Engine (optional)
+          <input id="faultCodeVehicle" autocomplete="off" placeholder="Example: VW Tiguan 2.0 TDI">
+        </label>
+        <label>Symptoms / Notes (optional)
+          <input id="faultCodeSymptoms" autocomplete="off" placeholder="Example: EML on, low power, intermittent">
+        </label>
+      </div>
+      <div class="fca-actions">
+        <button id="faultCodeAnalyseBtn" class="primary" type="button">Analyse Fault Code</button>
+        <button id="faultCodeClearBtn" class="secondary fca-clear" type="button">Clear</button>
+      </div>
+      <div id="faultCodeResult" class="fca-result hidden" aria-live="polite"></div>
+    </div>
 
     <div class="card">
       <h2>My Jobs</h2>
@@ -1286,6 +1330,8 @@
 <script src="finance-centre.js"></script>
 <script src="inventory-stock.js?v=111.0"></script>
 <script src="operational-gp.js"></script>
+<script src="ask-garage-guru.js?v=112.3"></script>
+<script src="fault-code-assistant.js?v=113.0"></script>
 <script src="customer-portal.js"></script>
 <script src="media-centre.js"></script>
 <script src="review-centre.js?v=110.7"></script>

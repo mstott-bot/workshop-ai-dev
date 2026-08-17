@@ -1,0 +1,12 @@
+.fca-card{border:1px solid #d7e2f2;background:linear-gradient(180deg,#ffffff 0%,#f7faff 100%);box-shadow:0 8px 24px rgba(13,42,82,.07)}
+.fca-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:14px}
+.fca-head h2{margin:2px 0 4px}.fca-kicker{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;color:#1769d2;text-transform:uppercase}
+.fca-badge{white-space:nowrap;background:#eaf3ff;color:#0d58b5;border:1px solid #c9e0ff;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:800}
+.fca-grid{display:grid;grid-template-columns:minmax(180px,.7fr) minmax(180px,1fr) minmax(220px,1.4fr);gap:12px;align-items:end}
+.fca-grid label{margin:0}.fca-grid input{text-transform:none}.fca-grid #faultCodeInput{text-transform:uppercase;font-weight:800;letter-spacing:.04em}
+.fca-actions{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}.fca-actions button{margin:0}.fca-clear{background:#fff}
+.fca-result{margin-top:16px;border-top:1px solid #dce6f2;padding-top:16px}.fca-result.hidden{display:none}
+.fca-result-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}.fca-result-head h3{margin:0;color:#112f57}.fca-source{font-size:11px;font-weight:800;color:#657a93;background:#edf2f7;border-radius:999px;padding:5px 8px;white-space:nowrap}
+.fca-summary{font-size:15px;line-height:1.55;margin:0 0 14px}.fca-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.fca-panel{background:#fff;border:1px solid #dce6f2;border-radius:12px;padding:13px}.fca-panel h4{margin:0 0 8px;color:#153d6d}.fca-panel ul{margin:0;padding-left:19px}.fca-panel li{margin:6px 0;line-height:1.4}.fca-note{margin-top:12px;padding:10px 12px;border-left:3px solid #f0a000;background:#fff9e9;border-radius:8px;font-size:12px;line-height:1.45;color:#5c4a19}
+.fca-loading{display:inline-flex;gap:8px;align-items:center;color:#42617f;font-weight:700}.fca-loading:before{content:"";width:14px;height:14px;border:2px solid #bdd1ea;border-top-color:#1769d2;border-radius:50%;animation:fcaSpin .7s linear infinite}@keyframes fcaSpin{to{transform:rotate(360deg)}}
+@media(max-width:900px){.fca-grid,.fca-columns{grid-template-columns:1fr}.fca-head,.fca-result-head{flex-direction:column}.fca-badge,.fca-source{white-space:normal}}

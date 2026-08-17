@@ -660,9 +660,11 @@ td{background:#fff}
   gap:18px;
 }
 .wai80-command-centre > .wai80-status-banner{grid-column:1;grid-row:1}
-.wai80-command-centre > .wai80-panel:nth-of-type(2){grid-column:2;grid-row:1}
+.wai80-command-centre > .wai80-panel{grid-column:2;grid-row:1}
 .wai80-command-centre > .wai80-two-column,
 .wai80-command-centre > .wai80-quick-access{grid-column:1/-1}
+.wai80-command-centre > .wai80-two-column{grid-row:3}
+.wai80-command-centre > .wai80-quick-access{grid-row:4}
 .wai80-status-banner{
   min-height:255px;
   flex-direction:column;
@@ -717,7 +719,8 @@ td{background:#fff}
   .header-tabs{grid-row:2;grid-template-columns:repeat(4,1fr);width:100%}
   .wai80-command-centre{grid-template-columns:1fr}
   .wai80-command-centre > .wai80-status-banner,
-  .wai80-command-centre > .wai80-panel:nth-of-type(2),
+  .wai80-command-centre > .wai80-panel,
+  .wai80-command-centre > .garage-guru-ask-card,
   .wai80-command-centre > .wai80-two-column,
   .wai80-command-centre > .wai80-quick-access{grid-column:1;grid-row:auto}
   .wai80-status-banner{min-height:210px}
@@ -1060,3 +1063,10 @@ body{background:linear-gradient(135deg,var(--gg-navy),var(--gg-navy-2));}
 .app-header h1 strong{color:var(--gg-blue);}
 /* retain the light operational workspace for day-long workshop readability */
 .card,.hero,.modal-card,.stat{background:#fff;}
+/* WAI-112.0 Ask Garage Guru */
+.garage-guru-ask-card{grid-column:1/-1;grid-row:2;margin:0;border:1px solid #bfd4f3;background:linear-gradient(135deg,#f7fbff 0%,#eef6ff 100%);box-shadow:0 10px 28px rgba(10,55,105,.08)}
+.garage-guru-ask-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.garage-guru-ask-head h2{margin:4px 0 5px;color:#123d70}.garage-guru-ask-head p{margin:0;color:#5c6f86}.garage-guru-live-pill{white-space:nowrap;background:#e3f0ff;color:#0b5eb8;border:1px solid #b8d6f6;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;letter-spacing:.06em}
+.garage-guru-ask-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:16px}.garage-guru-ask-row input{width:100%;min-height:46px;border:1px solid #b8cbe2;border-radius:10px;padding:0 14px;font-size:15px;background:#fff}.garage-guru-ask-row button{min-width:170px}
+.garage-guru-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.garage-guru-suggestions button{border:1px solid #c7d9ee;background:#fff;color:#315a84;border-radius:999px;padding:7px 11px;font-size:12px;cursor:pointer}.garage-guru-suggestions button:hover{border-color:#2375c9;color:#0b5eb8}
+.garage-guru-answer{margin-top:14px;background:#fff;border:1px solid #c8d9ec;border-left:4px solid #1670c5;border-radius:10px;padding:15px 17px;color:#25384c}.garage-guru-answer h3{margin:0 0 8px;color:#123d70}.garage-guru-answer p{margin:7px 0;line-height:1.5}.garage-guru-answer .guru-next{color:#536b83}.guru-thinking{font-weight:700;color:#315a84}
+@media(max-width:760px){.garage-guru-ask-row{grid-template-columns:1fr}.garage-guru-ask-row button{width:100%}.garage-guru-ask-head{display:block}.garage-guru-live-pill{display:inline-block;margin-top:10px}}
