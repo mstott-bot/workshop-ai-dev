@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="service-manager-pro.css?v=1070">
   <link rel="stylesheet" href="inventory-stock.css?v=111.0">
   <link rel="stylesheet" href="fault-code-assistant.css?v=113.0">
+  <link rel="stylesheet" href="company-settings.css?v=114.0">
 </head>
 
 <body>
@@ -43,13 +44,14 @@
     <button class="tab" data-screen="customerPortalScreen">Customer Portal</button>
     <button class="tab" data-screen="mediaCentreScreen">Media Centre</button>
     <button class="tab" data-screen="reviewCentreScreen">Review Centre</button>
+    <button class="tab" data-screen="companySettingsScreen">Company Settings</button>
     <button class="tab" data-screen="financeCentreScreen">Finance Centre</button>
   </nav>
   <div class="brand-lockup garage-gurus-lockup">
     <img src="garage-gurus-header.png" alt="Garage Gurus — Automotive Intelligence — Powered by AI" class="garage-gurus-logo">
     <div class="garage-gurus-date">
       <p id="todayDate"></p>
-      <p class="garage-gurus-version">Version WAI-113.0 · Workshop Control Centre 2.0</p>
+      <p class="garage-gurus-version">Version WAI-114.0 · Workshop Control Centre 2.0</p>
     </div>
   </div>
 </header>
@@ -1255,6 +1257,14 @@
 
   <section id="oilStockScreen" class="screen inventory-screen"><div id="oilStockHost"></div></section>
 
+  <section id="companySettingsScreen" class="screen company-settings-screen">
+    <div class="company-settings-hero"><div><span class="wai80-eyebrow">WORKSHOP ADMINISTRATION</span><h2>Company Settings</h2><p>Store your company information and logo once. Workshop AI uses these details on estimates and invoices.</p></div><div class="company-settings-status" id="companySettingsStatus">Not yet saved</div></div>
+    <div class="company-settings-layout"><div class="company-settings-main">
+      <div class="card company-settings-card"><div class="company-settings-heading"><span class="company-settings-icon">🏢</span><div><h2>Company Identity</h2><p class="muted">Trading and legal details used on customer documents.</p></div></div><div class="company-brand-panel"><div id="workshopCompanyLogoPreview" class="company-logo-preview"><span>No logo uploaded</span></div><div class="company-logo-actions"><label class="primary company-logo-upload">Upload Logo<input id="workshopCompanyLogoFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden></label><button type="button" class="secondary" id="workshopCompanyLogoRemove">Remove Logo</button><small>PNG, JPG, WebP or SVG. A wide transparent logo works best on printed invoices.</small></div></div><div class="grid company-settings-grid"><label>Trading Name *<input id="workshopCompanyTradingName" required></label><label>Full Legal Company Name *<input id="workshopCompanyLegalName" required></label><label class="company-wide">Trading Address *<textarea id="workshopCompanyTradingAddress" rows="4"></textarea></label><label class="company-wide">Registered Office Address<textarea id="workshopCompanyRegisteredAddress" rows="4"></textarea></label><label>Company Registration Number<input id="workshopCompanyNumber"></label><label>Registered In<select id="workshopCompanyRegisteredIn"><option>England and Wales</option><option>Scotland</option><option>Northern Ireland</option></select></label><label>VAT Registration Number<input id="workshopCompanyVatNumber"></label><label>Telephone<input id="workshopCompanyPhone"></label><label>Email<input id="workshopCompanyEmail" type="email"></label><label>Website<input id="workshopCompanyWebsite"></label></div></div>
+      <div class="card company-settings-card"><div class="company-settings-heading"><span class="company-settings-icon">💳</span><div><h2>Invoice & Payment Details</h2><p class="muted">These details feed Workshop AI estimates and invoices automatically.</p></div></div><div class="grid company-settings-grid"><label>Bank Name<input id="workshopCompanyBankName"></label><label>Account Name<input id="workshopCompanyAccountName"></label><label>Sort Code<input id="workshopCompanySortCode"></label><label>Account Number<input id="workshopCompanyAccountNumber"></label><label class="company-wide">Payment Terms<input id="workshopCompanyPaymentTerms" placeholder="Payment due on collection"></label><label class="company-check company-wide"><input id="workshopCompanyShowLogo" type="checkbox"> Show company logo on estimates and invoices</label><label class="company-check company-wide"><input id="workshopCompanyShowBank" type="checkbox"> Show bank details on estimates and invoices</label></div></div>
+    </div><aside class="company-settings-side"><div class="card company-document-preview-card"><span class="wai80-eyebrow">DOCUMENT PREVIEW</span><h2>Invoice Branding</h2><div id="workshopCompanyDocumentPreview" class="company-document-preview"></div></div><div class="card company-settings-save-card"><h2>Save Company Details</h2><p class="muted">Changes apply to future printouts immediately. Existing invoice financial data is not altered.</p><button id="workshopCompanySave" class="primary company-settings-save">💾 Save Company Settings</button></div></aside></div>
+  </section>
+
   <section id="financeCentreScreen" class="screen">
     <div class="finance-hero">
       <div><span class="finance-eyebrow">WAI-100 · CRM → JOB → LIVE INVOICE</span><h2>Finance Centre</h2><p>A fast live invoice is created automatically from every workshop job. Customer, vehicle, labour, parts, oil and MOT flow through once, without duplicate typing.</p></div>
@@ -1327,7 +1337,8 @@
 <script src="wai094-intelligence.js"></script>
 <script src="wai096-crm.js"></script>
 <script src="wai0962-customer-recognition.js?v=105.5.3"></script>
-<script src="finance-centre.js"></script>
+<script src="company-settings.js?v=114.0"></script>
+<script src="finance-centre.js?v=114.0"></script>
 <script src="inventory-stock.js?v=111.0"></script>
 <script src="operational-gp.js"></script>
 <script src="ask-garage-guru.js?v=112.3"></script>
