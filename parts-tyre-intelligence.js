@@ -62,6 +62,11 @@
   }
   function deliveredPartCard(r){const {job,part,status}=r;return `<div class="job-card good">${regTitle(job)}<p>${esc(part.qty||1)} × ${esc(part.description||part.text||"Part")}</p><p><strong>Arrived:</strong> ${fmt(part.receivedAt||part.arrivedAt||part.deliveredAt||part.deliveryDate)}</p><p><strong>Current status:</strong> ${esc(status)}</p><div class="wai085-actions">${openJobButton(job)}</div></div>`}
   function deliveredTyreCard(r){const {job,tyre,status}=r;return `<div class="job-card good">${regTitle(job)}<p>${esc(tyre.quantity||1)} × ${esc(tyre.brand?tyre.brand+" ":"")}${esc(tyre.size||"Tyre")}</p><p><strong>Arrived:</strong> ${fmt(tyre.deliveredAt||tyre.arrivedAt||tyre.receivedAt)}</p><p><strong>Current status:</strong> ${esc(status)}</p><div class="wai085-actions">${openJobButton(job)}</div></div>`}
+  function tyreHistoryCard(r){
+    const {job,tyre,status}=r;
+    const orderedAt=tyre.orderedAt||tyre.requestedAt;
+    return `<div class="job-card wai085-history-card">${regTitle(job)}<p><strong>Tyres:</strong> ${esc(tyre.quantity||1)} × ${esc(tyre.brand?tyre.brand+" ":"")}${esc(tyre.size||"Tyre")}</p><p><strong>Supplier:</strong> ${esc(tyre.supplier||"Not entered")} · <strong>Cost:</strong> £${Number(tyre.cost||0).toFixed(2)} · <strong>Status:</strong> <span class="wai085-pill">${esc(status)}</span></p><p class="muted"><strong>Ordered:</strong> ${fmt(orderedAt)}${tyre.deliveredAt?` · <strong>Delivered:</strong> ${fmt(tyre.deliveredAt)}`:""}${tyre.fittedAt?` · <strong>Fitted:</strong> ${fmt(tyre.fittedAt)}`:""}</p><div class="wai085-actions">${openJobButton(job)}</div></div>`;
+  }
   const empty=msg=>`<div class="job-card"><p>${esc(msg)}</p></div>`;
   function render(){
     if(!$('wai085Stats'))return;
@@ -77,6 +82,12 @@
     $('wai085TyresOutstanding').innerHTML=to.length?to.map(tyreCard).join(''):empty('No tyres are currently outstanding.');
     $('wai085PartsDeliveredToday').innerHTML=pd.length?pd.map(deliveredPartCard).join(''):empty('No parts delivered today.');
     $('wai085TyresDeliveredToday').innerHTML=td.length?td.map(deliveredTyreCard).join(''):empty('No tyres delivered today.');
+    const tyreHistory=tyres.filter(r=>["Ordered","Delivered","Fitted"].includes(r.status)).sort((a,b)=>new Date(b.tyre.orderedAt||b.tyre.requestedAt||0)-new Date(a.tyre.orderedAt||a.tyre.requestedAt||0));
+    const tyreSpend=tyreHistory.reduce((sum,r)=>sum+Number(r.tyre.cost||0),0);
+    const brandCounts={};tyreHistory.forEach(r=>{const b=r.tyre.brand||"Not entered";brandCounts[b]=(brandCounts[b]||0)+Number(r.tyre.quantity||1)});
+    const topBrand=Object.entries(brandCounts).sort((a,b)=>b[1]-a[1])[0]?.[0]||"No data";
+    if($('wai085TyreOrderHistoryStats'))$('wai085TyreOrderHistoryStats').innerHTML=`<div class="stat"><strong>${tyreHistory.length}</strong>Orders Recorded</div><div class="stat"><strong>£${tyreSpend.toFixed(2)}</strong>Ordered Spend</div><div class="stat"><strong>${esc(topBrand)}</strong>Most Ordered Brand</div>`;
+    if($('wai085TyreOrderHistory'))$('wai085TyreOrderHistory').innerHTML=tyreHistory.length?tyreHistory.map(tyreHistoryCard).join(''):empty('No tyre order history recorded yet.');
     const old=[...po,...to].filter(r=>ageDays((r.part||r.tyre).requestedAt)>=3).length;
     $('wai085Coach').innerHTML=`<h2>AI Parts &amp; Tyre Coach</h2><div class="coach-list"><div class="coach-card ${po.length+to.length?'warn':'good'}"><h3>${po.length+to.length?`${po.length+to.length} outstanding request(s) need attention`:'No supply bottlenecks detected'}</h3><p>${needOrder?`${needOrder} request(s) still need ordering. `:''}${awaiting?`${awaiting} order(s) are awaiting delivery or supplier resolution. `:''}${old?`${old} request(s) have been open for three days or longer.`:'No long-running requests are currently flagged.'}</p></div></div>`;
   }

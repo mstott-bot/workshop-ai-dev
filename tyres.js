@@ -263,26 +263,14 @@
     const ordered=allTyres().filter(row=>tyreStatus(row.tyre)==="Ordered");
     const active=[...requested,...ordered];
     panel.className="card service-parts-alert action-centre-v2"+(active.length?"":" clear");
-    panel.innerHTML=`<h2>🛞 Tyre Ordering</h2><p class="muted">Only tyres that still require Service Manager action are shown here. Delivered tyres move to Parts &amp; Tyres → Tyres Delivered Today.</p>
+    panel.innerHTML=`<h2>🛞 Tyre Ordering</h2><p class="muted">Service Team ordering controls stay here. Requested tyres can be ordered and ordered tyres can be marked delivered. Tyre order history and brand information are shown in Parts &amp; Tyre Intelligence.</p>
       <div class="stats"><div class="stat ${requested.length?"bad":"good"}"><strong>${requested.length}</strong>Need Ordering</div><div class="stat ${ordered.length?"warn":"good"}"><strong>${ordered.length}</strong>Awaiting Delivery</div></div>
-      <div class="job-list">${active.length?active.map(tyreAlertRow).join(""):"<div class='job-card good'><p>✅ No tyre orders require Service Manager action.</p></div>"}</div>`;
+      <div class="job-list">${active.length?active.map(tyreAlertRow).join(""):"<div class='job-card good'><p>✅ No tyre orders require Service Team action.</p></div>"}</div>`;
   }
 
-  function installManagerPanel(){
-    if(el("wai081TyreOrders"))return;
-    const manager=el("managerScreen");if(!manager)return;
-    const board=Array.from(manager.querySelectorAll(".card")).find(card=>card.querySelector("h2")?.textContent.trim()==="Service Manager Job Board");
-    const panel=document.createElement("div");panel.className="card";panel.id="wai081TyreOrders";
-    panel.innerHTML=`<h2>🛞 Tyre Orders</h2><p class="muted">All requested and ordered tyres linked to workshop jobs.</p><div id="wai081ManagerStats" class="stats"></div><div id="wai081ManagerList" class="job-list"></div>`;
-    manager.insertBefore(panel,board||null);
-  }
+  function installManagerPanel(){ /* Removed from Service Team; see Parts & Tyres. */ }
 
-  function renderManagerPanel(){
-    installManagerPanel();
-    const rows=allTyres();const requested=rows.filter(row=>tyreStatus(row.tyre)==="Requested");const ordered=rows.filter(row=>tyreStatus(row.tyre)==="Ordered");const active=[...requested,...ordered];
-    if(el("wai081ManagerStats"))el("wai081ManagerStats").innerHTML=`<div class="stat ${requested.length?"warn":"good"}"><strong>${requested.length}</strong>Awaiting Order</div><div class="stat ${ordered.length?"warn":"good"}"><strong>${ordered.length}</strong>Awaiting Delivery</div><div class="stat"><strong>${money(rows.filter(row=>tyreStatus(row.tyre)!=="Requested").reduce((sum,row)=>sum+Number(row.tyre.cost||0),0))}</strong>Ordered Spend</div>`;
-    if(el("wai081ManagerList"))el("wai081ManagerList").innerHTML=active.length?active.map(tyreAlertRow).join(""):"<div class='job-card good'><p>✅ No tyre orders require Service Manager action.</p></div>";
-  }
+  function renderManagerPanel(){ /* Removed from Service Team; see Parts & Tyres. */ }
 
   function installTechnicianPanel(){
     if(el("wai081TechnicianTyres"))return;

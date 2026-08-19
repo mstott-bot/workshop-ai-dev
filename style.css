@@ -1071,10 +1071,89 @@ body{background:linear-gradient(135deg,var(--gg-navy),var(--gg-navy-2));}
 .garage-guru-answer{margin-top:14px;background:#fff;border:1px solid #c8d9ec;border-left:4px solid #1670c5;border-radius:10px;padding:15px 17px;color:#25384c}.garage-guru-answer h3{margin:0 0 8px;color:#123d70}.garage-guru-answer p{margin:7px 0;line-height:1.5}.garage-guru-answer .guru-next{color:#536b83}.guru-thinking{font-weight:700;color:#315a84}
 @media(max-width:760px){.garage-guru-ask-row{grid-template-columns:1fr}.garage-guru-ask-row button{width:100%}.garage-guru-ask-head{display:block}.garage-guru-live-pill{display:inline-block;margin-top:10px}}
 
-/* WAI-115.22 Customer Waiting priority */
-.customer-waiting-job{border:2px solid #f59e0b!important;border-left:8px solid #f59e0b!important;background:#fffaf0!important;box-shadow:0 0 0 3px rgba(245,158,11,.13),0 8px 22px rgba(15,45,76,.10)!important}
-.customer-waiting-alert{display:block;margin:-2px -2px 12px;padding:11px 14px;border-radius:10px;background:#f59e0b;color:#17202a;font-weight:900;font-size:1rem;letter-spacing:.02em;text-align:center}
-.job-priority-label{font-weight:800}
-.active-customer-waiting{grid-column:1/-1!important;display:flex!important;flex-direction:column;gap:3px;padding:13px 15px!important;border:2px solid #f59e0b!important;border-radius:10px;background:#fff3cd!important;color:#17202a!important}
-.active-customer-waiting strong{font-size:1.05rem;color:#7c2d12!important}
-.active-customer-waiting span{font-weight:700;color:#17202a!important}
+/* WAI-115.23 — Service Team Action Queue professional polish
+   Presentation only: existing queue logic, buttons and action resolution remain unchanged. */
+#servicePartsAlert.action-centre-v2{
+  position:relative;
+  overflow:hidden;
+  padding:0;
+  border:1px solid #dbe4ee;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 12px 34px rgba(15,35,60,.08);
+}
+#servicePartsAlert.action-centre-v2:before{
+  content:"";position:absolute;inset:0 0 auto 0;height:4px;
+  background:linear-gradient(90deg,#1769e0,#3b82f6 55%,#60a5fa);
+}
+#servicePartsAlert .manager-action-heading{
+  margin:0;padding:24px 26px 20px;border-bottom:1px solid #e7edf4;
+  background:linear-gradient(180deg,#fbfdff 0%,#f7faff 100%);
+  align-items:center;gap:20px;
+}
+#servicePartsAlert .wai80-eyebrow{color:#1769e0;font-size:10px;letter-spacing:.16em;font-weight:900}
+#servicePartsAlert .manager-action-heading h2{margin:5px 0 5px;color:#102946;font-size:27px;letter-spacing:-.02em}
+#servicePartsAlert .manager-action-heading .muted{margin:0;color:#68788d;max-width:760px;line-height:1.45}
+#servicePartsAlert .manager-total-badge{min-width:27px;height:27px;font-size:13px;background:#d92d20;box-shadow:0 0 0 4px rgba(217,45,32,.08)}
+.manager-queue-summary{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:8px;align-items:center;min-width:118px;padding:11px 14px;border:1px solid #d9e5f2;border-radius:13px;background:#fff;text-align:right;box-shadow:0 4px 12px rgba(15,35,60,.05)}
+.manager-queue-summary .queue-live-dot{grid-row:1/3;width:9px;height:9px;border-radius:50%;background:#16a34a;box-shadow:0 0 0 4px rgba(22,163,74,.12)}
+.manager-queue-summary strong{font-size:19px;color:#102946;line-height:1}
+.manager-queue-summary small{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#718096}
+.manager-queue-summary .carryover-chip{grid-column:1/-1;margin-top:7px;padding:4px 7px;border-radius:999px;background:#fff7e8;color:#9a6700;font-size:10px;font-weight:800;text-align:center}
+#servicePartsAlert .manager-kpi-strip{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:0;padding:18px 22px;border-bottom:1px solid #e7edf4;background:#fff}
+#servicePartsAlert .manager-kpi-strip .stat{position:relative;display:grid;grid-template-columns:32px 1fr;grid-template-rows:auto auto;align-items:center;column-gap:8px;min-height:64px;padding:11px 12px;border:1px solid #e1e8f0!important;border-radius:13px;background:#f8fafc!important;box-shadow:none!important;text-align:left;color:#526174!important}
+#servicePartsAlert .manager-kpi-strip .stat strong{grid-column:2;font-size:22px;line-height:1;color:#12233f;margin:0}
+#servicePartsAlert .manager-kpi-strip .stat small{grid-column:2;font-size:11px;font-weight:750;color:#627187;white-space:normal}
+#servicePartsAlert .queue-tile-icon{grid-row:1/3;width:31px;height:31px;display:grid;place-items:center;border-radius:9px;background:#eaf2fc;color:#1769e0;font-size:15px;font-weight:900}
+#servicePartsAlert .manager-kpi-strip .stat.bad{border-color:#f0cbc8!important;background:#fffafa!important}
+#servicePartsAlert .manager-kpi-strip .stat.bad .queue-tile-icon{background:#feeceb;color:#c43228}
+#servicePartsAlert .manager-kpi-strip .stat.warn{border-color:#ecd9ad!important;background:#fffdf8!important}
+#servicePartsAlert .manager-kpi-strip .stat.warn .queue-tile-icon{background:#fff4d8;color:#a96c00}
+#servicePartsAlert .manager-kpi-strip .stat.good .queue-tile-icon{background:#eaf7ef;color:#16814a}
+#servicePartsAlert .manager-action-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0;padding:20px 22px 24px;background:#f5f8fb}
+#servicePartsAlert .manager-action-section{position:relative;padding:0;border:1px solid #dfe6ee;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 3px 10px rgba(15,35,60,.035)}
+#servicePartsAlert .manager-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid #edf1f5;background:#fbfcfe}
+#servicePartsAlert .manager-section-head h3{margin:0;font-size:14px;color:#26364d;font-weight:800}
+#servicePartsAlert .parts-alert-count{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#e9eef5;color:#46566c;font-size:11px;font-weight:900}
+#servicePartsAlert .manager-action-section.danger.has-actions{border-top:3px solid #d92d20}
+#servicePartsAlert .manager-action-section.warning.has-actions{border-top:3px solid #e6a700}
+#servicePartsAlert .manager-action-section.authorisation.has-actions{border-top:3px solid #d48a00}
+#servicePartsAlert .manager-action-section.parts-tone.has-actions,#servicePartsAlert .manager-action-section.tyres-tone.has-actions{border-top:3px solid #1769e0}
+#servicePartsAlert .manager-action-section.has-actions .manager-section-head{background:#fff}
+#servicePartsAlert .manager-action-section.has-actions .manager-action-card{margin:12px 12px 0;border-radius:11px}
+#servicePartsAlert .manager-action-section.has-actions .manager-action-card:last-child{margin-bottom:12px}
+#servicePartsAlert .manager-clear-state{display:flex;align-items:center;gap:10px;padding:13px 15px;background:#fff;color:#66758a}
+#servicePartsAlert .manager-clear-check{width:24px;height:24px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;background:#eaf7ef;color:#16814a;font-size:13px;font-weight:900}
+#servicePartsAlert .manager-clear-state div{display:flex;align-items:baseline;gap:7px;min-width:0}
+#servicePartsAlert .manager-clear-state strong{font-size:12px;color:#385046;white-space:nowrap}
+#servicePartsAlert .manager-clear-state span:not(.manager-clear-check){font-size:11px;color:#8290a2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#servicePartsAlert .manager-action-section.is-clear{min-height:91px}
+#servicePartsAlert .manager-action-section.is-clear .parts-alert-count{background:#eaf7ef;color:#16814a}
+#servicePartsAlert .manager-ready-list{margin:0 22px 22px;border-color:#cfe5d8;background:#f8fcfa}
+@media(max-width:1180px){#servicePartsAlert .manager-kpi-strip{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:850px){#servicePartsAlert .manager-action-heading{align-items:flex-start;flex-direction:column}.manager-queue-summary{text-align:left}#servicePartsAlert .manager-action-grid{grid-template-columns:1fr}}
+@media(max-width:620px){#servicePartsAlert .manager-kpi-strip{grid-template-columns:repeat(2,1fr);padding:14px}#servicePartsAlert .manager-action-grid{padding:14px}#servicePartsAlert .manager-action-heading{padding:20px 18px 17px}}
+/* WAI-115.26 — Service Team Action Queue visibility */
+#servicePartsAlert .manager-action-heading h2{font-size:31px;font-weight:900;color:#0b2342}
+#servicePartsAlert .manager-action-heading .muted{font-size:15px;font-weight:600;color:#4b5f78}
+#servicePartsAlert .wai80-eyebrow{font-size:11px}
+#servicePartsAlert .manager-kpi-strip{grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;padding:22px}
+#servicePartsAlert .manager-kpi-strip .stat{grid-template-columns:46px 1fr;min-height:84px;padding:15px 16px;border-width:2px!important;box-shadow:0 5px 14px rgba(15,35,60,.055)!important}
+#servicePartsAlert .manager-kpi-strip .stat strong{font-size:29px;font-weight:900;color:#0b2342}
+#servicePartsAlert .manager-kpi-strip .stat small{font-size:14px;font-weight:850;color:#34465e;line-height:1.25}
+#servicePartsAlert .queue-tile-icon{width:42px;height:42px;border-radius:11px;font-size:22px;background:#eaf2fc}
+#servicePartsAlert .manager-action-grid{gap:16px;padding:24px}
+#servicePartsAlert .manager-action-section{border-width:2px;box-shadow:0 6px 18px rgba(15,35,60,.055)}
+#servicePartsAlert .manager-section-head{padding:16px 18px;background:#f8fbff}
+#servicePartsAlert .manager-section-head h3{font-size:17px;font-weight:900;color:#122b4c;letter-spacing:-.01em}
+#servicePartsAlert .parts-alert-count{min-width:29px;height:29px;font-size:13px}
+#servicePartsAlert .manager-clear-state{padding:16px 18px}
+#servicePartsAlert .manager-clear-check{width:28px;height:28px;font-size:15px}
+#servicePartsAlert .manager-clear-state strong{font-size:14px;color:#24493a}
+#servicePartsAlert .manager-clear-state span:not(.manager-clear-check){font-size:13px;color:#607187}
+#servicePartsAlert .manager-action-card{padding:17px!important}
+#servicePartsAlert .manager-action-card .manager-action-top strong{font-size:16px}
+#servicePartsAlert .manager-action-card p{font-size:14px;line-height:1.45;color:#263a54}
+@media(max-width:1180px){#servicePartsAlert .manager-kpi-strip{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){#servicePartsAlert .manager-kpi-strip{grid-template-columns:repeat(2,1fr)}}
+

@@ -202,7 +202,7 @@ function buildManagerActions(){
       const status=String(tyre.status||"Requested");
       // Delivered tyres are no longer Service Manager actions. They move to
       // Parts & Tyre Intelligence → Tyres Delivered Today.
-      if(["Requested","Ordered"].includes(status)){
+      if(false && ["Requested","Ordered"].includes(status)){
         rows.push({id:`tyre-${job.id}-${tyre.id}`,job,type:"tyre",title:status==="Requested"?"Tyres Require Ordering":"Tyres Awaiting Delivery",detail:`${tyre.quantity||1} × ${tyre.brand?tyre.brand+" ":""}${tyre.size||"Tyre"}${tyre.supplier?` · ${tyre.supplier}`:""}`,createdAt:tyre.requestedAt||job.createdAt,priority:status==="Ordered"?"warn":"bad",tyre});
       }
     });
@@ -240,11 +240,11 @@ function renderServicePartsAlert(){
     if(a.type==="part"&&a.part?.status==="Requested") buttons=`<button onclick="markPartOrdered('${j.id}','${a.part.id}')">Mark Ordered</button>`+buttons;
     return `<div class="manager-action-card ${a.priority} ${ageClass}"><div class="manager-action-top"><div><strong>${a.title}</strong><span class="manager-action-reg">${j.reg}</span></div><span class="manager-action-age">${managerActionAge(a.createdAt)} waiting</span></div><p><strong>${j.customer||"Customer not entered"}</strong> · ${j.technician||"Unassigned"}</p><p>${a.detail}</p><div class="parts-actions">${buttons}</div></div>`;
   };
-  const section=(title,list,clearText)=>`<div class="manager-action-section"><h3>${title} <span class="parts-alert-count">${list.length}</span></h3>${list.length?list.map(actionCard).join(""):`<div class="action-section action-section-none good"><strong>✅ Clear</strong><span>${clearText}</span></div>`}</div>`;
+  const section=(title,list,clearText,tone="neutral")=>`<div class="manager-action-section ${tone} ${list.length?"has-actions":"is-clear"}"><div class="manager-section-head"><h3>${title}</h3><span class="parts-alert-count">${list.length}</span></div>${list.length?list.map(actionCard).join(""):`<div class="manager-clear-state"><span class="manager-clear-check">✓</span><div><strong>All clear</strong><span>${clearText}</span></div></div>`}</div>`;
 
-  el.innerHTML=`<div class="manager-action-heading"><div><span class="wai80-eyebrow">LIVE SERVICE MANAGER INBOX</span><h2>🔔 Action Queue ${count?`<span class="manager-total-badge">${count}</span>`:""}</h2><p class="muted">Only unresolved items remain here. Completed actions disappear; anything still waiting carries forward.</p></div></div>
-    <div class="stats action-tiles"><div class="stat ${overruns.length?"bad":"good"}"><strong>${overruns.length}</strong>Job Overruns</div><div class="stat ${authorisations.length?"bad":"good"}"><strong>${authorisations.length}</strong>Authorisations</div><div class="stat ${failed.length?"bad":"good"}"><strong>${failed.length}</strong>Failed MOT</div><div class="stat ${advisories.length?"warn":"good"}"><strong>${advisories.length}</strong>Advisory Actions</div><div class="stat ${parts.length?"bad":"good"}"><strong>${parts.length}</strong>Parts Actions</div><div class="stat ${tyres.length?"warn":"good"}"><strong>${tyres.length}</strong>Tyre Actions</div><div class="stat ${carryOvers.length?"warn":"good"}"><strong>${carryOvers.length}</strong>Carry Over</div></div>
-    <div class="manager-action-grid">${section("🔴 Job Over Allocated Time",overruns,"No live job overruns need attention.")}${section("🟣 Awaiting Authorisation",authorisations,"No technician authorisation requests are outstanding.")}${section("🔴 Failed MOTs",failed,"No failed MOTs need attention.")}${section("🟠 Passed with Advisories",advisories,"No advisory discussions are outstanding.")}${section("📦 Parts",parts,"No parts actions are outstanding.")}${section("🛞 Tyres",tyres,"No tyre actions are outstanding.")}</div>
+  el.innerHTML=`<div class="manager-action-heading"><div><span class="wai80-eyebrow">LIVE SERVICE TEAM INBOX</span><h2>Action Queue ${count?`<span class="manager-total-badge">${count}</span>`:""}</h2><p class="muted">Live workshop actions that need the Service Team. Resolved items disappear automatically; outstanding work carries forward.</p></div><div class="manager-queue-summary"><span class="queue-live-dot"></span><strong>${actions.length}</strong><small>live action${actions.length===1?"":"s"}</small>${carryOvers.length?`<span class="carryover-chip">${carryOvers.length} carry over</span>`:""}</div></div>
+    <div class="stats action-tiles manager-kpi-strip"><div class="stat ${overruns.length?"bad":"good"}"><span class="queue-tile-icon">⏱️</span><strong>${overruns.length}</strong><small>Job Overruns</small></div><div class="stat ${authorisations.length?"warn":"good"}"><span class="queue-tile-icon">🔐</span><strong>${authorisations.length}</strong><small>Authorisations</small></div><div class="stat ${failed.length?"bad":"good"}"><span class="queue-tile-icon">❌</span><strong>${failed.length}</strong><small>Failed MOT</small></div><div class="stat ${advisories.length?"warn":"good"}"><span class="queue-tile-icon">⚠️</span><strong>${advisories.length}</strong><small>Advisory Actions</small></div><div class="stat ${parts.length?"bad":"good"}"><span class="queue-tile-icon">🔧</span><strong>${parts.length}</strong><small>Parts Actions</small></div></div>
+    <div class="manager-action-grid">${section("⏱️ Job Over Allocated Time",overruns,"No live job overruns need attention.","danger")}${section("🔐 Awaiting Authorisation",authorisations,"No technician authorisation requests are outstanding.","authorisation")}${section("❌ Failed MOTs",failed,"No failed MOTs need attention.","danger")}${section("⚠️ Passed with Advisories",advisories,"No advisory discussions are outstanding.","warning")}${section("🔧 Parts Actions",parts,"No parts actions are outstanding.","parts-tone")}</div>
     ${ready.length?`<details class="manager-ready-list"><summary>🚗 Ready for Collection (${ready.length})</summary>${ready.map(j=>`<div class="board-job"><strong>${j.reg}</strong> · ${j.customer||"Customer"}<div class="parts-actions"><button onclick="openJob('${j.id}')">Open Job</button><button onclick="markCustomerCollected('${j.id}')">Customer Collected</button></div></div>`).join("")}</details>`:""}`;
 }
 
@@ -546,31 +546,16 @@ function monitorAllocatedJobTimes(){
   if(changed)renderServicePartsAlert();
 }
 
-function isCustomerWaitingPriority(job){
-  const p=String(job?.priority||"").toLowerCase();
-  return p.includes("customer waiting") || p.includes("waiting customer");
-}
-function workshopPriorityLabel(job){
-  const p=String(job?.priority||"").trim();
-  if(isCustomerWaitingPriority(job)) return "🟡 Customer Waiting";
-  if(p.toLowerCase().includes("urgent")) return "🔴 Urgent";
-  if(p.toLowerCase().includes("routine")) return "🔵 Today";
-  return p || "🔵 Today";
-}
-function workshopPriorityRank(job){
-  if(isCustomerWaitingPriority(job)) return 0;
-  if(String(job?.priority||"").toLowerCase().includes("urgent")) return 1;
-  return 2;
-}
 function technicianJobCard(job){
   const finished=completed(job),carried=!!job.carriedOverFrom;
-  return `<div class="job-card ${finished?"good":carried?"warn":""} ${isCustomerWaitingPriority(job)&&!finished?"customer-waiting-job":""}">
-    ${isCustomerWaitingPriority(job)&&!finished?`<div class="customer-waiting-alert">⚠️ CUSTOMER WAITING — PRIORITY JOB</div>`:""}
+  const waiting=String(job.priority||"").includes("Customer Waiting");
+  return `<div class="job-card ${finished?"good":waiting?"customer-waiting-job":carried?"warn":""}">
     <h3>${job.jobNo||""} | ${job.reg} — ${job.technician}</h3>
+    ${waiting?`<div class="customer-waiting-banner">⚠️ CUSTOMER WAITING — PRIORITY JOB</div>`:""}
     <p><strong>${job.make||"Make"} ${job.model||""}</strong></p>
     <p><strong>Customer:</strong> ${job.customer||"Not entered"}</p>
     <p><strong>Job description:</strong> ${job.workRequired||job.complaint||"No description entered"}</p>
-    <p><strong>Priority:</strong> <span class="job-priority-label">${workshopPriorityLabel(job)}</span> | <strong>Status:</strong> ${job.status} | <strong>MOT:</strong> ${job.mot}</p>
+    <p><strong>Status:</strong> ${job.status} | <strong>MOT:</strong> ${job.mot}</p>
     ${carried?`<p><strong>Carried over from:</strong> ${job.carriedOverFrom}</p>`:""}
     ${finished?"<p class='muted'><strong>Completed job:</strong> opening it will not restart the timer or change its status.</p>":""}
     <button onclick="openJob('${job.id}')">Open Job</button>
@@ -591,17 +576,16 @@ function renderTech(){
     const overdueUnfinished=date<today&&!completed(j);
     return completedToday||unfinishedToday||overdueUnfinished;
   }).sort((a,b)=>{
+    const aw=String(a.priority||"").includes("Customer Waiting"),bw=String(b.priority||"").includes("Customer Waiting");
+    if(aw!==bw)return aw?-1:1;
     if(completed(a)!==completed(b))return completed(a)?1:-1;
-    const apr=workshopPriorityRank(a),bpr=workshopPriorityRank(b);
-    if(apr!==bpr)return apr-bpr;
     const ad=technicianDayKey(a),bd=technicianDayKey(b);
     if(ad!==bd)return ad<bd?-1:1;
     return new Date(a.createdAt||0)-new Date(b.createdAt||0);
   });
   $("techJobs").innerHTML=perf+`<div class="job-card"><h2>Today’s Jobs</h2><p>All jobs allocated for today remain accessible, including completed and ready-for-collection jobs. Unfinished work can be carried to the next working day.</p></div>`+(list.length?list.map(technicianJobCard).join(""):"<div class='job-card'><p>No jobs assigned for today.</p></div>");
-}function openJob(id){const j=jobs.find(x=>x.id===id);if(!j)return;ensureTimeline(j);activeJobId=id;$("activeTitle").textContent=`${j.jobNo||""} | ${j.reg} — ${j.technician}`;$("activeDetails").innerHTML=`${j.type} | ${j.make||""} ${j.model||""} | Priority: ${workshopPriorityLabel(j)} | Hours allowed: ${j.hours} | MOT: ${j.mot}${j.customerLoyalty?`<div class="customer-rank-banner ${j.customerLoyalty.toLowerCase()}"><strong>⭐ ${j.customerLoyalty} Customer</strong>${j.customerHealth!==""&&j.customerHealth!==undefined?` · Customer Health ${j.customerHealth}%`:""}<span>Customer ranking is shown to help deliver the right level of care. Always follow special instructions.</span></div>`:""}`;
+}function openJob(id){const j=jobs.find(x=>x.id===id);if(!j)return;ensureTimeline(j);activeJobId=id;$("activeTitle").textContent=`${j.jobNo||""} | ${j.reg} — ${j.technician}`;$("activeDetails").innerHTML=`${String(j.priority||"").includes("Customer Waiting")?`<div class="customer-waiting-banner">⚠️ CUSTOMER WAITING — PRIORITY JOB</div>`:""}${j.type} | ${j.make||""} ${j.model||""} | Hours allowed: ${j.hours} | MOT: ${j.mot}${j.customerLoyalty?`<div class="customer-rank-banner ${j.customerLoyalty.toLowerCase()}"><strong>⭐ ${j.customerLoyalty} Customer</strong>${j.customerHealth!==""&&j.customerHealth!==undefined?` · Customer Health ${j.customerHealth}%`:""}<span>Customer ranking is shown to help deliver the right level of care. Always follow special instructions.</span></div>`:""}`;
 $("activeJobInfo").innerHTML=`
-  ${isCustomerWaitingPriority(j)?`<div class="active-customer-waiting"><strong>⚠️ CUSTOMER WAITING</strong><span>This vehicle is waiting on site — prioritise this job.</span></div>`:""}
   <div><strong>Registration</strong><span>${j.reg}</span></div>
   <div><strong>Customer</strong><span>${j.customer||"Not entered"}</span></div>
   <div><strong>Vehicle</strong><span>${j.make||"Not entered"} ${j.model||""}</span></div>
@@ -2287,8 +2271,11 @@ function renderScorecard(){
 if($("kpiPeriod")) $("kpiPeriod").addEventListener("change",e=>{kpiScorecardPeriod=e.target.value;renderScorecard();});
 if($("assignJob")) $("assignJob").addEventListener("click",function(e){
   const tech=val("technician");
-  if(techAvailableHours(tech)<=0){
-    alert(`${tech} is marked as ${techStatusLabel(tech)} and is not available for job allocation today.`);
+  const date=val("bookingDate")||todayISO();
+  const availability=typeof workshopAvailabilityForDate==="function"?workshopAvailabilityForDate(date):null;
+  const row=availability?.rows?.find(r=>r.technician===tech);
+  if(row && Number(row.hours||0)<=0){
+    alert(`${tech} is not available on ${dateLabel(date)}. Choose another technician or update Tech Team availability.`);
     e.preventDefault(); e.stopImmediatePropagation();
   }
 },true);
@@ -3248,6 +3235,7 @@ card=function(job,open=true,manager=false){
 
   return `<div class="job-card">
     <h3>${job.jobNo||""} | ${job.reg} — ${job.technician}</h3>
+    ${waiting?`<div class="customer-waiting-banner">⚠️ CUSTOMER WAITING — PRIORITY JOB</div>`:""}
     <p><strong>${job.make||"Make"} ${job.model||""}</strong></p>
     <p><strong>Customer:</strong> ${job.customer||"Not entered"}</p>
     <p><strong>Telephone:</strong> ${telephone}</p>

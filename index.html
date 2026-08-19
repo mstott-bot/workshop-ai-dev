@@ -13,12 +13,13 @@
   <link rel="stylesheet" href="customer-portal.css">
   <link rel="stylesheet" href="ui-responsive.css?v=105.5.3">
   <link rel="stylesheet" href="media-centre.css?v=110.6">
-  <link rel="stylesheet" href="review-centre.css?v=110.7">
+  <link rel="stylesheet" href="review-centre.css?v=115.27">
   <link rel="stylesheet" href="staff-calendar.css?v=106.0">
   <link rel="stylesheet" href="service-manager-pro.css?v=1070">
   <link rel="stylesheet" href="inventory-stock.css?v=111.0">
   <link rel="stylesheet" href="fault-code-assistant.css?v=113.0">
   <link rel="stylesheet" href="company-settings.css?v=114.0">
+<link rel="stylesheet" href="workshop-diary.css?v=115.24">
 </head>
 
 <body>
@@ -26,6 +27,7 @@
   <nav class="tabs header-tabs" aria-label="Workshop navigation">
     <button class="tab active" data-screen="commandScreen">Command Centre</button>
     <button class="tab" data-screen="managerScreen">Service Team</button>
+    <button class="tab" data-screen="diaryScreen">Workshop Diary</button>
     <button class="tab" data-screen="techScreen">Tech View</button>
     <button class="tab" data-screen="reportsScreen">Team Performance</button>
     <button class="tab" data-screen="plannerScreen">Daily Planner</button>
@@ -198,10 +200,42 @@
     <div id="servicePartsAlert" class="card service-parts-alert clear"></div>
 
     <div class="card">
-      <h2>Load New Job</h2>
+      <h2>Service Manager Daily Briefing</h2>
+      <p class="muted">Morning actions and end-of-day summary are available here for the Service Manager.</p>
+      <pre id="serviceManagerMorningBriefing">No morning briefing yet.</pre>
+      <button id="copyServiceMorningBriefing" class="secondary">Copy Morning Briefing</button>
+      <pre id="serviceManagerEndOfDayBriefing">No end-of-day briefing yet.</pre>
+      <button id="copyServiceEndBriefing" class="secondary">Copy End of Day Briefing</button>
+    </div>
+
+    <div class="card">
+      <h2>Service Manager Job Board</h2>
+      <div id="managerJobs" class="job-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Completed Technician Write-Ups</h2>
+      <p class="muted">When a technician finishes and saves a job report, it automatically appears here for the Service Manager.</p>
+      <div id="completedReportsInbox" class="job-list"></div>
+    </div>
+
+  </section>
+
+  <section id="diaryScreen" class="screen">
+    <div class="diary-hero">
+      <div><span class="diary-eyebrow">GARAGE GURUS · WORKSHOP PLANNING</span><h2>Workshop Diary</h2><p>Plan work against real technician capacity. Available hours reflect who is working and the hours allocated to them for each day.</p></div>
+      <div class="diary-hero-actions"><button type="button" class="secondary" id="diaryTodayBtn">Today</button><button type="button" class="primary" id="diaryAddBookingBtn">+ Add Booking</button></div>
+    </div>
+    <div class="card diary-capacity-card">
+      <div class="diary-toolbar"><div><h2>Capacity Forecast</h2><p class="muted">Available hours − booked labour hours = remaining capacity.</p></div><label>Week starting<input id="diaryAnchorDate" type="date"></label></div>
+      <div id="diaryCapacityStrip" class="diary-capacity-strip"></div>
+    </div>
+    <div id="diaryBookingForm" class="diary-booking-form">
+    <div class="card">
+      <div class="diary-form-heading"><div><span class="diary-eyebrow">NEW WORKSHOP BOOKING</span><h2>Add Booking</h2><p class="muted">Book future or same-day work. Capacity updates automatically from technician availability and allocated hours.</p></div><button type="button" class="secondary" id="diaryClearForm">Clear</button></div>
       <div class="grid">
         <label>Vehicle Registration / Reg Number *<input id="reg" placeholder="AB19 XYZ"></label>
-        <label>Booking Date / Future Booking<input id="bookingDate" type="date"></label>
+        <label>Booking Date<input id="bookingDate" type="date"></label>
         <label>Customer Name<input id="customer" placeholder="Customer name"></label>
         <label>Telephone<input id="phone" placeholder="Telephone"></label>
         <label>Make<input id="make" placeholder="Ford / Audi / VW"></label>
@@ -244,21 +278,13 @@
         <textarea id="specialInstructions" placeholder="Example: Customer waiting, do not wash, locking wheel nut in boot, phone before repairs."></textarea>
       </label>
 
-      <button id="assignJob" class="primary">Assign Job</button>
+      <div class="diary-form-actions"><button id="assignJob" class="primary">Save Workshop Booking</button><span class="muted">Bookings for today feed directly into the live workshop. Future bookings stay in the diary until their booked day.</span></div>
     </div>
 
-    <div class="card">
-      <h2>Service Manager Daily Briefing</h2>
-      <p class="muted">Morning actions and end-of-day summary are available here for the Service Manager.</p>
-      <pre id="serviceManagerMorningBriefing">No morning briefing yet.</pre>
-      <button id="copyServiceMorningBriefing" class="secondary">Copy Morning Briefing</button>
-      <pre id="serviceManagerEndOfDayBriefing">No end-of-day briefing yet.</pre>
-      <button id="copyServiceEndBriefing" class="secondary">Copy End of Day Briefing</button>
     </div>
-
     <div class="card">
-      <h2>Future Bookings</h2>
-      <p class="muted">Jobs can be loaded for days ahead. Select a date below to view or plan upcoming work.</p>
+      <h2>Diary Bookings</h2>
+      <p class="muted">Select a date or use the capacity strip above. Bookings can be moved, opened or removed directly from the diary.</p>
       <div class="grid">
         <label>View Booking Date
           <input id="futureBookingDate" type="date">
@@ -272,17 +298,6 @@
         </label>
       </div>
       <div id="futureBookingsList" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>Service Manager Job Board</h2>
-      <div id="managerJobs" class="job-list"></div>
-    </div>
-
-    <div class="card">
-      <h2>Completed Technician Write-Ups</h2>
-      <p class="muted">When a technician finishes and saves a job report, it automatically appears here for the Service Manager.</p>
-      <div id="completedReportsInbox" class="job-list"></div>
     </div>
 
   </section>
@@ -1004,6 +1019,12 @@
         <div id="wai085TyresOutstanding" class="job-list"></div>
       </div>
     </div>
+    <div class="card">
+      <h2>🛞 Tyre Order History &amp; Brand Intelligence</h2>
+      <p class="muted">Ordered tyre history has moved here from Service Team. Review tyre brand, size, supplier, spend and current delivery/fitting status without cluttering the live Service Team screen.</p>
+      <div id="wai085TyreOrderHistoryStats" class="stats"></div>
+      <div id="wai085TyreOrderHistory" class="job-list"></div>
+    </div>
     <div class="wai085-grid">
       <div class="card">
         <h2>✅ Parts Delivered Today</h2>
@@ -1314,7 +1335,7 @@
     <div id="modalTimeline" class="timeline"></div>
   </div>
 </div>
-<script src="script.js?v=115.21"></script>
+<script src="script.js?v=115.24"></script>
 <script src="unified-productivity-engine.js?v=115.6"></script>
 <script src="unified-queue-engine.js"></script>
 <script src="unified-capacity-engine.js"></script>
@@ -1323,14 +1344,14 @@
 <script src="vehicle-intelligence-fix.js"></script>
 <script src="performance-dashboard.js?v=115.11"></script>
 <script src="reports-intelligence.js?v=115.6"></script>
-<script src="tyres.js"></script>
+<script src="tyres.js?v=115.24"></script>
 <script src="mot-intelligence.js"></script>
 <script src="parts-tyre-intelligence.js"></script>
 <script src="technician-league-intelligence-wai092.js?v=115.6"></script>
 <script src="wai0922-workflow.js"></script>
 <script src="wai093-vhc.js?v=115.16"></script>
 <script src="wai094-intelligence.js?v=115.6"></script>
-<script src="wai096-crm.js?v=115.15"></script>
+<script src="wai096-crm.js?v=115.24"></script>
 <script src="wai0962-customer-recognition.js?v=105.5.3"></script>
 <script src="company-settings.js?v=114.0"></script>
 <script src="finance-centre.js?v=115.20"></script>
@@ -1340,10 +1361,11 @@
 <script src="fault-code-assistant.js?v=113.0"></script>
 <script src="customer-portal.js"></script>
 <script src="media-centre.js"></script>
-<script src="review-centre.js?v=110.7"></script>
+<script src="review-centre.js?v=115.27"></script>
 <script src="wai095-workshop-intelligence.js?v=115.9"></script>
 <script src="wai1022-parts-fix.js"></script>
 <script src="staff-calendar.js?v=106.0"></script>
+<script src="workshop-diary.js?v=115.24"></script>
 <div id="financePrintSheet" class="print-sheet"></div>
   <script src="service-manager-pro.js?v=1070"></script>
 </body>
