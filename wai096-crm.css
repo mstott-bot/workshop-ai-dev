@@ -10,3 +10,26 @@
 
 /* WAI-102.7 Prospect Centre Pro */
 .crm-pro-kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin:0 0 16px}.crm-pro-kpi{background:linear-gradient(180deg,#173d5d,#102b43);border:1px solid #2d6f9e;border-radius:15px;padding:15px;color:#fff;box-shadow:0 8px 20px rgba(6,28,47,.18)}.crm-pro-kpi span{display:block;font-size:12px;color:#bcd7ea;margin-bottom:7px}.crm-pro-kpi strong{display:block;font-size:24px}.crm-pro-report-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:16px;margin-bottom:16px}.crm-funnel{display:flex;flex-direction:column;gap:8px;align-items:center;padding:8px 0}.crm-funnel>div{width:var(--w);min-width:180px;background:linear-gradient(90deg,#1c77b7,#49aee9);color:#fff;padding:11px 14px;border-radius:10px;text-align:center}.crm-funnel strong,.crm-funnel span{display:block}.crm-funnel strong{font-size:20px}.crm-funnel span{font-size:12px}.crm-pro-table{min-width:1320px}.crm-prospect-badge.contacted{background:#e1effa;color:#155f91;border:1px solid #9fc7e2}.crm-prospect-badge.responded{background:#efe7ff;color:#6835a7;border:1px solid #cdb6ef}.crm-prospect-badge.completed{background:#d4f5df;color:#0c6d33;border:1px solid #8bd3a5}.crm-prospect-badge.snoozed{background:#fff0cc;color:#8c5e00;border:1px solid #ebcb7f}.crm-pro-details summary{cursor:pointer;font-weight:800;color:#176f9f}.crm-pro-timeline{min-width:250px;max-height:270px;overflow:auto;padding:8px}.crm-pro-timeline-item{border-left:3px solid #2a89c4;padding:0 0 10px 10px;margin-bottom:8px}.crm-pro-timeline-item span,.crm-pro-timeline-item small{display:block;font-size:11px;color:#6e8192}.crm-pro-timeline-item strong{display:block;margin:2px 0}.crm-pro-timeline-item p{margin:2px 0;font-size:12px}.crm-prospect-actions .crm-small-btn{white-space:nowrap}@media(max-width:1100px){.crm-pro-kpi-grid{grid-template-columns:repeat(3,1fr)}.crm-pro-report-grid{grid-template-columns:1fr}}@media(max-width:650px){.crm-pro-kpi-grid{grid-template-columns:repeat(2,1fr)}}
+
+
+/* WAI-115.5 — CRM to Workshop Job */
+.crm-job-vehicle-picker{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
+.crm-job-vehicle-option{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:16px;border:1px solid #cfdce7;border-radius:14px;background:#f8fbfe;color:#173653;text-align:left;cursor:pointer}
+.crm-job-vehicle-option:hover{border-color:#2d78b7;background:#eef7ff}
+.crm-job-vehicle-option strong{font-size:18px;color:#0e3556}
+.crm-job-vehicle-option span{font-weight:700}
+.crm-job-vehicle-option small{color:#668096}
+
+
+/* WAI-115.15 — automatic CRM lifetime spend */
+.crm-auto-finance-note{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  padding:13px 14px;
+  border:1px solid #cfe1ef;
+  border-radius:12px;
+  background:#f2f8fd;
+  color:#234a68;
+}
+.crm-auto-finance-note span{font-size:13px;color:#607b91}

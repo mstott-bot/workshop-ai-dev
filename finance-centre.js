@@ -10,7 +10,15 @@ const targets=()=>read('pcaTargetsV11',read('pcaTargetsV10',{}));
 const techNames=()=>read('workshopAITechnicians',['Jake','Gordon','James','Jimmy','Ross','Other']);
 const defaults={company:'Workshop AI Garage',address:'Business address',vatNumber:'VAT number',bankDetails:'Bank details',paymentTerms:'Payment due on collection',invoicePrefix:'INV-',nextNumber:1001,defaultVat:20,retailRate:70,warrantyRate:40,internalRate:40,motSellPrice:54.85,motDurationHours:0.5,oil5w30CostPerLitre:0,technicianCosts:{}};
 let settings={...defaults,...read(SETTINGS_KEY,{})};
-function companySettings(){return window.WAICompanySettings?.get?.()||{}}
+function companySettings(){
+  const live=window.WAICompanySettings?.get?.();
+  if(live&&Object.keys(live).length)return live;
+  try{
+    return JSON.parse(localStorage.getItem('workshopAI.companySettings.v1')||'{}')||{};
+  }catch{
+    return {};
+  }
+}
 function syncCompanyIntoFinance(){const c=companySettings();if(!Object.keys(c).length)return;settings.company=c.tradingName||c.legalName||settings.company;settings.address=c.tradingAddress||c.registeredAddress||settings.address;settings.vatNumber=c.vatNumber||settings.vatNumber;settings.paymentTerms=c.paymentTerms||settings.paymentTerms;const bank=[c.bankName,c.accountName,c.sortCode,c.accountNumber].filter(Boolean).join(' · ');if(bank)settings.bankDetails=bank}
 syncCompanyIntoFinance();window.addEventListener('wai-company-settings-updated',()=>{syncCompanyIntoFinance();save();renderAll()});
 settings.technicianCosts={...Object.fromEntries(techNames().map(n=>[n,0])),...(settings.technicianCosts||{})};
@@ -90,19 +98,67 @@ function finishRevenueBucket(a){a.gp=round(a.net-a.cost);a.total=round(a.net+a.v
 function getRevenueSummary(){
   const day=today();
   const liveStatuses=['Estimate','Authorised','Invoice Ready'];
-  const issuedStatuses=['Invoice Issued','Part Paid','Paid','Archived'];
   const live=emptyRevenueBucket(), liveToday=emptyRevenueBucket(), issuedToday=emptyRevenueBucket(), creditsToday=emptyRevenueBucket();
   invoices.forEach(inv=>{
     const x=totals(inv);
     if(liveStatuses.includes(inv.status)){addTotals(live,x);if(inv.date===day)addTotals(liveToday,x)}
-    if(inv.date===day&&issuedStatuses.includes(inv.status))addTotals(issuedToday,x);
-    const creditedToday=inv.status==='Credited'&&Array.isArray(inv.audit)&&inv.audit.some(a=>a.action==='Credit note created'&&String(a.at||'').slice(0,10)===day);
-    if(creditedToday)addTotals(creditsToday,x);
+    const audit=Array.isArray(inv.audit)?inv.audit:[];
+    const issuedTodayEvent=audit.some(a=>String(a.action||'').toLowerCase()==='invoice issued'&&String(a.at||'').slice(0,10)===day);
+    const creditedTodayEvent=audit.some(a=>a.action==='Credit note created'&&String(a.at||'').slice(0,10)===day);
+    if(issuedTodayEvent)addTotals(issuedToday,x);
+    if(creditedTodayEvent)addTotals(creditsToday,x);
   });
   finishRevenueBucket(live);finishRevenueBucket(liveToday);finishRevenueBucket(issuedToday);finishRevenueBucket(creditsToday);
   const outlook=emptyRevenueBucket();
   [liveToday,issuedToday].forEach(x=>addTotals(outlook,x));finishRevenueBucket(outlook);
-  return{generatedAt:nowISO(),live,liveToday,issuedToday,creditsToday,outlook,netIssuedToday:round(issuedToday.net-creditsToday.net)};
+  return{
+    generatedAt:nowISO(),
+    live,
+    liveToday,
+    issuedToday,
+    creditsToday,
+    outlook,
+    actualRevenueToday:round(issuedToday.net-creditsToday.net),
+    netIssuedToday:round(issuedToday.net-creditsToday.net)
+  };
+}
+function getMonthlyPerformanceSummary(monthKey=today().slice(0,7)){
+  const month=String(monthKey||today().slice(0,7)).slice(0,7);
+  let revenueIssued=0,revenueCredited=0,labourHoursIssued=0,labourHoursCredited=0,invoicesIssued=0,creditsRaised=0;
+
+  invoices.forEach(inv=>{
+    const audit=Array.isArray(inv.audit)?inv.audit:[];
+    const issueEvents=audit.filter(a=>String(a.action||'').toLowerCase()==='invoice issued'&&String(a.at||'').slice(0,7)===month);
+    const creditEvents=audit.filter(a=>String(a.action||'').toLowerCase()==='credit note created'&&String(a.at||'').slice(0,7)===month);
+    const invTotals=totals(inv);
+    const labourHours=(inv.lines||[])
+      .filter(l=>String(l.type||'').toLowerCase()==='labour')
+      .reduce((sum,l)=>sum+Math.max(0,numberValue(l.qty)),0);
+
+    if(issueEvents.length){
+      revenueIssued=round(revenueIssued+invTotals.net);
+      labourHoursIssued=round(labourHoursIssued+labourHours);
+      invoicesIssued+=1;
+    }
+    if(creditEvents.length){
+      revenueCredited=round(revenueCredited+invTotals.net);
+      labourHoursCredited=round(labourHoursCredited+labourHours);
+      creditsRaised+=1;
+    }
+  });
+
+  return{
+    month,
+    generatedAt:nowISO(),
+    revenueIssued:round(revenueIssued),
+    revenueCredited:round(revenueCredited),
+    actualRevenue:round(revenueIssued-revenueCredited),
+    labourHoursIssued:round(labourHoursIssued),
+    labourHoursCredited:round(labourHoursCredited),
+    labourHoursSold:round(labourHoursIssued-labourHoursCredited),
+    invoicesIssued,
+    creditsRaised
+  };
 }
 
 function invoiceReconciles(inv){const x=totals(inv);return Math.abs(round(x.net+x.vat)-x.total)<0.01&&Math.abs(round(x.net-x.cost)-x.gp)<0.01;}
@@ -121,7 +177,49 @@ function commitInvoiceInventory(inv){
 function restoreInvoiceInventory(inv,reason='Invoice reopened/credited'){
  const db=inventoryDb();let changed=false;(inv.lines||[]).filter(l=>l.inventoryId&&l.inventoryCommitted).forEach(l=>{const bucket=inventoryBucket(l.inventoryType);const item=(db[bucket]||[]).find(x=>x.id===l.inventoryId);if(!item)return;const qty=Number(l.qty)||0;inventorySetAvailable(item,l.inventoryType,inventoryAvailable(item,l.inventoryType)+qty);l.inventoryCommitted=false;db.movements.unshift({id:uid(),at:nowISO(),action:reason,invoiceId:inv.id,invoiceNumber:inv.number,inventoryId:l.inventoryId,inventoryType:l.inventoryType,description:l.description,qty:qty});changed=true});if(changed)saveInventoryDb(db)
 }
-function addInventoryLineToInvoice(invoiceId,item,type,qty){const inv=invoices.find(i=>i.id===invoiceId);if(!inv)return {ok:false,message:'Invoice not found.'};if(inv.status!=='Estimate')return {ok:false,message:'Stock can only be added to an estimate before it is issued.'};qty=Number(qty)||0;if(qty<=0)return {ok:false,message:'Enter a quantity greater than zero.'};const line=blankLine(inventoryLineType(type),inv);line.inventoryId=item.id;line.inventoryType=type;line.inventoryCommitted=false;line.partNumber=type==='part'?(item.partNumber||''):type==='tyre'?(item.size||''):'';line.description=type==='part'?(item.description||item.partNumber||'Part'):type==='tyre'?([item.brand,item.pattern,item.size].filter(Boolean).join(' ')||'Tyre'):([item.brand,item.grade,item.spec].filter(Boolean).join(' ')||'Oil');line.qty=qty;line.unit=type==='oil'?'litre':type==='tyre'?'tyre':'each';line.cost=Number(type==='oil'?item.costPerLitre:item.cost)||0;line.sell=Number(type==='oil'?item.sellPerLitre:item.sell)||0;inv.lines.push(line);inv.audit.push(audit('Stock item added',`${line.description} × ${qty}`));save();return {ok:true,invoiceNumber:inv.number}}
+function restoreInventoryLine(inv,line,reason='Stock line removed'){
+  if(!line?.inventoryId||!line.inventoryCommitted)return;
+  const db=inventoryDb(),bucket=inventoryBucket(line.inventoryType),item=(db[bucket]||[]).find(x=>x.id===line.inventoryId);
+  if(!item)return;
+  const qty=Math.max(0,Number(line.qty)||0);
+  inventorySetAvailable(item,line.inventoryType,inventoryAvailable(item,line.inventoryType)+qty);
+  line.inventoryCommitted=false;
+  db.movements.unshift({id:uid(),at:nowISO(),action:reason,invoiceId:inv.id,invoiceNumber:inv.number,inventoryId:line.inventoryId,inventoryType:line.inventoryType,description:line.description,qty:qty});
+  saveInventoryDb(db);
+}
+function addInventoryLineToInvoice(invoiceId,item,type,qty){
+  const inv=invoices.find(i=>i.id===invoiceId);
+  if(!inv)return {ok:false,message:'Invoice not found.'};
+  if(inv.status!=='Estimate')return {ok:false,message:'Stock can only be added to an estimate before it is issued.'};
+  qty=Number(qty)||0;
+  if(qty<=0)return {ok:false,message:'Enter a quantity greater than zero.'};
+
+  const db=inventoryDb(),bucket=inventoryBucket(type),stockItem=(db[bucket]||[]).find(x=>x.id===item.id);
+  if(!stockItem)return {ok:false,message:'That stock item no longer exists.'};
+  const available=inventoryAvailable(stockItem,type);
+  if(available+1e-9<qty)return {ok:false,message:`Not enough stock. In stock: ${available}, required: ${qty}.`};
+
+  const line=blankLine(inventoryLineType(type),inv);
+  line.inventoryId=stockItem.id;
+  line.inventoryType=type;
+  line.inventoryCommitted=true;
+  line.inventoryDeductedAt=nowISO();
+  line.partNumber=type==='part'?(stockItem.partNumber||''):type==='tyre'?(stockItem.size||''):'';
+  line.description=type==='part'?(stockItem.description||stockItem.partNumber||'Part'):type==='tyre'?([stockItem.brand,stockItem.pattern,stockItem.size].filter(Boolean).join(' ')||'Tyre'):([stockItem.brand,stockItem.grade,stockItem.spec].filter(Boolean).join(' ')||'Oil');if(type==='oil')line.oilGradeEditable=true;
+  line.qty=qty;
+  line.unit=type==='oil'?'litre':type==='tyre'?'tyre':'each';
+  line.cost=Number(type==='oil'?stockItem.costPerLitre:stockItem.cost)||0;
+  line.sell=Number(type==='oil'?stockItem.sellPerLitre:stockItem.sell)||0;
+
+  inventorySetAvailable(stockItem,type,available-qty);
+  db.movements.unshift({id:uid(),at:nowISO(),action:'Allocated to invoice estimate',invoiceId:inv.id,invoiceNumber:inv.number,inventoryId:line.inventoryId,inventoryType:type,description:line.description,qty:-qty});
+  saveInventoryDb(db);
+
+  inv.lines.push(line);
+  inv.audit.push(audit('Stock item added and deducted',`${line.description} × ${qty}`));
+  save();
+  return {ok:true,invoiceNumber:inv.number,remaining:inventoryAvailable(stockItem,type)};
+}
 function init(){if(!document.getElementById('financeCentreScreen'))return;bindStatic();syncAllJobs();save();renderAll()}
 function bindStatic(){document.getElementById('financeNewInvoiceBtn')?.addEventListener('click',()=>{newInvoice();showPanel('invoiceBuilder');renderAll()});document.querySelectorAll('[data-finance-panel]').forEach(b=>b.addEventListener('click',()=>showPanel(b.dataset.financePanel)));document.getElementById('financeSearch')?.addEventListener('input',renderRegister);document.getElementById('financeStatusFilter')?.addEventListener('change',renderRegister);document.getElementById('financeSettingsBtn')?.addEventListener('click',()=>showPanel('financeSettings'))}
 function showPanel(id){document.querySelectorAll('.finance-panel').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('[data-finance-panel]').forEach(b=>b.classList.toggle('active',b.dataset.financePanel===id));if(id==='financeDashboard')renderDashboard();if(id==='invoiceRegister')renderRegister();if(id==='invoiceBuilder')renderBuilder();if(id==='partsDifferenceReport')renderPartsDifferenceReport();if(id==='financeSettings')renderSettings()}
@@ -133,8 +231,8 @@ function renderRegister(){const body=document.getElementById('invoiceRegisterBod
 const field=(label,key,val,disabled=false,type='text',cls='')=>`<label class="${cls}">${label}<input data-inv-field="${key}" type="${type}" value="${esc(val)}" ${disabled?'disabled':''}></label>`;
 const select=(label,key,val,opts,disabled=false)=>`<label>${label}<select data-inv-field="${key}" ${disabled?'disabled':''}>${opts.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select></label>`;
 const area=(label,key,val,cls='')=>`<label class="${cls}">${label}<textarea data-inv-field="${key}">${esc(val)}</textarea></label>`;
-function lineRow(l,n,locked){const c=calcLine(l),dis=locked?'disabled':'',autoOil=l.type==='Oil'&&/5\s*w\s*30/i.test(String(l.description||'')),auto=['Labour','MOT'].includes(l.type)||autoOil,partCell=l.type==='Parts'?`<div class="part-number-cell"><input data-lf="partNumber" list="knownPartNumbers" value="${esc(l.partNumber)}" placeholder="Part number" ${dis}>${partCostWarning(l)}</div>`:'<span class="muted">—</span>';return `<tr data-line="${n}"><td><select data-lf="type" ${dis}>${['Labour','Parts','Oil','Consumables','MOT','Sublet','Other'].map(o=>`<option ${o===l.type?'selected':''}>${o}</option>`).join('')}</select></td><td>${partCell}</td><td><input class="desc" data-lf="description" value="${esc(l.description)}" ${dis}></td><td><input type="number" min="0" step="0.01" data-lf="qty" value="${l.qty}" ${dis}></td><td><input data-lf="unit" value="${esc(l.unit)}" ${dis}></td><td><input type="number" min="0" step="0.01" data-lf="cost" value="${l.cost}" ${dis||auto?'disabled':''} title="${auto?'Automatically set from Finance Settings':''}"></td><td><input type="number" min="0" step="0.01" data-lf="sell" value="${l.sell}" ${dis}></td><td><div class="discount-cell"><select data-lf="discountType" ${dis}><option ${l.discountType==='£'?'selected':''}>£</option><option ${l.discountType==='%'?'selected':''}>%</option></select><input type="number" min="0" step="0.01" data-lf="discount" value="${l.discount}" ${dis}></div></td><td><select class="vat-select" data-lf="vat" ${dis}><option value="20" ${String(l.vat)==='20'?'selected':''}>20%</option><option value="5" ${String(l.vat)==='5'?'selected':''}>5%</option><option value="0" ${String(l.vat)==='0'?'selected':''}>0%</option></select></td><td class="calculated-cell line-net" data-line-net>${money(c.net)}</td><td class="calculated-cell invoice-line-profit" data-line-gp>${money(c.gp)}<br><small>${c.gpPct}%</small></td><td><button class="finance-btn danger remove-line" ${dis}>×</button></td></tr>`}
-function renderBuilder(){const host=document.getElementById('invoiceBuilderHost'),inv=getCurrent();if(!host)return;if(!inv){host.innerHTML='<div class="finance-card finance-empty"><h3>No estimate selected</h3><p>Create a new estimate or open one from the register.</p></div>';return}inv.lines.forEach(l=>applyAutoPricing(l,inv));const locked=inv.status!=='Estimate',x=totals(inv);host.innerHTML=`<div class="finance-card"><div class="invoice-workflow-header"><div><span>Status</span><strong class="invoice-status ${statusClass(inv.status)}">${esc(inv.status)}</strong></div><div><span>Job type</span><strong>${esc(inv.jobType)}</strong></div><div><span>Default labour rate</span><strong>${money(rateFor(inv.jobType))}/hr</strong></div><div><span>Technician cost</span><strong>${money(techCost(inv.technician))}/hr</strong></div></div>${locked?`<div class="finance-lock">This invoice is ${esc(inv.status)} and is locked.</div>`:'<div class="finance-note">Retail, Internal or Warranty selects the default labour rate. You can still change the sell rate or apply a £ / % adjustment for this estimate.</div>'}<div class="invoice-form">${field('Invoice number','number',inv.number,true)}${field('Date','date',inv.date,false,'date')}${field('Job number','jobNumber',inv.jobNumber)}${select('Job type','jobType',inv.jobType,['Retail','Internal','Warranty'],locked)}${field('Customer','customer',inv.customer,false,'text','span-2')}${field('Telephone','phone',inv.phone)}${field('Email','email',inv.email)}${field('Address','address',inv.address,false,'text','span-2')}${field('Registration','registration',inv.registration)}${field('Make / model','makeModel',inv.makeModel)}${field('Mileage','mileage',inv.mileage)}${select('Technician','technician',inv.technician||'', ['',...techNames()],locked)}${field('Service advisor','advisor',inv.advisor)}${locked?field('Amount paid','paidAmount',inv.paidAmount,false,'number'):''}${area('Customer notes','customerNotes',inv.customerNotes,'span-2')}${area('Internal notes','internalNotes',inv.internalNotes,'span-2')}</div><div class="quick-invoice-bar"><strong>Quick add</strong>${['Labour','Parts','Oil','MOT','Consumables','Sublet','Other'].map(v=>`<button class="finance-btn quick" type="button" data-quick-type="${v}" ${locked?'disabled':''}>+ ${v==='Parts'?'Part':v}</button>`).join('')}<span>New line opens instantly</span></div><datalist id="knownPartNumbers">${partCatalogue.map(p=>`<option value="${esc(p.partNumber)}">${esc(p.description||'')} · last ${money(p.lastCost)}</option>`).join('')}</datalist><div class="invoice-table-wrap"><table class="invoice-table"><thead><tr><th>Type</th><th>Part number</th><th>Description</th><th>Qty</th><th>Unit</th><th>Cost ex VAT</th><th>Sell ex VAT</th><th>Discount</th><th>VAT</th><th>Net</th><th>GP</th><th></th></tr></thead><tbody>${inv.lines.map((l,n)=>lineRow(l,n,locked)).join('')}</tbody></table></div><div class="invoice-summary"><div><span>Cost ex VAT</span><strong data-summary-cost>${money(x.cost)}</strong></div><div><span>Sales ex VAT</span><strong data-summary-net>${money(x.net)}</strong></div><div><span>VAT</span><strong data-summary-vat>${money(x.vat)}</strong></div><div class="profit"><span>Gross profit</span><strong data-summary-gp>${money(x.gp)}</strong></div><div class="grand"><span>Customer total</span><strong data-summary-total>${money(x.total)}</strong></div></div><div class="invoice-footer-actions">${!locked?'<button class="finance-btn primary" id="saveInvoiceBtn">Save estimate</button><button class="finance-btn success" id="issueInvoiceBtn">Issue invoice</button><button class="finance-btn danger" id="deleteEstimateBtn">Delete estimate</button>':''}<button class="finance-btn secondary" id="printInvoiceBtn">Print</button>${locked&&!['Paid','Credited'].includes(inv.status)?'<button class="finance-btn warn" id="reopenInvoiceBtn">Reopen as estimate</button>':''}${['Invoice Issued','Part Paid','Paid'].includes(inv.status)?'<button class="finance-btn danger" id="creditInvoiceBtn">Create credit note</button>':''}${['Invoice Issued','Part Paid'].includes(inv.status)?'<button class="finance-btn success" id="markPaidBtn">Mark paid</button>':''}</div></div>`;bindBuilder(inv,locked)}
+function lineRow(l,n,locked){const c=calcLine(l),dis=locked?'disabled':'',auto=['Labour','MOT'].includes(l.type),partCell=l.type==='Parts'?`<div class="part-number-cell"><input data-lf="partNumber" list="knownPartNumbers" value="${esc(l.partNumber)}" placeholder="Part number" ${dis}>${partCostWarning(l)}</div>`:'<span class="muted">—</span>';return `<tr data-line="${n}"><td><select data-lf="type" ${dis}>${['Labour','Parts','Oil','Consumables','MOT','Sublet','Other'].map(o=>`<option ${o===l.type?'selected':''}>${o}</option>`).join('')}</select></td><td>${partCell}</td><td><input class="desc" data-lf="description" value="${esc(l.description)}" ${dis}></td><td><input type="number" min="0" step="0.01" data-lf="qty" value="${l.qty}" ${dis}></td><td><input data-lf="unit" value="${esc(l.unit)}" ${dis}></td><td><input type="number" min="0" step="0.01" data-lf="cost" value="${l.cost}" ${dis||auto?'disabled':''} title="${auto?'Automatically set from Finance Settings':''}"></td><td><input type="number" min="0" step="0.01" data-lf="sell" value="${l.sell}" ${dis}></td><td><div class="discount-cell"><select data-lf="discountType" ${dis}><option ${l.discountType==='£'?'selected':''}>£</option><option ${l.discountType==='%'?'selected':''}>%</option></select><input type="number" min="0" step="0.01" data-lf="discount" value="${l.discount}" ${dis}></div></td><td><select class="vat-select" data-lf="vat" ${dis}><option value="20" ${String(l.vat)==='20'?'selected':''}>20%</option><option value="5" ${String(l.vat)==='5'?'selected':''}>5%</option><option value="0" ${String(l.vat)==='0'?'selected':''}>0%</option></select></td><td class="calculated-cell line-net" data-line-net>${money(c.net)}</td><td class="calculated-cell invoice-line-profit" data-line-gp>${money(c.gp)}<br><small>${c.gpPct}%</small></td><td><button class="finance-btn danger remove-line" ${dis}>×</button></td></tr>`}
+function renderBuilder(){const host=document.getElementById('invoiceBuilderHost'),inv=getCurrent();if(!host)return;if(!inv){host.innerHTML='<div class="finance-card finance-empty"><h3>No estimate selected</h3><p>Create a new estimate or open one from the register.</p></div>';return}inv.lines.forEach(l=>applyAutoPricing(l,inv));const locked=inv.status!=='Estimate',x=totals(inv);host.innerHTML=`<div class="finance-card"><div class="invoice-workflow-header"><div><span>Status</span><strong class="invoice-status ${statusClass(inv.status)}">${esc(inv.status)}</strong></div><div><span>Job type</span><strong>${esc(inv.jobType)}</strong></div><div><span>Default labour rate</span><strong>${money(rateFor(inv.jobType))}/hr</strong></div><div><span>Technician cost</span><strong>${money(techCost(inv.technician))}/hr</strong></div></div>${locked?`<div class="finance-lock">This invoice is ${esc(inv.status)} and is locked.</div>`:'<div class="finance-note">Retail, Internal or Warranty selects the default labour rate. You can still change the sell rate or apply a £ / % adjustment for this estimate. Oil defaults to 5W30 for convenience, but the grade, quantity, cost and sell price can all be edited before the invoice is issued.</div>'}<div class="invoice-form">${field('Invoice number','number',inv.number,true)}${field('Date','date',inv.date,false,'date')}${field('Job number','jobNumber',inv.jobNumber)}${select('Job type','jobType',inv.jobType,['Retail','Internal','Warranty'],locked)}${field('Customer','customer',inv.customer,false,'text','span-2')}${field('Telephone','phone',inv.phone)}${field('Email','email',inv.email)}${field('Address','address',inv.address,false,'text','span-2')}${field('Registration','registration',inv.registration)}${field('Make / model','makeModel',inv.makeModel)}${field('Mileage','mileage',inv.mileage)}${select('Technician','technician',inv.technician||'', ['',...techNames()],locked)}${field('Service advisor','advisor',inv.advisor)}${locked?field('Amount paid','paidAmount',inv.paidAmount,false,'number'):''}${area('Customer notes','customerNotes',inv.customerNotes,'span-2')}${area('Internal notes','internalNotes',inv.internalNotes,'span-2')}</div><div class="quick-invoice-bar"><strong>Quick add</strong>${['Labour','Parts','Oil','MOT','Consumables','Sublet','Other'].map(v=>`<button class="finance-btn quick" type="button" data-quick-type="${v}" ${locked?'disabled':''}>+ ${v==='Parts'?'Part':v}</button>`).join('')}<span>New line opens instantly</span></div><datalist id="knownPartNumbers">${partCatalogue.map(p=>`<option value="${esc(p.partNumber)}">${esc(p.description||'')} · last ${money(p.lastCost)}</option>`).join('')}</datalist><div class="invoice-table-wrap"><table class="invoice-table"><thead><tr><th>Type</th><th>Part number</th><th>Description</th><th>Qty</th><th>Unit</th><th>Cost ex VAT</th><th>Sell ex VAT</th><th>Discount</th><th>VAT</th><th>Net</th><th>GP</th><th></th></tr></thead><tbody>${inv.lines.map((l,n)=>lineRow(l,n,locked)).join('')}</tbody></table></div><div class="invoice-summary"><div><span>Cost ex VAT</span><strong data-summary-cost>${money(x.cost)}</strong></div><div><span>Sales ex VAT</span><strong data-summary-net>${money(x.net)}</strong></div><div><span>VAT</span><strong data-summary-vat>${money(x.vat)}</strong></div><div class="profit"><span>Gross profit</span><strong data-summary-gp>${money(x.gp)}</strong></div><div class="grand"><span>Customer total</span><strong data-summary-total>${money(x.total)}</strong></div></div><div class="invoice-footer-actions">${!locked?'<button class="finance-btn primary" id="saveInvoiceBtn">Save estimate</button><button class="finance-btn success" id="issueInvoiceBtn">Issue invoice</button><button class="finance-btn danger" id="deleteEstimateBtn">Delete estimate</button>':''}<button class="finance-btn secondary" id="printInvoiceBtn">Print</button>${locked&&!['Paid','Credited'].includes(inv.status)?'<button class="finance-btn warn" id="reopenInvoiceBtn">Reopen as estimate</button>':''}${['Invoice Issued','Part Paid','Paid'].includes(inv.status)?'<button class="finance-btn danger" id="creditInvoiceBtn">Create credit note</button>':''}${['Invoice Issued','Part Paid'].includes(inv.status)?'<button class="finance-btn success" id="markPaidBtn">Mark paid</button>':''}</div></div>`;bindBuilder(inv,locked)}
 function refreshInvoiceSummary(inv){const x=totals(inv);const map={cost:x.cost,net:x.net,vat:x.vat,gp:x.gp,total:x.total};Object.entries(map).forEach(([k,v])=>{const el=document.querySelector(`[data-summary-${k}]`);if(el)el.textContent=money(v)})}
 function refreshAllLineCalculations(inv){
   document.querySelectorAll('[data-line]').forEach(row=>{
@@ -147,9 +245,153 @@ function refreshAllLineCalculations(inv){
   });
   refreshInvoiceSummary(inv);
 }
-function bindBuilder(inv,locked){document.querySelectorAll('[data-inv-field]').forEach(el=>{el.onchange=el.oninput=()=>{if(locked)return;const k=el.dataset.invField,old=inv[k];inv[k]=el.type==='number'?Number(el.value):el.value;if(k==='jobType'||k==='technician'){inv.lines.forEach(l=>applyAutoPricing(l,inv,k==='jobType'));inv.audit.push(audit(k==='jobType'?'Job type changed':'Technician changed',`${old||'—'} → ${inv[k]||'—'}`));save();renderBuilder()}else save()}});document.querySelectorAll('[data-line]').forEach(row=>row.querySelectorAll('[data-lf]').forEach(el=>{const commit=()=>{if(locked)return;const l=inv.lines[Number(row.dataset.line)],k=el.dataset.lf;l[k]=['qty','cost','sell','discount','vat'].includes(k)?Number(el.value):el.value;if(k==='partNumber'){l.partNumber=normPartNumber(l.partNumber);const matched=applyKnownPart(l);if(matched)inv.audit.push(audit('Recognised part added',l.partNumber));}if(k==='type')applyAutoPricing(l,inv,true);if(k==='description'&&l.type==='Oil')applyAutoPricing(l,inv,false);save();if(k==='type'||k==='partNumber'||(k==='description'&&l.type==='Oil')||(k==='cost'&&l.type==='Parts'))renderBuilder();else refreshAllLineCalculations(inv)};el.oninput=commit;el.onchange=commit}));document.querySelectorAll('[data-quick-type]').forEach(b=>b.onclick=()=>{const l=blankLine(b.dataset.quickType,inv);if(l.type==='Labour')l.description='Workshop labour';if(l.type==='MOT')l.description='MOT test';if(l.type==='Oil'){l.description='5W30 Oil';l.cost=Number(settings.oil5w30CostPerLitre)||0;l.unit='litre'};inv.lines.push(l);inv.audit.push(audit('Quick add line',l.type));save();renderBuilder();requestAnimationFrame(()=>document.querySelector('[data-line]:last-child [data-lf="description"]')?.focus())});document.querySelectorAll('.remove-line').forEach((b,n)=>b.onclick=()=>{inv.lines.splice(n,1);save();renderBuilder()});document.getElementById('saveInvoiceBtn')?.addEventListener('click',()=>{inv.audit.push(audit('Estimate saved'));save();renderAll()});document.getElementById('issueInvoiceBtn')?.addEventListener('click',()=>{if(!inv.customer||!inv.registration||!inv.lines.some(l=>l.description&&numberValue(l.sell)>0)){alert('Add the customer, registration and at least one priced line before issuing.');return}refreshAllLineCalculations(inv);if(!invoiceReconciles(inv)){alert('This invoice does not reconcile. Check the line values before issuing.');return}const stockCheck=commitInvoiceInventory(inv);if(!stockCheck.ok){alert(stockCheck.message);return}inv.status='Invoice Issued';inv.audit.push(audit('Invoice issued',`Total ${money(totals(inv).total)}`));save();renderAll()});document.getElementById('deleteEstimateBtn')?.addEventListener('click',()=>deleteEstimate(inv.id));document.getElementById('printInvoiceBtn')?.addEventListener('click',()=>printInvoice(inv));document.getElementById('reopenInvoiceBtn')?.addEventListener('click',()=>{const r=prompt('Reason for reopening:');if(!r)return;restoreInvoiceInventory(inv,'Invoice reopened');inv.status='Estimate';inv.audit.push(audit('Invoice reopened',r));save();renderAll()});document.getElementById('creditInvoiceBtn')?.addEventListener('click',()=>{const r=prompt('Reason for credit note:');if(!r)return;restoreInvoiceInventory(inv,'Credit note created');inv.status='Credited';inv.audit.push(audit('Credit note created',r));save();renderAll()});document.getElementById('markPaidBtn')?.addEventListener('click',()=>{inv.paidAmount=totals(inv).total;inv.status='Paid';inv.audit.push(audit('Invoice marked paid'));save();renderAll()})}
-function deleteEstimate(id){const inv=invoices.find(i=>i.id===id);if(!inv||inv.status!=='Estimate')return alert('Only estimates can be deleted.');if(!confirm(`Delete estimate ${inv.number}?`))return;if(inv.jobId&&!deletedJobInvoices.includes(inv.jobId))deletedJobInvoices.push(inv.jobId);invoices=invoices.filter(i=>i.id!==id);if(currentId===id)currentId=null;save();showPanel('financeDashboard');renderAll()}
-function printInvoice(inv){const x=totals(inv),sheet=document.getElementById('financePrintSheet'),c=companySettings(),trading=c.tradingName||settings.company||'Workshop',legal=c.legalName||trading,address=c.tradingAddress||c.registeredAddress||settings.address||'',logo=c.showLogo!==false&&c.logoData?`<img class="invoice-company-logo" src="${c.logoData}" alt="${esc(trading)} logo">`:'',companyLine=[c.companyNumber?`Company ${esc(c.companyNumber)}`:'',c.vatNumber?`VAT ${esc(c.vatNumber)}`:(settings.vatNumber?esc(settings.vatNumber):'')].filter(Boolean).join(' · '),contacts=[c.phone,c.email,c.website].filter(Boolean).map(esc).join(' · '),bank=c.showBankInvoice?[c.bankName,c.accountName,c.sortCode,c.accountNumber].filter(Boolean).map(esc).join(' · '):'',terms=c.paymentTerms||settings.paymentTerms||inv.paymentTerms||'';sheet.innerHTML=`<div class="print-header branded-invoice-header"><div class="invoice-company-block">${logo}<div><h1>${esc(trading)}</h1>${legal!==trading?`<strong>${esc(legal)}</strong>`:''}<div class="invoice-address">${esc(address).replace(/\n/g,'<br>')}</div>${companyLine?`<div>${companyLine}</div>`:''}${contacts?`<div>${contacts}</div>`:''}</div></div><div><h2>${inv.status==='Estimate'?'ESTIMATE':'INVOICE'}</h2><strong>${esc(inv.number)}</strong><div>${esc(inv.date)}</div></div></div><div class="print-meta"><div><strong>Customer</strong><br>${esc(inv.customer)}<br>${esc(inv.address)}</div><div><strong>Vehicle</strong><br>${esc(inv.registration)}<br>${esc(inv.makeModel)}<br>Job: ${esc(inv.jobNumber)}</div></div><table><thead><tr><th>Part number</th><th>Description</th><th>Qty</th><th>Unit price ex VAT</th><th>VAT</th><th>Total inc VAT</th></tr></thead><tbody>${inv.lines.filter(l=>l.description).map(l=>{const z=calcLine(l);return `<tr><td>${esc(l.type==='Parts'?l.partNumber||'—':'—')}</td><td>${esc(l.description)}</td><td>${l.qty} ${esc(l.unit)}</td><td>${money(l.sell)}</td><td>${Number(l.vat)||0}%</td><td>${money(z.total)}</td></tr>`}).join('')}</tbody></table><div class="print-totals"><div><span>Subtotal ex VAT</span><strong>${money(x.net)}</strong></div><div><span>VAT</span><strong>${money(x.vat)}</strong></div><div class="print-total"><span>Total</span><strong>${money(x.total)}</strong></div></div><div class="invoice-print-footer">${terms?`<div><strong>Payment terms</strong><br>${esc(terms)}</div>`:''}${bank?`<div><strong>Bank details</strong><br>${bank}</div>`:''}</div>`;document.body.classList.add('finance-printing');window.print();setTimeout(()=>document.body.classList.remove('finance-printing'),500)}
+function bindBuilder(inv,locked){document.querySelectorAll('[data-inv-field]').forEach(el=>{el.onchange=el.oninput=()=>{if(locked)return;const k=el.dataset.invField,old=inv[k];inv[k]=el.type==='number'?Number(el.value):el.value;if(k==='jobType'||k==='technician'){inv.lines.forEach(l=>applyAutoPricing(l,inv,k==='jobType'));inv.audit.push(audit(k==='jobType'?'Job type changed':'Technician changed',`${old||'—'} → ${inv[k]||'—'}`));save();renderBuilder()}else save()}});document.querySelectorAll('[data-line]').forEach(row=>row.querySelectorAll('[data-lf]').forEach(el=>{const commit=()=>{if(locked)return;const l=inv.lines[Number(row.dataset.line)],k=el.dataset.lf;l[k]=['qty','cost','sell','discount','vat'].includes(k)?Number(el.value):el.value;if(k==='partNumber'){l.partNumber=normPartNumber(l.partNumber);const matched=applyKnownPart(l);if(matched)inv.audit.push(audit('Recognised part added',l.partNumber));}if(k==='type')applyAutoPricing(l,inv,true);save();if(k==='type'||k==='partNumber'||(k==='cost'&&l.type==='Parts'))renderBuilder();else refreshAllLineCalculations(inv)};el.oninput=commit;el.onchange=commit}));document.querySelectorAll('[data-quick-type]').forEach(b=>b.onclick=()=>{
+  const type=b.dataset.quickType;
+  if(type==='Parts'||type==='Oil'){
+    const isStock=confirm(`Is this ${type==='Parts'?'part':'oil'} being taken from workshop stock?\n\nOK = Yes, select it from ${type==='Parts'?'Parts Stock':'Oil Stock'}\nCancel = No, add a normal invoice line`);
+    if(isStock){
+      sessionStorage.setItem('garageGurusInventoryTargetInvoice',inv.id);
+      sessionStorage.setItem('garageGurusInventoryReturnToInvoice','1');
+      if(typeof window.show==='function')window.show(type==='Parts'?'partsStockScreen':'oilStockScreen');
+      setTimeout(()=>window.GarageGurusInventory?.render?.(type==='Parts'?'part':'oil'),50);
+      return;
+    }
+  }
+  const l=blankLine(type,inv);
+  if(l.type==='Labour')l.description='Workshop labour';
+  if(l.type==='MOT')l.description='MOT test';
+  if(l.type==='Oil'){l.description='5W30 Oil';l.cost=Number(settings.oil5w30CostPerLitre)||0;l.unit='litre';l.oilGradeEditable=true}
+  inv.lines.push(l);
+  inv.audit.push(audit('Quick add line',l.type));
+  save();renderBuilder();
+  requestAnimationFrame(()=>document.querySelector('[data-line]:last-child [data-lf="description"]')?.focus());
+});document.querySelectorAll('.remove-line').forEach((b,n)=>b.onclick=()=>{
+  const line=inv.lines[n];
+  if(line?.inventoryId&&line.inventoryCommitted)restoreInventoryLine(inv,line,'Stock invoice line removed');
+  inv.lines.splice(n,1);
+  save();renderBuilder();
+});document.getElementById('saveInvoiceBtn')?.addEventListener('click',()=>{inv.audit.push(audit('Estimate saved'));save();renderAll()});document.getElementById('issueInvoiceBtn')?.addEventListener('click',()=>{if(!inv.customer||!inv.registration||!inv.lines.some(l=>l.description&&numberValue(l.sell)>0)){alert('Add the customer, registration and at least one priced line before issuing.');return}refreshAllLineCalculations(inv);if(!invoiceReconciles(inv)){alert('This invoice does not reconcile. Check the line values before issuing.');return}const stockCheck=commitInvoiceInventory(inv);if(!stockCheck.ok){alert(stockCheck.message);return}inv.status='Invoice Issued';inv.audit.push(audit('Invoice issued',`Total ${money(totals(inv).total)}`));save();renderAll()});document.getElementById('deleteEstimateBtn')?.addEventListener('click',()=>deleteEstimate(inv.id));document.getElementById('printInvoiceBtn')?.addEventListener('click',()=>printInvoice(inv));document.getElementById('reopenInvoiceBtn')?.addEventListener('click',()=>{const r=prompt('Reason for reopening:');if(!r)return;inv.status='Estimate';inv.audit.push(audit('Invoice reopened',`${r} · Stock allocations retained`));save();renderAll()});document.getElementById('creditInvoiceBtn')?.addEventListener('click',()=>{const r=prompt('Reason for credit note:');if(!r)return;inv.status='Credited';inv.audit.push(audit('Credit note created',`${r} · Stock not automatically returned`));save();renderAll()});document.getElementById('markPaidBtn')?.addEventListener('click',()=>{inv.paidAmount=totals(inv).total;inv.status='Paid';inv.audit.push(audit('Invoice marked paid'));save();renderAll()})}
+function deleteEstimate(id){const inv=invoices.find(i=>i.id===id);if(!inv||inv.status!=='Estimate')return alert('Only estimates can be deleted.');if(!confirm(`Delete estimate ${inv.number}?`))return;restoreInvoiceInventory(inv,'Estimate deleted — stock returned');if(inv.jobId&&!deletedJobInvoices.includes(inv.jobId))deletedJobInvoices.push(inv.jobId);invoices=invoices.filter(i=>i.id!==id);if(currentId===id)currentId=null;save();showPanel('financeDashboard');renderAll()}
+function printInvoice(inv){
+ const x=totals(inv),sheet=document.getElementById('financePrintSheet'),c=companySettings(),
+ trading=c.tradingName||settings.company||'Workshop',legal=c.legalName||trading,
+ address=c.tradingAddress||c.registeredAddress||settings.address||'',
+ logo=c.showLogo!==false&&c.logoData?`<img class="invoice-company-logo" src="${c.logoData}" alt="${esc(trading)} logo">`:'',
+ companyLine=[c.companyNumber?`Company ${esc(c.companyNumber)}`:'',c.vatNumber?`VAT ${esc(c.vatNumber)}`:(settings.vatNumber?esc(settings.vatNumber):'')].filter(Boolean).join(' · '),
+ contacts=[c.phone,c.email,c.website].filter(Boolean).map(esc).join(' · '),
+ bank=c.showBankInvoice?[c.bankName,c.accountName,c.sortCode,c.accountNumber].filter(Boolean).map(esc).join(' · '):'',
+ terms=c.paymentTerms||settings.paymentTerms||inv.paymentTerms||'',
+ docTitle=inv.status==='Estimate'?'ESTIMATE':'INVOICE',
+ statusText=esc(inv.status||docTitle),
+ paid=Math.max(0,Number(inv.paidAmount||0)),
+ balance=Math.max(0,round(x.total-paid));
+
+ sheet.innerHTML=`
+ <div class="pro-invoice">
+   <header class="pro-invoice-header">
+     <div class="invoice-company-block">
+       ${logo}
+       <div class="pro-company-copy">
+         <h1>${esc(trading)}</h1>
+         ${legal!==trading?`<div class="pro-legal-name">${esc(legal)}</div>`:''}
+         ${address?`<div class="pro-company-address">${esc(address).replace(/\n/g,'<br>')}</div>`:''}
+         ${contacts?`<div class="pro-company-contact">${contacts}</div>`:''}
+         ${companyLine?`<div class="pro-company-reg">${companyLine}</div>`:''}
+       </div>
+     </div>
+     <div class="pro-document-block">
+       <span class="pro-document-kicker">${docTitle}</span>
+       <strong class="pro-document-number">${esc(inv.number)}</strong>
+       <span class="pro-document-date">${esc(inv.date)}</span>
+       <span class="pro-status-chip">${statusText}</span>
+     </div>
+   </header>
+
+   <section class="pro-invoice-info-grid">
+     <div class="pro-info-card">
+       <span class="pro-info-label">BILL TO</span>
+       <strong>${esc(inv.customer||'Customer')}</strong>
+       ${inv.address?`<div>${esc(inv.address).replace(/\n/g,'<br>')}</div>`:''}
+       ${inv.phone?`<div>${esc(inv.phone)}</div>`:''}
+       ${inv.email?`<div>${esc(inv.email)}</div>`:''}
+     </div>
+     <div class="pro-info-card">
+       <span class="pro-info-label">VEHICLE</span>
+       <strong>${esc(inv.registration||'—')}</strong>
+       ${inv.makeModel?`<div>${esc(inv.makeModel)}</div>`:''}
+       ${inv.mileage?`<div>Mileage: ${esc(inv.mileage)}</div>`:''}
+       ${inv.jobNumber?`<div>Job: ${esc(inv.jobNumber)}</div>`:''}
+     </div>
+     <div class="pro-info-card pro-service-card">
+       <span class="pro-info-label">SERVICE DETAILS</span>
+       <div><strong>Job type:</strong> ${esc(inv.jobType||'Retail')}</div>
+       ${inv.technician?`<div><strong>Technician:</strong> ${esc(inv.technician)}</div>`:''}
+       ${inv.advisor?`<div><strong>Advisor:</strong> ${esc(inv.advisor)}</div>`:''}
+     </div>
+   </section>
+
+   <table class="pro-invoice-table">
+     <thead>
+       <tr>
+         <th class="pro-col-item">Item</th>
+         <th>Description</th>
+         <th class="pro-num">Qty</th>
+         <th class="pro-num">Rate ex VAT</th>
+         <th class="pro-num">VAT</th>
+         <th class="pro-num">Line Total</th>
+       </tr>
+     </thead>
+     <tbody>
+       ${inv.lines.filter(l=>l.description).map(l=>{
+         const z=calcLine(l);
+         const item=l.type==='Parts'&&l.partNumber?`${esc(l.type)}<small>${esc(l.partNumber)}</small>`:esc(l.type||'Item');
+         return `<tr>
+           <td class="pro-item-type">${item}</td>
+           <td>${esc(l.description)}</td>
+           <td class="pro-num">${Number(l.qty||0).toLocaleString('en-GB',{maximumFractionDigits:2})}${l.unit?` ${esc(l.unit)}`:''}</td>
+           <td class="pro-num">${money(l.sell)}</td>
+           <td class="pro-num">${Number(l.vat)||0}%</td>
+           <td class="pro-num pro-line-total">${money(z.total)}</td>
+         </tr>`;
+       }).join('')}
+     </tbody>
+   </table>
+
+   <section class="pro-invoice-lower">
+     <div class="pro-notes">
+       ${inv.customerNotes?`<div class="pro-note-block"><span class="pro-info-label">CUSTOMER NOTES</span><p>${esc(inv.customerNotes).replace(/\n/g,'<br>')}</p></div>`:''}
+       ${terms?`<div class="pro-note-block"><span class="pro-info-label">PAYMENT TERMS</span><p>${esc(terms)}</p></div>`:''}
+       ${bank?`<div class="pro-note-block"><span class="pro-info-label">BANK DETAILS</span><p>${bank}</p></div>`:''}
+     </div>
+
+     <div class="pro-totals-card">
+       <div><span>Subtotal ex VAT</span><strong>${money(x.net)}</strong></div>
+       <div><span>VAT</span><strong>${money(x.vat)}</strong></div>
+       <div class="pro-grand-total"><span>Total</span><strong>${money(x.total)}</strong></div>
+       ${paid>0?`<div><span>Paid</span><strong>${money(paid)}</strong></div>`:''}
+       ${paid>0?`<div class="pro-balance"><span>Balance Due</span><strong>${money(balance)}</strong></div>`:''}
+     </div>
+   </section>
+
+   <footer class="pro-invoice-footer">
+     <div>Thank you for your business.</div>
+     <div>${esc(trading)} · ${esc(inv.number)}</div>
+   </footer>
+ </div>`;
+
+ document.body.classList.add('finance-printing');
+ const doPrint=()=>{window.print();setTimeout(()=>document.body.classList.remove('finance-printing'),500)};
+ const logoImg=sheet.querySelector('.invoice-company-logo');
+ if(logoImg&&!logoImg.complete){
+   let done=false;
+   const finish=()=>{if(done)return;done=true;setTimeout(doPrint,80)};
+   logoImg.addEventListener('load',finish,{once:true});
+   logoImg.addEventListener('error',finish,{once:true});
+   setTimeout(finish,800);
+ }else{
+   setTimeout(doPrint,80);
+ }
+}
 function renderPartsDifferenceReport(){
   const host=document.getElementById('partsDifferenceReportHost');if(!host)return;
   const rows=partObservations(240), groups={};
@@ -180,7 +422,7 @@ function customerName(c){return c?[c.title,c.firstName,c.surname].filter(Boolean
 function crmAddress(c){return c?[c.address1,c.address2,c.town,c.county,c.postcode].filter(Boolean).join(', '):''}
 function sourceLine(inv,type,id){return inv.lines.find(l=>l.sourceType===type&&l.sourceId===id)}
 function isMotOnlyJob(job){if(!job||!job.mot||job.mot==='None')return false;const work=String(job.workRequired||job.description||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,' ');if(!work)return true;const stripped=work.replace(/\b(mot|test|class 4|class four|annual)\b/g,'').trim();return !stripped}
-function syncJobIntoInvoice(job,inv){const {customer:c,vehicle:v}=crmForJob(job);inv.jobId=job.id;inv.jobNumber=job.jobNo||inv.jobNumber;inv.jobType=job.type||inv.jobType||'Retail';inv.customer=customerName(c)||job.customer||inv.customer;inv.address=crmAddress(c)||inv.address;inv.phone=(c&&(c.mobile||c.home||c.work))||job.phone||inv.phone;inv.email=(c&&c.email)||job.customerEmail||inv.email;inv.registration=job.reg||inv.registration;inv.makeModel=[v?.make||job.make,[v?.model,v?.variant].filter(Boolean).join(' ')||job.model].filter(Boolean).join(' ');inv.mileage=job.mileage||v?.mileage||inv.mileage;inv.technician=job.technician||inv.technician;const motOnly=isMotOnlyJob(job);let labour=sourceLine(inv,'job-labour',job.id);if(motOnly){if(labour)inv.lines=inv.lines.filter(l=>l!==labour)}else{if(!labour){labour=blankLine('Labour',inv);labour.sourceType='job-labour';labour.sourceId=job.id;inv.lines.unshift(labour)}labour.description=job.workRequired?`Labour — ${job.workRequired}`:'Workshop labour';labour.qty=Number(job.actualHours)>0?round(job.actualHours):Number(job.hours)||0;labour.sell=Number(job.labourRateSnapshot)||rateFor(inv.jobType);applyAutoPricing(labour,inv)}(job.partsRequests||[]).forEach((p,idx)=>{const pid=p.id||`${job.id}-part-${idx}`;if(['cancelled','returned','credited'].includes(String(p.status||'').toLowerCase()))return;let line=sourceLine(inv,'job-part',pid);if(!line){line=blankLine('Parts',inv);line.sourceType='job-part';line.sourceId=pid;inv.lines.push(line)}line.partNumber=normPartNumber(p.partNumber||p.partNo||line.partNumber);line.description=p.description||p.text||p.partNumber||'Part';line.qty=Number(p.qty)||1;line.cost=Number(p.cost??p.costPrice??0)||0;line.sell=Number(p.sell??p.sellPrice??p.customerPrice??p.price??0)||0});if(job.mot&&job.mot!=='None'){let mot=sourceLine(inv,'job-mot',job.id);if(!mot){mot=blankLine('MOT',inv);mot.sourceType='job-mot';mot.sourceId=job.id;inv.lines.push(mot)}mot.description=`MOT — ${job.mot}`;applyAutoPricing(mot,inv)}return inv}
+function syncJobIntoInvoice(job,inv){const {customer:c,vehicle:v}=crmForJob(job);inv.jobId=job.id;inv.jobNumber=job.jobNo||inv.jobNumber;inv.jobType=job.type||inv.jobType||'Retail';inv.crmCustomerId=c?.id||inv.crmCustomerId||job.customerId||'';inv.crmVehicleId=v?.id||inv.crmVehicleId||job.vehicleId||'';inv.customer=customerName(c)||job.customer||inv.customer;inv.address=crmAddress(c)||inv.address;inv.phone=(c&&(c.mobile||c.home||c.work))||job.phone||inv.phone;inv.email=(c&&c.email)||job.customerEmail||inv.email;inv.registration=job.reg||inv.registration;inv.makeModel=[v?.make||job.make,[v?.model,v?.variant].filter(Boolean).join(' ')||job.model].filter(Boolean).join(' ');inv.mileage=job.mileage||v?.mileage||inv.mileage;inv.technician=job.technician||inv.technician;const motOnly=isMotOnlyJob(job);let labour=sourceLine(inv,'job-labour',job.id);if(motOnly){if(labour)inv.lines=inv.lines.filter(l=>l!==labour)}else{if(!labour){labour=blankLine('Labour',inv);labour.sourceType='job-labour';labour.sourceId=job.id;inv.lines.unshift(labour)}labour.description=job.workRequired?`Labour — ${job.workRequired}`:'Workshop labour';labour.qty=Number(job.actualHours)>0?round(job.actualHours):Number(job.hours)||0;labour.sell=Number(job.labourRateSnapshot)||rateFor(inv.jobType);applyAutoPricing(labour,inv)}(job.partsRequests||[]).forEach((p,idx)=>{const pid=p.id||`${job.id}-part-${idx}`;if(['cancelled','returned','credited'].includes(String(p.status||'').toLowerCase()))return;let line=sourceLine(inv,'job-part',pid);if(!line){line=blankLine('Parts',inv);line.sourceType='job-part';line.sourceId=pid;inv.lines.push(line)}line.partNumber=normPartNumber(p.partNumber||p.partNo||line.partNumber);line.description=p.description||p.text||p.partNumber||'Part';line.qty=Number(p.qty)||1;line.cost=Number(p.cost??p.costPrice??0)||0;line.sell=Number(p.sell??p.sellPrice??p.customerPrice??p.price??0)||0});if(job.mot&&job.mot!=='None'){let mot=sourceLine(inv,'job-mot',job.id);if(!mot){mot=blankLine('MOT',inv);mot.sourceType='job-mot';mot.sourceId=job.id;inv.lines.push(mot)}mot.description=`MOT — ${job.mot}`;applyAutoPricing(mot,inv)}return inv}
 function ensureInvoiceForJob(job){if(deletedJobInvoices.includes(job.id))return null;let inv=invoices.find(i=>i.jobId===job.id||(i.jobNumber&&i.jobNumber===job.jobNo));if(!inv){inv={id:uid(),number:settings.invoicePrefix+String(settings.nextNumber++).padStart(5,'0'),status:'Estimate',jobType:job.type||'Retail',date:String(job.bookingDate||job.createdAt||today()).slice(0,10),jobId:job.id,jobNumber:job.jobNo||'',customer:'',address:'',phone:'',email:'',registration:'',makeModel:'',mileage:'',technician:job.technician||'',advisor:'',paymentTerms:settings.paymentTerms,customerNotes:'',internalNotes:'',paidAmount:0,lines:[],audit:[audit('Live estimate created from workshop job')],createdAt:nowISO(),updatedAt:nowISO()};invoices.unshift(inv)}return syncJobIntoInvoice(job,inv)}
 function syncAllJobs(){workshopJobs().forEach(ensureInvoiceForJob);save()}
 function openJobInvoice(jobId){const job=workshopJobs().find(j=>j.id===jobId);if(!job)return;const inv=ensureInvoiceForJob(job);if(!inv)return alert("This job's estimate was deleted.");currentId=inv.id;save();if(typeof window.show==='function')window.show('financeCentreScreen');showPanel('invoiceBuilder')}
@@ -190,7 +432,7 @@ function getJobFinancials(jobId){
   const x=totals(inv);
   return Object.assign({found:true,status:inv.status,invoiceId:inv.id,number:inv.number},x);
 }
-window.WAI099FinanceBridge={syncAllJobs,ensureInvoiceForJob,openJobInvoice,getRevenueSummary,getJobFinancials,getInvoices:()=>invoices.map(i=>Object.assign({},i,{lines:(i.lines||[]).map(l=>Object.assign({},l))})),addInventoryLineToInvoice,openInvoice:(id)=>{const inv=invoices.find(i=>i.id===id);if(!inv)return;currentId=id;save();if(typeof window.show==='function')window.show('financeCentreScreen');showPanel('invoiceBuilder')},syncJob:job=>{const inv=ensureInvoiceForJob(job);save();renderAll();return inv}};
+window.WAI099FinanceBridge={syncAllJobs,ensureInvoiceForJob,openJobInvoice,getRevenueSummary,getMonthlyPerformanceSummary,getJobFinancials,getInvoices:()=>invoices.map(i=>Object.assign({},i,{lines:(i.lines||[]).map(l=>Object.assign({},l))})),addInventoryLineToInvoice,openInvoice:(id)=>{const inv=invoices.find(i=>i.id===id);if(!inv)return;currentId=id;save();if(typeof window.show==='function')window.show('financeCentreScreen');showPanel('invoiceBuilder')},syncJob:job=>{const inv=ensureInvoiceForJob(job);save();renderAll();return inv}};
 document.addEventListener('click',e=>{if(e.target?.id==='openCompanySettingsFromFinance')window.WAICompanySettings?.open?.()});
 document.addEventListener('DOMContentLoaded',init);
 })();

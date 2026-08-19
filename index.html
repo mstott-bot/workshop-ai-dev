@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workshop AI OS — WAI-104.0 Customer Portal</title>
   <link rel="stylesheet" href="style.css?v=111.1" />
-  <link rel="stylesheet" href="wai093-vhc.css">
+  <link rel="stylesheet" href="wai093-vhc.css?v=115.16">
   <link rel="stylesheet" href="wai094-intelligence.css">
   <link rel="stylesheet" href="wai095-workshop-intelligence.css">
-  <link rel="stylesheet" href="wai096-crm.css">
-  <link rel="stylesheet" href="finance-centre.css">
+  <link rel="stylesheet" href="wai096-crm.css?v=115.15">
+  <link rel="stylesheet" href="finance-centre.css?v=115.20">
   <link rel="stylesheet" href="customer-portal.css">
   <link rel="stylesheet" href="ui-responsive.css?v=105.5.3">
   <link rel="stylesheet" href="media-centre.css?v=110.6">
@@ -224,7 +224,7 @@
 
         <label>Priority
           <select id="priority">
-            <option>🟢 Routine</option><option>🟠 Today</option><option>🔴 Urgent</option>
+            <option>🟡 Customer Waiting</option><option selected>🔵 Today</option><option>🔴 Urgent</option>
           </select>
         </label>
 
@@ -234,11 +234,6 @@
           </select>
         </label>
 
-        <label id="authBox">Retail Authorisation
-          <select id="auth">
-            <option>Awaiting Customer Approval</option><option>Approved</option><option>Declined</option>
-          </select>
-        </label>
       </div>
 
       <label>Work Required
@@ -345,7 +340,7 @@
 
       <div class="button-row">
         <button id="startTimer" class="secondary">▶ Start Job Timer</button>
-        <button id="finishTimer" class="secondary">■ Finish Job Timer</button>
+        <button id="finishTimer" class="secondary">■ Stop Job Timer</button>
       </div>
 
       <div id="technicianMOTControls" class="mot-technician-controls hidden" aria-live="polite"></div>
@@ -1319,34 +1314,34 @@
     <div id="modalTimeline" class="timeline"></div>
   </div>
 </div>
-<script src="script.js?v=108.1"></script>
-<script src="unified-productivity-engine.js"></script>
+<script src="script.js?v=115.21"></script>
+<script src="unified-productivity-engine.js?v=115.6"></script>
 <script src="unified-queue-engine.js"></script>
 <script src="unified-capacity-engine.js"></script>
 <script src="coach-fix.js"></script>
 <script src="garage-health-fix.js"></script>
 <script src="vehicle-intelligence-fix.js"></script>
-<script src="performance-dashboard.js"></script>
-<script src="reports-intelligence.js"></script>
+<script src="performance-dashboard.js?v=115.11"></script>
+<script src="reports-intelligence.js?v=115.6"></script>
 <script src="tyres.js"></script>
 <script src="mot-intelligence.js"></script>
 <script src="parts-tyre-intelligence.js"></script>
-<script src="technician-league-intelligence-wai092.js"></script>
+<script src="technician-league-intelligence-wai092.js?v=115.6"></script>
 <script src="wai0922-workflow.js"></script>
-<script src="wai093-vhc.js"></script>
-<script src="wai094-intelligence.js"></script>
-<script src="wai096-crm.js"></script>
+<script src="wai093-vhc.js?v=115.16"></script>
+<script src="wai094-intelligence.js?v=115.6"></script>
+<script src="wai096-crm.js?v=115.15"></script>
 <script src="wai0962-customer-recognition.js?v=105.5.3"></script>
 <script src="company-settings.js?v=114.0"></script>
-<script src="finance-centre.js?v=114.0"></script>
-<script src="inventory-stock.js?v=111.0"></script>
+<script src="finance-centre.js?v=115.20"></script>
+<script src="inventory-stock.js?v=115.18"></script>
 <script src="operational-gp.js"></script>
 <script src="ask-garage-guru.js?v=112.3"></script>
 <script src="fault-code-assistant.js?v=113.0"></script>
 <script src="customer-portal.js"></script>
 <script src="media-centre.js"></script>
 <script src="review-centre.js?v=110.7"></script>
-<script src="wai095-workshop-intelligence.js"></script>
+<script src="wai095-workshop-intelligence.js?v=115.9"></script>
 <script src="wai1022-parts-fix.js"></script>
 <script src="staff-calendar.js?v=106.0"></script>
 <div id="financePrintSheet" class="print-sheet"></div>

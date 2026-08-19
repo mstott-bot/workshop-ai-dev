@@ -1,8 +1,8 @@
-/* WAI-103.0 Unified Productivity Engine
+/* WAI-115.6 Unified Productivity Engine
    One source of truth for every Workshop AI module.
-   Productivity = sold labour hours / actual job-clocked hours.
-   Efficiency   = allocated/sold hours / actual job-clocked hours (job performance).
-   Utilisation  = actual job-clocked hours / available hours.
+   Productivity = actual productive job-clocked hours / available attendance hours.
+   Efficiency   = allocated/sold hours / actual productive job-clocked hours.
+   Utilisation  = actual job-clocked hours / available hours (retained existing definition).
 */
 (function(){
   'use strict';
@@ -14,11 +14,11 @@
     const soldHours=list.reduce((s,j)=>s+sold(j),0);
     const clockedHours=list.reduce((s,j)=>s+clocked(j),0);
     const available=n(availableHours);
-    const productivity=clockedHours>0?(soldHours/clockedHours)*100:null;
+    const productivity=available>0?(clockedHours/available)*100:null;
     const efficiency=clockedHours>0?(soldHours/clockedHours)*100:null;
     const utilisation=available>0?(clockedHours/available)*100:null;
     return {soldHours,clockedHours,availableHours:available,productivity,efficiency,utilisation};
   }
-  window.WorkshopAIProductivityEngine={version:'WAI-103.0',soldHours:sold,clockedHours:clocked,calculate};
+  window.WorkshopAIProductivityEngine={version:'WAI-115.6',soldHours:sold,clockedHours:clocked,calculate};
   window.calculateWorkshopProductivity=calculate;
 })();

@@ -1070,3 +1070,11 @@ body{background:linear-gradient(135deg,var(--gg-navy),var(--gg-navy-2));}
 .garage-guru-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.garage-guru-suggestions button{border:1px solid #c7d9ee;background:#fff;color:#315a84;border-radius:999px;padding:7px 11px;font-size:12px;cursor:pointer}.garage-guru-suggestions button:hover{border-color:#2375c9;color:#0b5eb8}
 .garage-guru-answer{margin-top:14px;background:#fff;border:1px solid #c8d9ec;border-left:4px solid #1670c5;border-radius:10px;padding:15px 17px;color:#25384c}.garage-guru-answer h3{margin:0 0 8px;color:#123d70}.garage-guru-answer p{margin:7px 0;line-height:1.5}.garage-guru-answer .guru-next{color:#536b83}.guru-thinking{font-weight:700;color:#315a84}
 @media(max-width:760px){.garage-guru-ask-row{grid-template-columns:1fr}.garage-guru-ask-row button{width:100%}.garage-guru-ask-head{display:block}.garage-guru-live-pill{display:inline-block;margin-top:10px}}
+
+/* WAI-115.22 Customer Waiting priority */
+.customer-waiting-job{border:2px solid #f59e0b!important;border-left:8px solid #f59e0b!important;background:#fffaf0!important;box-shadow:0 0 0 3px rgba(245,158,11,.13),0 8px 22px rgba(15,45,76,.10)!important}
+.customer-waiting-alert{display:block;margin:-2px -2px 12px;padding:11px 14px;border-radius:10px;background:#f59e0b;color:#17202a;font-weight:900;font-size:1rem;letter-spacing:.02em;text-align:center}
+.job-priority-label{font-weight:800}
+.active-customer-waiting{grid-column:1/-1!important;display:flex!important;flex-direction:column;gap:3px;padding:13px 15px!important;border:2px solid #f59e0b!important;border-radius:10px;background:#fff3cd!important;color:#17202a!important}
+.active-customer-waiting strong{font-size:1.05rem;color:#7c2d12!important}
+.active-customer-waiting span{font-weight:700;color:#17202a!important}

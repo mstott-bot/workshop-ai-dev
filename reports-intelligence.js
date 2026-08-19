@@ -251,10 +251,10 @@
     }
     return total;
   }
-  function productivityFor(list){
-    const sold=list.reduce((sum,job)=>sum+soldHours(job),0);
+  function productivityFor(list,selectedRange=range(),tech=selectedTechnician()){
     const actual=list.reduce((sum,job)=>sum+actualClocked(job),0);
-    return actual>0?(sold/actual)*100:null;
+    const available=availabilityHoursForRange(selectedRange,tech);
+    return available>0?(actual/available)*100:null;
   }
   function labourValue(job){
     if(typeof jobLabourValue==="function") return safeNumber(jobLabourValue(job));
@@ -583,7 +583,7 @@
         reportCard("Available",hours(available),"Available Hours"),
         reportCard("Clocked",hours(actual),"Productive Clocked Hours"),
         reportCard("Sold",hours(sold),"Sold Hours"),
-        reportCard("Productivity",percent(productivity),"Sold ÷ Clocked",productivity!==null&&productivity>=90?"good":"warn"),
+        reportCard("Productivity",percent(productivity),"Clocked ÷ Available",productivity!==null&&productivity>=90?"good":"warn"),
         reportCard("Utilisation",percent(utilisation),"Clocked ÷ Available",utilisation!==null&&utilisation>=85?"good":"warn"),
         reportCard("Efficiency",percent(efficiency),"Efficiency",efficiency!==null&&efficiency>=100?"good":"warn")
       ].join(""),
@@ -1090,7 +1090,7 @@
     const sold=nonMotJobs.reduce((sum,job)=>sum+soldHours(job),0);
     const actual=nonMotJobs.reduce((sum,job)=>sum+actualClocked(job),0);
     const available=availabilityHoursForRange(selectedRange,technician);
-    const productivity=actual>0?sold/actual*100:null;
+    const productivity=available>0?actual/available*100:null;
     const efficiency=actual>0?sold/actual*100:null;
     const repeats=repeatRepairs().filter(record=>record.technician===technician&&inRange(repeatDate(record),selectedRange));
     const firstTimeFix=nonMotJobs.length?Math.max(0,(nonMotJobs.length-repeats.length)/nonMotJobs.length*100):100;

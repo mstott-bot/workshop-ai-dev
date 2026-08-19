@@ -1,1 +1,131 @@
 .vhc-dashboard-button{width:100%;padding:18px;text-align:left;border:2px solid #ef8b35;background:linear-gradient(135deg,#fff7ed,#fff);color:#40220b}.vhc-dashboard-button strong{font-size:1.18rem;display:block}.vhc-dashboard-counts{display:flex;gap:18px;margin-top:8px;font-weight:800}.vhc-red{color:#b42318}.vhc-amber{color:#b54708}.vhc-green{color:#067647}.vhc-modal{position:fixed;inset:0;background:rgba(15,23,42,.68);z-index:10000;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow:auto}.vhc-modal.hidden{display:none}.vhc-panel{background:#fff;border-radius:18px;width:min(1180px,100%);padding:22px;box-shadow:0 25px 80px rgba(0,0,0,.35)}.vhc-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.vhc-close{font-size:24px;border:0;background:#eef2f6;border-radius:50%;width:42px;height:42px}.vhc-section{margin:18px 0;border:1px solid #dce3ea;border-radius:14px;overflow:hidden}.vhc-section h3{margin:0;padding:12px 15px;background:#f5f7fa}.vhc-row{display:grid;grid-template-columns:minmax(170px,1.1fr) minmax(260px,2fr);gap:12px;padding:12px 15px;border-top:1px solid #e8edf2}.vhc-statuses{display:flex;flex-wrap:wrap;gap:7px}.vhc-status{padding:8px 11px;border:1px solid #cbd5e1;background:#fff;border-radius:8px}.vhc-status.selected[data-status=Green]{background:#dcfae6;border-color:#17b26a}.vhc-status.selected[data-status=Amber]{background:#fef0c7;border-color:#f79009}.vhc-status.selected[data-status=Red]{background:#fee4e2;border-color:#f04438}.vhc-status.selected[data-status='Not Checked']{background:#e9edf2;border-color:#667085}.vhc-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.vhc-actions{position:sticky;bottom:0;background:#fff;border-top:1px solid #e1e7ee;padding:14px 0 0;display:flex;flex-wrap:wrap;gap:10px}.vhc-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.vhc-summary>div{padding:12px;border-radius:12px;background:#f5f7fa;text-align:center}.vhc-followup-card{border-left:6px solid #f79009}.vhc-followup-card.red{border-left-color:#f04438}.vhc-followup-actions{display:flex;flex-wrap:wrap;gap:8px}.vhc-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.vhc-filter-row button.active{background:#172b4d;color:white}.vhc-print-report{font-family:Arial,sans-serif}.vhc-report-table{width:100%;border-collapse:collapse}.vhc-report-table th,.vhc-report-table td{border:1px solid #bbb;padding:8px;text-align:left}.vhc-report-Green{background:#dcfae6}.vhc-report-Amber{background:#fef0c7}.vhc-report-Red{background:#fee4e2}@media(max-width:720px){.vhc-row{grid-template-columns:1fr}.vhc-inputs{grid-template-columns:1fr}.vhc-summary{grid-template-columns:1fr 1fr}}
+
+
+/* WAI-115.0 — structured VHC + safe full-height scroll */
+.vhc-inputs-structured{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+#vhcModal{
+  overflow:hidden;
+  padding:16px;
+  align-items:center;
+}
+#vhcModal .vhc-panel{
+  width:min(1180px,100%);
+  max-height:calc(100dvh - 32px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  padding:0;
+}
+#vhcModal .vhc-head{
+  flex:0 0 auto;
+  padding:20px 22px 14px;
+  border-bottom:1px solid #e1e7ee;
+  background:#fff;
+  z-index:3;
+}
+#vhcModal #vhcBody{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding:0 22px 105px;
+}
+#vhcModal .vhc-actions{
+  position:sticky;
+  bottom:0;
+  z-index:5;
+  margin:18px -22px -105px;
+  padding:14px 22px 18px;
+  min-height:84px;
+  background:#fff;
+  border-top:1px solid #dfe6ed;
+  box-shadow:0 -8px 20px rgba(15,23,42,.08);
+}
+@media(max-width:900px){
+  #vhcModal{padding:10px;align-items:flex-start;}
+  #vhcModal .vhc-panel{max-height:calc(100dvh - 20px);}
+  #vhcModal .vhc-head{padding:16px;}
+  #vhcModal #vhcBody{padding:0 16px 116px;}
+  #vhcModal .vhc-actions{margin:16px -16px -116px;padding:12px 16px 16px;}
+}
+@media(max-width:720px){
+  .vhc-inputs-structured{grid-template-columns:1fr}
+}
+
+
+/* WAI-115.4 — VHC branded colour print */
+.vhc-company-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding-bottom:14px;margin-bottom:16px;border-bottom:3px solid #143a5a}
+.vhc-company-logo{display:block;width:auto;height:auto;max-width:190px;max-height:85px;object-fit:contain}
+.vhc-company-details{margin-left:auto;text-align:right;color:#173653}
+.vhc-company-details strong,.vhc-company-details span{display:block}
+.vhc-company-details strong{font-size:18px;margin-bottom:4px}
+.vhc-print-title{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:12px}
+.vhc-print-title h1{margin:0 0 4px;color:#10324f}
+.vhc-print-title h2{margin:0;color:#31536d;font-size:18px}
+.vhc-print-summary{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.vhc-print-count{display:inline-block;padding:7px 10px;border-radius:7px;font-weight:800;border:1px solid currentColor}
+.vhc-print-count.green{background:#d1fadf;color:#067647}
+.vhc-print-count.amber{background:#fef0c7;color:#b54708}
+.vhc-print-count.red{background:#fee4e2;color:#b42318}
+.vhc-report-section th{background:#123b5f!important;color:#fff!important}
+.vhc-report-table thead th{background:#0f2f4b!important;color:#fff!important}
+.vhc-result-cell{font-weight:800;text-align:center!important;border:2px solid transparent!important}
+.vhc-result-cell.green{background:#d1fadf!important;color:#067647!important;border-color:#17b26a!important}
+.vhc-result-cell.amber{background:#fef0c7!important;color:#8f3f08!important;border-color:#f79009!important}
+.vhc-result-cell.red{background:#fee4e2!important;color:#b42318!important;border-color:#f04438!important}
+.vhc-result-cell.notchecked{background:#eef2f6!important;color:#475467!important;border-color:#98a2b3!important}
+@media print{
+  .vhc-print-report,.vhc-print-report *,.vhc-company-logo,.vhc-print-count,.vhc-report-table th,.vhc-report-table td,.vhc-result-cell{
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+    color-adjust:exact!important;
+  }
+  .vhc-company-head{break-inside:avoid;page-break-inside:avoid}
+  .vhc-company-logo{display:block!important;visibility:visible!important;opacity:1!important}
+  .vhc-report-section th{background:#123b5f!important;color:#fff!important}
+  .vhc-result-cell.green{background:#d1fadf!important;color:#067647!important;border:2px solid #17b26a!important}
+  .vhc-result-cell.amber{background:#fef0c7!important;color:#8f3f08!important;border:2px solid #f79009!important}
+  .vhc-result-cell.red{background:#fee4e2!important;color:#b42318!important;border:2px solid #f04438!important}
+  .vhc-result-cell.notchecked{background:#eef2f6!important;color:#475467!important;border:2px solid #98a2b3!important}
+}
+
+
+/* WAI-115.16 — VHC action panel must remain below the inspection */
+#vhcModal .vhc-actions,
+#vhcScreen .vhc-actions,
+.vhc-modal .vhc-actions,
+.vhc-actions {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  z-index: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  margin: 24px 0 8px !important;
+}
+#vhcModal,
+#vhcModal .modal-content,
+#vhcModal .vhc-body,
+#vhcScreen,
+.vhc-modal,
+.vhc-modal .modal-content {
+  overflow-y: auto !important;
+}
+#vhcModal .modal-content,
+.vhc-modal .modal-content {
+  max-height: calc(100vh - 32px) !important;
+  padding-bottom: 28px !important;
+}
+.vhc-actions {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+}
+.vhc-actions button {
+  width: 100% !important;
+  min-height: 46px;
+}

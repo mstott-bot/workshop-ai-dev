@@ -56,7 +56,7 @@
     const sold=list.reduce((s,j)=>s+num(j.hours||j.allowedHours),0);
     const clocked=list.reduce((s,j)=>s+num(j.actualHours||j.clockedHours),0);
     const available=availableHours(tech,start,end,period);
-    const productivity=clocked>0?sold/clocked*100:null;
+    const productivity=available>0?clocked/available*100:null;
     const efficiency=clocked>0?sold/clocked*100:null;
     const utilisation=available>0?clocked/available*100:null;
     const jobsDone=list.length;
