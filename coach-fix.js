@@ -28,6 +28,7 @@
   function completed(j){ return !!j.completedAt || String(j.status||"").includes("Ready") || String(j.status||"").includes("Complete") || String(j.status||"").includes("Closed"); }
   function num(v){ return Number(v||0); }
   function pct(n){ return n===null || n===undefined || !isFinite(n) ? "Not available" : Number(n).toFixed(0)+"%"; }
+  function effPct(n){ return n===null || n===undefined || !isFinite(n) ? "Not available" : Number(n)>200 ? "200%+" : Number(n).toFixed(0)+"%"; }
   function money(n){ return "£"+Math.round(Number(n||0)).toLocaleString("en-GB"); }
   function hours(n){ return Number(n||0).toFixed(1)+" hrs"; }
   function escapeHtml(str){
@@ -99,10 +100,10 @@
   function renderPanel(m){
     if(mode === "live"){
       return `<h3>Live Priorities</h3>${priorityCards(m)}<h3>Workshop Snapshot</h3>
-        <div class="coach-card good"><p><strong>Allowed hours today:</strong> ${hours(m.allowed)}</p><p><strong>Actual hours:</strong> ${hours(m.actual)}</p><p><strong>Efficiency:</strong> ${pct(m.efficiency)}</p><p><strong>Capacity used:</strong> ${pct(m.used)}</p></div>`;
+        <div class="coach-card good"><p><strong>Allowed hours today:</strong> ${hours(m.allowed)}</p><p><strong>Actual hours:</strong> ${hours(m.actual)}</p><p><strong>Efficiency:</strong> ${effPct(m.efficiency)}</p><p><strong>Capacity used:</strong> ${pct(m.used)}</p></div>`;
     }
     if(mode === "end"){
-      return `<h3>End of Day Summary</h3><pre>WORKSHOP AI END OF DAY BRIEFING\n\nJobs today: ${m.todayJobs.length}\nOpen jobs: ${m.open.length}\nReady for collection: ${m.ready.length}\nWaiting for parts: ${m.waitingParts.length}\nWaiting for customer approval: ${m.waitingApproval.length}\n\nAllowed hours: ${m.allowed.toFixed(1)}\nActual hours: ${m.actual.toFixed(1)}\nEfficiency: ${pct(m.efficiency)}\n\nRecommendation:\n${m.waitingParts.length?'Check parts ETAs and update customers where needed.':m.waitingApproval.length?'Prioritise customer approval calls.':'Workshop looks controlled. Prepare tomorrow’s work.'}</pre>`;
+      return `<h3>End of Day Summary</h3><pre>WORKSHOP AI END OF DAY BRIEFING\n\nJobs today: ${m.todayJobs.length}\nOpen jobs: ${m.open.length}\nReady for collection: ${m.ready.length}\nWaiting for parts: ${m.waitingParts.length}\nWaiting for customer approval: ${m.waitingApproval.length}\n\nAllowed hours: ${m.allowed.toFixed(1)}\nActual hours: ${m.actual.toFixed(1)}\nEfficiency: ${effPct(m.efficiency)}\n\nRecommendation:\n${m.waitingParts.length?'Check parts ETAs and update customers where needed.':m.waitingApproval.length?'Prioritise customer approval calls.':'Workshop looks controlled. Prepare tomorrow’s work.'}</pre>`;
     }
     return `<h3>Morning Briefing</h3><pre>WORKSHOP AI MORNING BRIEFING\n\nToday's jobs: ${m.todayJobs.length}\nOpen carried jobs: ${m.open.length}\nAllocated hours today: ${m.allowed.toFixed(1)}\nCapacity used: ${pct(m.used)}\n\nWaiting for parts: ${m.waitingParts.length}\nWaiting for approval: ${m.waitingApproval.length}\nReady for collection: ${m.ready.length}\n\nFirst action:\n${m.waitingApproval.length?'Call customers awaiting approval.':m.waitingParts.length?'Check parts ETAs.':m.ready.length?'Update ready-for-collection customers.':'Keep job statuses and technician notes updated.'}</pre><h3>Top Priorities</h3>${priorityCards(m)}`;
   }

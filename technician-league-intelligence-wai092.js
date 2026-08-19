@@ -23,7 +23,7 @@
   const completedDate=j=>validDate(j.completedAt||j.finishedAt||j.updatedAt||j.bookingDate||j.createdAt);
   const monday=value=>{const d=dayStart(value);d.setDate(d.getDate()-((d.getDay()+6)%7));return d};
   const workingDays=(start,end)=>{let total=0,d=dayStart(start),last=dayStart(end);while(d<=last){if(d.getDay()!==0&&d.getDay()!==6)total++;d.setDate(d.getDate()+1)}return total};
-  const fmt=v=>Number.isFinite(v)?`${v.toFixed(0)}%`:"N/A";
+  const fmt=v=>Number.isFinite(v)?(v>200?"200%+":`${v.toFixed(0)}%`):"N/A";
   const escapeHtml=s=>String(s??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
   function ranges(period){
@@ -62,7 +62,7 @@
     const jobsDone=list.length;
     const jobComponent=Math.min(100,jobsDone*20);
     const score=[productivity,efficiency,utilisation].every(v=>v===null)?null:
-      Math.min(150,(productivity||0)*.40+(efficiency||0)*.30+(utilisation||0)*.20+jobComponent*.10);
+      Math.min(150,(productivity||0)*.40+Math.min(efficiency||0,200)*.30+(utilisation||0)*.20+jobComponent*.10);
     return {tech,list,sold,clocked,available,productivity,efficiency,utilisation,jobs:jobsDone,score};
   }
 

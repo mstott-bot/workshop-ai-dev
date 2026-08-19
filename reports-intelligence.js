@@ -49,6 +49,11 @@
       ? "N/A"
       : Number(value).toFixed(0)+"%";
   }
+  function efficiencyPercent(value){
+    return value===null||value===undefined||Number.isNaN(Number(value))
+      ? "N/A"
+      : Number(value)>200 ? "200%+" : Number(value).toFixed(0)+"%";
+  }
   function normalDate(value){
     const text=String(value||"");
     return text ? text.slice(0,10) : "";
@@ -369,7 +374,7 @@
       reportCard("Jobs",list.length,"Jobs Completed"),
       reportCard("Sold",hours(sold),"Sold Labour"),
       reportCard("Clocked",hours(actual),"Clocked Labour"),
-      reportCard("Efficiency",percent(efficiency),"Efficiency",efficiency!==null&&efficiency>=100?"good":efficiency!==null&&efficiency<85?"bad":"warn"),
+      reportCard("Efficiency",efficiencyPercent(efficiency),"Efficiency",efficiency!==null&&efficiency>=100?"good":efficiency!==null&&efficiency<85?"bad":"warn"),
       reportCard("Productivity",percent(productivity),"Productivity",productivity!==null&&productivity>=90?"good":"warn"),
       reportCard("Value",money(value),"Labour Value")
     ].join("");
@@ -585,7 +590,7 @@
         reportCard("Sold",hours(sold),"Sold Hours"),
         reportCard("Productivity",percent(productivity),"Clocked ÷ Available",productivity!==null&&productivity>=90?"good":"warn"),
         reportCard("Utilisation",percent(utilisation),"Clocked ÷ Available",utilisation!==null&&utilisation>=85?"good":"warn"),
-        reportCard("Efficiency",percent(efficiency),"Efficiency",efficiency!==null&&efficiency>=100?"good":"warn")
+        reportCard("Efficiency",efficiencyPercent(efficiency),"Efficiency",efficiency!==null&&efficiency>=100?"good":"warn")
       ].join(""),
       insightHtml:insight(
         "Formula Check",
@@ -872,7 +877,7 @@
       title:"Garage Health",
       summary:[
         reportCard("Health",score+"/100","Garage Health",score>=85?"good":score>=65?"warn":"bad"),
-        reportCard("Efficiency",percent(efficiency),"Efficiency"),
+        reportCard("Efficiency",efficiencyPercent(efficiency),"Efficiency"),
         reportCard("Productivity",percent(productivity),"Productivity"),
         reportCard("Downtime",hours(downtime),"Lost Hours"),
         reportCard("Parts",openParts,"Outstanding Parts"),
@@ -1123,14 +1128,14 @@
       const improved=inverse?diff<0:diff>0; return `${diff>0?"▲":"▼"} ${Math.abs(diff).toFixed(1)}${improved?" improvement":""}`;
     };
     const repeatRows=current.repeats.map(r=>`<tr><td>${escapeHtml(r.registration)}</td><td>${escapeHtml(r.originalJob)}</td><td>${escapeHtml(r.returnDate)}</td><td>${escapeHtml(r.rootCause)}</td><td>${hours(r.lostHours)}</td><td>${moneyExact(r.cost)}</td></tr>`);
-    const leagueRows=league.map((row,index)=>`<tr class="${row.technician===technician?'selected-review-tech':''}"><td>${index+1}</td><td>${escapeHtml(row.technician)}</td><td>${percent(row.productivity)}</td><td>${percent(row.efficiency)}</td><td>${percent(row.firstTimeFix)}</td><td>${row.nonMotJobs.length}</td><td>${moneyExact(row.costPerJob)}</td></tr>`);
+    const leagueRows=league.map((row,index)=>`<tr class="${row.technician===technician?'selected-review-tech':''}"><td>${index+1}</td><td>${escapeHtml(row.technician)}</td><td>${percent(row.productivity)}</td><td>${efficiencyPercent(row.efficiency)}</td><td>${percent(row.firstTimeFix)}</td><td>${row.nonMotJobs.length}</td><td>${moneyExact(row.costPerJob)}</td></tr>`);
     const monthName=selectedRange.start.toLocaleDateString("en-GB",{month:"long",year:"numeric"});
     setOutput({
       title:`Monthly Technician Performance Review — ${technician}`,
       summary:[
         reportCard("Position",`${position} of ${league.length}`,"League Position",position===1?"good":""),
         reportCard("Productivity",percent(current.productivity),"Productivity",current.productivity>=93?"good":current.productivity<85?"bad":"warn"),
-        reportCard("Efficiency",percent(current.efficiency),"Efficiency",current.efficiency>=100?"good":current.efficiency<85?"bad":"warn"),
+        reportCard("Efficiency",efficiencyPercent(current.efficiency),"Efficiency",current.efficiency>=100?"good":current.efficiency<85?"bad":"warn"),
         reportCard("FTF",percent(current.firstTimeFix),"First-Time Fix",current.firstTimeFix>=97?"good":current.firstTimeFix<94?"bad":"warn"),
         reportCard("Jobs",current.nonMotJobs.length,"Jobs ex MOT"),
         reportCard("Cost",moneyExact(current.costPerJob),"Labour Cost per Job")
@@ -1141,7 +1146,7 @@
         <div class="review-actions no-print"><label>True hourly employment cost (£)<input id="monthlyReviewHourlyCost" type="number" min="0" step="0.01" value="${current.hourlyCost.toFixed(2)}"></label><button onclick="saveMonthlyReviewCost('${escapeHtml(technician)}')">Save Cost</button><button onclick="window.print()">Print Individual Review</button></div>
         <h3>Monthly KPI Scorecard</h3>${table(["Measure","This Month","Previous Month","Movement"],[
           `<tr><td>Productivity</td><td>${percent(current.productivity)}</td><td>${percent(previous.productivity)}</td><td>${trend(current.productivity,previous.productivity)}</td></tr>`,
-          `<tr><td>Efficiency</td><td>${percent(current.efficiency)}</td><td>${percent(previous.efficiency)}</td><td>${trend(current.efficiency,previous.efficiency)}</td></tr>`,
+          `<tr><td>Efficiency</td><td>${efficiencyPercent(current.efficiency)}</td><td>${efficiencyPercent(previous.efficiency)}</td><td>${trend(current.efficiency,previous.efficiency)}</td></tr>`,
           `<tr><td>First-Time Fix</td><td>${percent(current.firstTimeFix)}</td><td>${percent(previous.firstTimeFix)}</td><td>${trend(current.firstTimeFix,previous.firstTimeFix)}</td></tr>`,
           `<tr><td>Jobs completed excluding MOTs</td><td>${current.nonMotJobs.length}</td><td>${previous.nonMotJobs.length}</td><td>${trend(current.nonMotJobs.length,previous.nonMotJobs.length)}</td></tr>`,
           `<tr><td>Labour cost per job</td><td>${moneyExact(current.costPerJob)}</td><td>${moneyExact(previous.costPerJob)}</td><td>${trend(current.costPerJob,previous.costPerJob,true)}</td></tr>`,
