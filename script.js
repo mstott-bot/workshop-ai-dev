@@ -2109,11 +2109,11 @@ function renderGarageHealthBreakdown(m,health){
   const cards=[
     {id:"productivity",title:"👨‍🔧 Technician Productivity",value:pctText(m.productivity),target:"100%+",cls:classifyPct(m.productivity||0),impact:health.weighted.productivity.toFixed(1)+" / 35"},
     {id:"efficiency",title:"⚙️ Workshop Efficiency",value:efficiencyText(m.workshopEff),target:(targets.efficiency||95)+"%",cls:classifyPct(m.workshopEff||0),impact:health.weighted.efficiency.toFixed(1)+" / 25"},
-    {id:"utilisation",title:"🚗 Workshop Utilisation",value:pctText(m.utilisation),target:"95%+",cls:classifyPct(m.utilisation||0),impact:health.weighted.utilisation.toFixed(1)+" / 15"},
+    {id:"utilisation",title:"🚗 Workshop Utilisation",value:pctText(m.utilisation),target:"95%+",cls:classifyPct(m.utilisation||0),impact:health.weighted.utilisation.toFixed(1)+" / 15",explanation:"How much of the technicians’ available working time is being used productively on workshop jobs."},
     {id:"carried",title:"📅 Carried-over Jobs",value:String(m.carried.length),target:"0",cls:m.carried.length===0?"good":m.carried.length<=2?"warn":"bad",impact:health.weighted.carriedOver.toFixed(1)+" / 20"},
     {id:"retail",title:"💼 Retail Hours Target",value:pctText(m.retailPct),target:(targets.retailHours||0)+" hrs",cls:classifyPct(m.retailPct||0),impact:health.weighted.retail.toFixed(1)+" / 5"}
   ];
-  el.innerHTML=cards.map(c=>`<div class="job-card ${c.cls}" onclick="showKpiMeaning('${c.id}')" style="cursor:pointer"><h3>${c.title}</h3><p><strong>${c.value}</strong> | Target: ${c.target}</p><p><strong>Garage Health impact:</strong> ${c.impact}</p><p class="muted">Click to see the meaning behind this number.</p></div>`).join("");
+  el.innerHTML=cards.map(c=>`<div class="job-card ${c.cls}" onclick="showKpiMeaning('${c.id}')" style="cursor:pointer"><h3>${c.title}</h3><p><strong>${c.value}</strong> | Target: ${c.target}</p>${c.explanation?`<p class="kpi-inline-explanation">${c.explanation}</p>`:""}<p><strong>Garage Health impact:</strong> ${c.impact}</p><p class="muted">Click for a full explanation and how to improve it.</p></div>`).join("");
 }
 function renderDailyPriority(m,health){
   const el=$("dailyPriorityBanner"); if(!el) return;

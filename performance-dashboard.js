@@ -90,9 +90,9 @@
     stats.innerHTML=`
       <div class="stat"><strong>${labourHours.toFixed(1)}</strong>Labour Sold MTD</div>
       <div class="stat"><strong>${money(revenue)}</strong>Revenue MTD</div>
-      <div class="stat"><strong>${recovery.toFixed(0)}%</strong>Labour Recovery</div>
+      <div class="stat kpi-teaching-card"><strong>${recovery.toFixed(0)}%</strong>Labour Recovery<small class="kpi-explanation">Invoiced labour hours ÷ productive job-clocked hours. 100% means one invoiced labour hour is recovered for every productive hour worked.</small></div>
       <div class="stat" title="Productive job-clocked hours month-to-date ÷ available attendance hours month-to-date"><strong>${productivity.toFixed(0)}%</strong>Productivity</div>
-      <div class="stat" title="Booked/allocated labour hours month-to-date ÷ available attendance hours month-to-date"><strong>${utilisation.toFixed(0)}%</strong>Utilisation</div>
+      <div class="stat kpi-teaching-card" title="Booked/allocated labour hours month-to-date ÷ available attendance hours month-to-date"><strong>${utilisation.toFixed(0)}%</strong>Utilisation<small class="kpi-explanation">Booked/allocated labour hours ÷ available technician attendance hours. 100% means all available workshop time is booked.</small></div>
       <div class="stat"><strong>${completedJobs}</strong>Jobs Completed MTD</div>
       <div class="stat"><strong>${carryOvers}</strong>Carry Overs</div>
       <div class="stat"><strong>${partsWaiting}</strong>Parts Waiting</div>`;

@@ -33,3 +33,64 @@
   color:#234a68;
 }
 .crm-auto-finance-note span{font-size:13px;color:#607b91}
+
+/* WAI-115.34 CRM texting + declined prospect workflow */
+.crm-profile-actions #crmTextCustomerBtn{background:#0b74b8;color:#fff;border-color:#0b74b8;font-weight:800}
+.crm-declined-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:18px 18px 10px}
+.crm-declined-head h3{margin:0 0 4px;color:#173d5d}
+.crm-declined-head p{margin:0;max-width:760px}
+.crm-declined-head>strong{display:inline-flex;min-width:42px;height:42px;align-items:center;justify-content:center;border-radius:12px;background:#fde8e8;color:#a52b2b;font-size:20px}
+.crm-prospect-actions .danger{background:#fff0f0;color:#a32626;border:1px solid #e8b5b5;font-weight:800}
+.crm-prospect-actions .danger:hover{background:#a32626;color:#fff;border-color:#a32626}
+
+/* WAI-115.35 — CRM visibility / contrast fix */
+#crmScreen #crmStats{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin:14px 0 16px;
+}
+#crmScreen #crmStats .stat-card{
+  background:linear-gradient(180deg,#ffffff 0%,#f4f8fc 100%);
+  border:1px solid #cbdbea;
+  border-radius:14px;
+  padding:14px 16px;
+  text-align:center;
+  box-shadow:0 5px 14px rgba(7,35,62,.10);
+  color:#0b2f55 !important;
+}
+#crmScreen #crmStats .stat-card strong{
+  display:block;
+  color:#082b50 !important;
+  font-size:27px;
+  line-height:1.1;
+  font-weight:900;
+  margin-bottom:5px;
+}
+#crmScreen #crmStats .stat-card span{
+  display:block;
+  color:#244c70 !important;
+  font-size:13px;
+  line-height:1.25;
+  font-weight:800;
+}
+/* Ensure all CRM summary/supporting copy remains readable on dark panels. */
+#crmScreen .muted,
+#crmScreen .crm-mini{
+  color:#526b82;
+}
+.header-tabs .tab[data-screen="crmScreen"],
+.header-tabs .tab[data-screen="crmScreen"] *{
+  color:#f5fbff !important;
+}
+.header-tabs .tab[data-screen="crmScreen"].active{
+  background:linear-gradient(135deg,#198ee8,#0d6fd0) !important;
+  border-color:#55c6ff !important;
+  box-shadow:0 0 0 2px rgba(85,198,255,.22),0 8px 18px rgba(5,70,125,.28) !important;
+}
+@media(max-width:900px){
+  #crmScreen #crmStats{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:560px){
+  #crmScreen #crmStats{grid-template-columns:1fr;}
+}
