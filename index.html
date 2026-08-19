@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="fault-code-assistant.css?v=113.0">
   <link rel="stylesheet" href="company-settings.css?v=114.0">
 <link rel="stylesheet" href="workshop-diary.css?v=115.24">
+<link rel="stylesheet" href="message-centre.css?v=115.29">
 </head>
 
 <body>
@@ -46,6 +47,7 @@
     <button class="tab" data-screen="customerPortalScreen">Customer Portal</button>
     <button class="tab" data-screen="mediaCentreScreen">Media Centre</button>
     <button class="tab" data-screen="reviewCentreScreen">Review Centre</button>
+    <button class="tab message-tab" data-screen="messageCentreScreen">💬 Messages <span id="messageUnreadBadge" class="message-unread-badge hidden">0</span></button>
     <button class="tab" data-screen="companySettingsScreen">Company Settings</button>
     <button class="tab" data-screen="financeCentreScreen">Finance Centre</button>
   </nav>
@@ -53,7 +55,7 @@
     <img src="garage-gurus-header.png" alt="Garage Gurus — Automotive Intelligence — Powered by AI" class="garage-gurus-logo">
     <div class="garage-gurus-date">
       <p id="todayDate"></p>
-      <p class="garage-gurus-version">Version WAI-114.0 · Workshop Control Centre 2.0</p>
+      <p class="garage-gurus-version">Version WAI-115.28 · Workshop Control Centre 2.0</p>
     </div>
   </div>
 </header>
@@ -1281,6 +1283,74 @@
     </div><aside class="company-settings-side"><div class="card company-document-preview-card"><span class="wai80-eyebrow">DOCUMENT PREVIEW</span><h2>Invoice Branding</h2><div id="workshopCompanyDocumentPreview" class="company-document-preview"></div></div><div class="card company-settings-save-card"><h2>Save Company Details</h2><p class="muted">Changes apply to future printouts immediately. Existing invoice financial data is not altered.</p><button id="workshopCompanySave" class="primary company-settings-save">💾 Save Company Settings</button></div></aside></div>
   </section>
 
+  <section id="messageCentreScreen" class="screen">
+    <div class="message-centre-shell">
+      <div class="message-centre-heading">
+        <div>
+          <span class="message-eyebrow">GARAGE GURUS · INTERNAL COMMUNICATIONS</span>
+          <h2>💬 Message Centre</h2>
+          <p>Send workshop messages between Service Team and technicians. Messages can be linked to a registration/job and stay in the conversation history.</p>
+        </div>
+        <label class="message-view-as">View messages as
+          <select id="messageIdentity"></select>
+        </label>
+      </div>
+
+      <div id="messageCentreStats" class="message-stats"></div>
+
+      <div class="message-layout">
+        <aside class="message-sidebar">
+          <div class="message-sidebar-title">
+            <h3>Conversations</h3>
+            <button id="newMessageBtn" class="primary" type="button">+ New Message</button>
+          </div>
+          <div id="messageConversationList" class="message-conversation-list"></div>
+        </aside>
+
+        <div class="message-main">
+          <div id="messageEmptyState" class="message-empty-state">
+            <div class="message-empty-icon">💬</div>
+            <h3>Select a conversation</h3>
+            <p>Choose a technician or Service Team conversation, or start a new message.</p>
+          </div>
+          <div id="messageThreadPanel" class="hidden">
+            <div class="message-thread-header">
+              <div>
+                <span class="message-thread-label">Conversation with</span>
+                <h3 id="messageThreadTitle"></h3>
+              </div>
+              <button id="clearMessageJobLink" class="secondary" type="button">Clear job link</button>
+            </div>
+            <div id="messageThread" class="message-thread"></div>
+            <div class="message-compose">
+              <div class="message-compose-row">
+                <label>To
+                  <select id="messageRecipient"></select>
+                </label>
+                <label>Link to Today's Job / Registration (optional)
+                  <select id="messageJobLink"><option value="">No job linked</option></select>
+                </label>
+              </div>
+              <label>Message
+                <textarea id="messageText" rows="3" placeholder="Type a workshop message…"></textarea>
+              </label>
+              <div class="message-quick-actions">
+                <button type="button" data-message-quick="Please see me when you are free.">👋 Please see me</button>
+                <button type="button" data-message-quick="Customer has authorised the work — please proceed.">✅ Work authorised</button>
+                <button type="button" data-message-quick="Please update me on this job when you can.">🔄 Job update please</button>
+                <button type="button" data-message-quick="I need help with this job when you are available.">🛠 Need assistance</button>
+              </div>
+              <div class="message-send-row">
+                <span id="messageComposeHint">Messages are stored in this Workshop AI installation.</span>
+                <button id="sendWorkshopMessage" class="primary" type="button">Send Message ➜</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="financeCentreScreen" class="screen">
     <div class="finance-hero">
       <div><span class="finance-eyebrow">WAI-100 · CRM → JOB → LIVE INVOICE</span><h2>Finance Centre</h2><p>A fast live invoice is created automatically from every workshop job. Customer, vehicle, labour, parts, oil and MOT flow through once, without duplicate typing.</p></div>
@@ -1362,6 +1432,7 @@
 <script src="customer-portal.js"></script>
 <script src="media-centre.js"></script>
 <script src="review-centre.js?v=115.27"></script>
+<script src="message-centre.js?v=115.29"></script>
 <script src="wai095-workshop-intelligence.js?v=115.9"></script>
 <script src="wai1022-parts-fix.js"></script>
 <script src="staff-calendar.js?v=106.0"></script>

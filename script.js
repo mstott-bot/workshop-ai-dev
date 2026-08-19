@@ -546,12 +546,20 @@ function monitorAllocatedJobTimes(){
   if(changed)renderServicePartsAlert();
 }
 
+function technicianMessageCount(job){
+  try{return window.WorkshopMessages?.unreadForJob(job.technician,job.id)||0;}catch(e){return 0;}
+}
+function technicianTotalMessages(name){
+  try{return window.WorkshopMessages?.unreadForTechnician(name)||0;}catch(e){return 0;}
+}
 function technicianJobCard(job){
   const finished=completed(job),carried=!!job.carriedOverFrom;
   const waiting=String(job.priority||"").includes("Customer Waiting");
+  const messageCount=technicianMessageCount(job);
   return `<div class="job-card ${finished?"good":waiting?"customer-waiting-job":carried?"warn":""}">
     <h3>${job.jobNo||""} | ${job.reg} — ${job.technician}</h3>
     ${waiting?`<div class="customer-waiting-banner">⚠️ CUSTOMER WAITING — PRIORITY JOB</div>`:""}
+    ${messageCount?`<button class="tech-message-job-alert" type="button" onclick="event.stopPropagation();window.WorkshopMessages&&window.WorkshopMessages.openForTechnician('${job.technician.replace(/'/g,"\'")}','${job.id}')">💬 ${messageCount} NEW MESSAGE${messageCount===1?'':'S'} FROM SERVICE TEAM — OPEN</button>`:""}
     <p><strong>${job.make||"Make"} ${job.model||""}</strong></p>
     <p><strong>Customer:</strong> ${job.customer||"Not entered"}</p>
     <p><strong>Job description:</strong> ${job.workRequired||job.complaint||"No description entered"}</p>
@@ -583,8 +591,10 @@ function renderTech(){
     if(ad!==bd)return ad<bd?-1:1;
     return new Date(a.createdAt||0)-new Date(b.createdAt||0);
   });
-  $("techJobs").innerHTML=perf+`<div class="job-card"><h2>Today’s Jobs</h2><p>All jobs allocated for today remain accessible, including completed and ready-for-collection jobs. Unfinished work can be carried to the next working day.</p></div>`+(list.length?list.map(technicianJobCard).join(""):"<div class='job-card'><p>No jobs assigned for today.</p></div>");
-}function openJob(id){const j=jobs.find(x=>x.id===id);if(!j)return;ensureTimeline(j);activeJobId=id;$("activeTitle").textContent=`${j.jobNo||""} | ${j.reg} — ${j.technician}`;$("activeDetails").innerHTML=`${String(j.priority||"").includes("Customer Waiting")?`<div class="customer-waiting-banner">⚠️ CUSTOMER WAITING — PRIORITY JOB</div>`:""}${j.type} | ${j.make||""} ${j.model||""} | Hours allowed: ${j.hours} | MOT: ${j.mot}${j.customerLoyalty?`<div class="customer-rank-banner ${j.customerLoyalty.toLowerCase()}"><strong>⭐ ${j.customerLoyalty} Customer</strong>${j.customerHealth!==""&&j.customerHealth!==undefined?` · Customer Health ${j.customerHealth}%`:""}<span>Customer ranking is shown to help deliver the right level of care. Always follow special instructions.</span></div>`:""}`;
+  const unread=f!=="All"?technicianTotalMessages(f):0;
+  const messageBanner=unread?`<button class="tech-message-inbox-alert" type="button" onclick="window.WorkshopMessages&&window.WorkshopMessages.openForTechnician('${String(f).replace(/'/g,"\'")}')"><span>💬</span><strong>${unread} New Message${unread===1?'':'s'}</strong><small>from Service Team · tap to open</small></button>`:"";
+  $("techJobs").innerHTML=perf+messageBanner+`<div class="job-card"><h2>Today’s Jobs</h2><p>All jobs allocated for today remain accessible, including completed and ready-for-collection jobs. Unfinished work can be carried to the next working day.</p></div>`+(list.length?list.map(technicianJobCard).join(""):"<div class='job-card'><p>No jobs assigned for today.</p></div>");
+}function openJob(id){const j=jobs.find(x=>x.id===id);if(!j)return;ensureTimeline(j);activeJobId=id;const linkedMessages=technicianMessageCount(j);$("activeTitle").textContent=`${j.jobNo||""} | ${j.reg} — ${j.technician}`;$("activeDetails").innerHTML=`${linkedMessages?`<button class="tech-message-job-alert" type="button" onclick="window.WorkshopMessages&&window.WorkshopMessages.openForTechnician('${j.technician.replace(/'/g,"\'")}','${j.id}')">💬 NEW MESSAGE FROM SERVICE TEAM — OPEN MESSAGE</button>`:""}${String(j.priority||"").includes("Customer Waiting")?`<div class="customer-waiting-banner">⚠️ CUSTOMER WAITING — PRIORITY JOB</div>`:""}${j.type} | ${j.make||""} ${j.model||""} | Hours allowed: ${j.hours} | MOT: ${j.mot}${j.customerLoyalty?`<div class="customer-rank-banner ${j.customerLoyalty.toLowerCase()}"><strong>⭐ ${j.customerLoyalty} Customer</strong>${j.customerHealth!==""&&j.customerHealth!==undefined?` · Customer Health ${j.customerHealth}%`:""}<span>Customer ranking is shown to help deliver the right level of care. Always follow special instructions.</span></div>`:""}`;
 $("activeJobInfo").innerHTML=`
   <div><strong>Registration</strong><span>${j.reg}</span></div>
   <div><strong>Customer</strong><span>${j.customer||"Not entered"}</span></div>
