@@ -20,6 +20,7 @@
     {id:"labour", category:"Performance", icon:"⏱", title:"Completed Labour Hours", description:"Completed sold labour hours by technician and workshop."},
     {id:"productivity", category:"Performance", icon:"⚡", title:"Productivity & Efficiency", description:"Actual clocked productive time, available capacity and sold-hours efficiency."},
     {id:"revenue", category:"Financial", icon:"💷", title:"Revenue Watch", description:"Completed labour value by job type and technician."},
+    {id:"lostGainedLabour", category:"Financial", icon:"⚖️", title:"Lost & Gained Labour", description:"Actual productive hours versus labour hours charged, showing hours and income lost or gained with month comparison."},
     {id:"parts", category:"Operations", icon:"📦", title:"Parts & Supplier Performance", description:"Outstanding parts, delivery times, partial deliveries and incorrect parts."},
     {id:"returns", category:"Operations", icon:"↩️", title:"Parts & Tyres Returns", description:"Returned parts and tyres, suppliers, reasons, values and credit status."},
     {id:"downtime", category:"Operations", icon:"⏸", title:"Downtime Intelligence", description:"Lost hours, reasons and technician downtime patterns."},
@@ -1169,6 +1170,175 @@
   window.saveMonthlyReviewNotes=function(technician){const notes=monthlyReviewNotes(),key=reviewKey(technician,range());notes[key]={strengths:el("reviewStrengths")?.value||"",improvements:el("reviewImprovements")?.value||"",training:el("reviewTraining")?.value||"",actions:el("reviewActions")?.value||"",technicianComments:el("reviewTechnicianComments")?.value||"",savedAt:new Date().toISOString()};localStorage.setItem(TECH_REVIEW_NOTES_KEY,JSON.stringify(notes));alert("Monthly review notes saved.");};
 
 
+
+  /* WAI-115.38 — Lost & Gained Labour */
+  function invoiceLabourHoursForJob(job){
+    try{
+      const bridge=window.WAI099FinanceBridge;
+      if(!bridge||typeof bridge.getInvoices!=="function") return null;
+      const jobNo=String(job.jobNo||"").trim();
+      const inv=(bridge.getInvoices()||[])
+        .filter(i=>String(i.status||"").toLowerCase()!=="credited")
+        .find(i=>i.jobId===job.id||(jobNo&&String(i.jobNumber||"").trim()===jobNo));
+      if(!inv) return null;
+      const labour=(inv.lines||[])
+        .filter(line=>String(line.type||"").toLowerCase()==="labour")
+        .reduce((sum,line)=>sum+safeNumber(line.qty),0);
+      return labour>0?labour:null;
+    }catch(e){ return null; }
+  }
+
+  function chargedLabourHours(job){
+    const invoiceHours=invoiceLabourHoursForJob(job);
+    return invoiceHours!==null?invoiceHours:soldHours(job);
+  }
+
+  function varianceRate(job){
+    if(typeof appliedJobRate==="function"){
+      const rate=safeNumber(appliedJobRate(job));
+      if(rate>0) return rate;
+    }
+    const type=String(job.type||job.jobType||"Retail").toLowerCase();
+    if(type.includes("warranty")) return safeNumber(targets.warrantyRate||40);
+    if(type.includes("internal")) return safeNumber(targets.internalRate||40);
+    return safeNumber(targets.retailRate||70);
+  }
+
+  function lostGainForRange(selectedRange){
+    const tech=selectedTechnician();
+    const list=jobs.filter(job=>{
+      if(tech!=="All"&&job.technician!==tech) return false;
+      if(!completed(job)) return false;
+      return inRange(jobDate(job),selectedRange);
+    });
+
+    const rows=list.map(job=>{
+      const actual=actualClocked(job);
+      const charged=chargedLabourHours(job);
+      const difference=charged-actual;
+      const rate=varianceRate(job);
+      return {job,actual,charged,difference,rate,value:Math.abs(difference)*rate};
+    });
+
+    const total=rows.reduce((a,r)=>{
+      a.actual+=r.actual; a.charged+=r.charged;
+      if(r.difference<0){a.lostHours+=Math.abs(r.difference);a.lostIncome+=r.value;}
+      if(r.difference>0){a.gainedHours+=r.difference;a.gainedIncome+=r.value;}
+      return a;
+    },{actual:0,charged:0,lostHours:0,lostIncome:0,gainedHours:0,gainedIncome:0});
+
+    total.netHours=total.gainedHours-total.lostHours;
+    total.netIncome=total.gainedIncome-total.lostIncome;
+    total.rows=rows;
+    return total;
+  }
+
+  function lostGainMonthRange(value){
+    if(!value||!/^\d{4}-\d{2}$/.test(value)) return null;
+    const [y,m]=value.split("-").map(Number);
+    return {
+      start:new Date(y,m-1,1,0,0,0,0),
+      end:new Date(y,m,0,23,59,59,999),
+      label:new Date(y,m-1,1).toLocaleDateString("en-GB",{month:"long",year:"numeric"})
+    };
+  }
+
+  function lostGainMonthValue(date){
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`;
+  }
+
+  function signedMoney(v){
+    return `${v>0?"+":v<0?"-":""}£${Math.abs(v).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+  }
+
+  function signedHours(v){
+    return `${v>0?"+":""}${v.toFixed(1)} hrs`;
+  }
+
+  function lostGainMonthComparison(aRange,bRange){
+    const a=lostGainForRange(aRange), b=lostGainForRange(bRange);
+    return `<div class="coach-card">
+      <h3>Month Comparison — ${escapeHtml(aRange.label)} vs ${escapeHtml(bRange.label)}</h3>
+      ${table(["Measure",escapeHtml(aRange.label),escapeHtml(bRange.label),"Difference"],[
+        `<tr><td>Hours lost</td><td>${a.lostHours.toFixed(1)}</td><td>${b.lostHours.toFixed(1)}</td><td>${signedHours(a.lostHours-b.lostHours)}</td></tr>`,
+        `<tr><td>Income lost</td><td>${moneyExact(a.lostIncome)}</td><td>${moneyExact(b.lostIncome)}</td><td>${signedMoney(a.lostIncome-b.lostIncome)}</td></tr>`,
+        `<tr><td>Hours gained</td><td>${a.gainedHours.toFixed(1)}</td><td>${b.gainedHours.toFixed(1)}</td><td>${signedHours(a.gainedHours-b.gainedHours)}</td></tr>`,
+        `<tr><td>Income gained</td><td>${moneyExact(a.gainedIncome)}</td><td>${moneyExact(b.gainedIncome)}</td><td>${signedMoney(a.gainedIncome-b.gainedIncome)}</td></tr>`,
+        `<tr><td><strong>Net hours</strong></td><td><strong>${signedHours(a.netHours)}</strong></td><td><strong>${signedHours(b.netHours)}</strong></td><td><strong>${signedHours(a.netHours-b.netHours)}</strong></td></tr>`,
+        `<tr><td><strong>Net income</strong></td><td><strong>${signedMoney(a.netIncome)}</strong></td><td><strong>${signedMoney(b.netIncome)}</strong></td><td><strong>${signedMoney(a.netIncome-b.netIncome)}</strong></td></tr>`
+      ])}
+    </div>`;
+  }
+
+  window.compareLostGainMonths=function(){
+    const a=lostGainMonthRange(el("lostGainMonthA")?.value);
+    const b=lostGainMonthRange(el("lostGainMonthB")?.value);
+    const host=el("lostGainMonthComparison");
+    if(host&&a&&b) host.innerHTML=lostGainMonthComparison(a,b);
+  };
+
+  function renderLostGainedLabour(){
+    const m=lostGainForRange(range());
+    const netClass=m.netIncome<0?"bad":m.netIncome>0?"good":"";
+    const now=new Date(), prev=new Date(now.getFullYear(),now.getMonth()-1,1);
+    const monthA=lostGainMonthValue(now), monthB=lostGainMonthValue(prev);
+
+    const rows=m.rows.sort((a,b)=>jobDate(b.job)-jobDate(a.job)).map(r=>{
+      const result=r.difference<0
+        ? `<strong>LOST ${Math.abs(r.difference).toFixed(1)} hrs</strong>`
+        : r.difference>0
+          ? `<strong>GAINED ${r.difference.toFixed(1)} hrs</strong>`
+          : `<strong>EVEN</strong>`;
+      const impact=r.difference<0?`-${moneyExact(r.value)}`:r.difference>0?`+${moneyExact(r.value)}`:moneyExact(0);
+      return `<tr>
+        <td>${jobDate(r.job).toLocaleDateString("en-GB")}</td>
+        <td><strong>${escapeHtml(r.job.reg||"—")}</strong><br><small>${escapeHtml(r.job.customer||"")}</small></td>
+        <td>${escapeHtml(r.job.type||r.job.jobType||"Retail")}</td>
+        <td>${escapeHtml(r.job.technician||"Unassigned")}</td>
+        <td>${r.actual.toFixed(1)}</td>
+        <td>${r.charged.toFixed(1)}</td>
+        <td>${result}</td>
+        <td>${moneyExact(r.rate)}/hr</td>
+        <td>${impact}</td>
+      </tr>`;
+    });
+
+    const explanation=m.netIncome<0
+      ? `This period has a net labour-value loss of ${moneyExact(Math.abs(m.netIncome))}.`
+      : m.netIncome>0
+        ? `This period has a net labour-value gain of ${moneyExact(m.netIncome)}.`
+        : `Actual productive hours and charged labour hours are balanced for this period.`;
+
+    setOutput({
+      title:"Lost & Gained Labour",
+      summary:[
+        reportCard("Hours Lost",m.lostHours.toFixed(1)+" hrs","Worked but not charged","bad"),
+        reportCard("Income Lost",moneyExact(m.lostIncome),"Labour value not recovered","bad"),
+        reportCard("Hours Gained",m.gainedHours.toFixed(1)+" hrs","Charged above actual time","good"),
+        reportCard("Income Gained",moneyExact(m.gainedIncome),"Additional labour value recovered","good"),
+        reportCard("Net Hours",signedHours(m.netHours),"Gain minus loss",netClass),
+        reportCard("Net Income",signedMoney(m.netIncome),"Gain minus loss",netClass)
+      ].join(""),
+      insightHtml:insight("Labour variance",explanation,netClass||"good"),
+      output:`
+        <div class="job-card">
+          <h3>Compare Any Two Months</h3>
+          <p class="muted">Select any two months to compare lost/gained hours and their labour-value impact.</p>
+          <div class="grid">
+            <label>Month A<input id="lostGainMonthA" type="month" value="${monthA}"></label>
+            <label>Month B<input id="lostGainMonthB" type="month" value="${monthB}"></label>
+          </div>
+          <div class="button-row"><button class="primary" onclick="compareLostGainMonths()">Compare Months</button></div>
+          <div id="lostGainMonthComparison">${lostGainMonthComparison(lostGainMonthRange(monthA),lostGainMonthRange(monthB))}</div>
+        </div>
+        <div class="job-card">
+          <h3>Job-by-Job Labour Variance</h3>
+          <p class="muted">Actual productive time is compared with labour hours charged/sold. The £ value uses the applicable Retail, Internal or Warranty labour rate.</p>
+          ${table(["Date","Vehicle / Customer","Job Type","Technician","Actual Hours","Charged Hours","Result","Rate","£ Impact"],rows)}
+        </div>`
+    });
+  }
+
   function renderVHCReport(){
     if(typeof window.renderVHCIntelligenceReport!=="function"){
       setOutput({title:"Vehicle Health Check Performance",output:insight("VHC module unavailable","The WAI-093 VHC module has not loaded.","bad")});
@@ -1194,6 +1364,7 @@
       mot:renderMot,
       approvals:renderApprovals,
       revenue:renderRevenue,
+      lostGainedLabour:renderLostGainedLabour,
       carryover:renderCarryover,
       garageHealth:renderGarageHealth,
       repeatRepairs:renderRepeatRepairs,
