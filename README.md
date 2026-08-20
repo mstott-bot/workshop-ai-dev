@@ -19,3 +19,12 @@ Keep the previous stable ZIP as a backup while testing.
 
 ## WAI-105.5 — Smart Booking Move & Capacity Planner
 Jobs can now be moved directly from the Service Manager diary or Future Bookings. The move retains the complete job record, checks workshop and technician capacity, and writes a permanent audit trail.
+
+## WAI-115.37 — Shared Job Efficiency Rule
+- Every stopped timer session is stored against the technician who performed it.
+- Productive clocked time stays with that technician for productivity and utilisation.
+- On completed shared/handover jobs, sold labour hours are split proportionally by each technician's productive time.
+- Sold hours are counted once only; they are never duplicated across technicians.
+- Open shared jobs do not award final sold-hour efficiency credit until completion.
+- Single-technician jobs retain the existing calculation.
+- The 200%+ efficiency display guard remains in place.

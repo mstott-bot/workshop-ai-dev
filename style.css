@@ -1163,3 +1163,12 @@ body{background:linear-gradient(135deg,var(--gg-navy),var(--gg-navy-2));}
 
 /* WAI-115.33 — plain-English KPI teaching text */
 .kpi-teaching-card{min-height:148px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:5px}.kpi-explanation{display:block;margin-top:8px;color:#41556a;font-size:12px;line-height:1.35;font-weight:600;text-align:center;max-width:230px}.kpi-inline-explanation{margin:8px 0!important;padding:9px 10px;background:#eef6ff;border:1px solid #cfe1f4;border-radius:9px;color:#23415f;font-size:13px;line-height:1.4;font-weight:650}
+
+/* WAI-115.36 — technician handover visibility */
+.technician-handover{margin:12px 0 14px;padding:14px 16px;border:2px solid #f59e0b;border-radius:12px;background:#fff7db;color:#17335f;box-shadow:0 5px 16px rgba(31,55,92,.12)}
+.technician-handover .handover-title{font-size:15px;font-weight:900;letter-spacing:.04em;color:#9a5400;margin-bottom:5px}
+.technician-handover .handover-meta{font-size:13px;color:#5e4a20;margin-bottom:7px}
+.technician-handover .handover-note{font-size:16px;line-height:1.45;font-weight:750;color:#17335f;white-space:pre-wrap}
+.technician-handover .handover-reminder{margin-top:8px;font-size:12px;font-weight:800;color:#9a5400;text-transform:uppercase;letter-spacing:.025em}
+.technician-handover.compact{padding:11px 13px;margin:9px 0 11px}
+.technician-handover.compact .handover-note{font-size:14px}

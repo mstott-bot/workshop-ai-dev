@@ -52,9 +52,11 @@
   }
 
   function metrics(tech,start,end,period){
-    const list=allJobs().filter(j=>j.technician===tech&&isComplete(j)).filter(j=>{const d=completedDate(j);return d&&d>=start&&d<=end});
-    const sold=list.reduce((s,j)=>s+num(j.hours||j.allowedHours),0);
-    const clocked=list.reduce((s,j)=>s+num(j.actualHours||j.clockedHours),0);
+    const list=allJobs().filter(j=>isComplete(j)&&((j.technician===tech)||((j.techTimeSessions||[]).some(x=>x.technician===tech)))).filter(j=>{const d=completedDate(j);return d&&d>=start&&d<=end});
+    const techHours=j=>{const ss=j.techTimeSessions||[];if(!ss.length)return j.technician===tech?num(j.actualHours||j.clockedHours):0;return ss.filter(x=>x.technician===tech).reduce((a,x)=>a+num(x.hours),0)};
+    const soldCredit=j=>{const ss=j.techTimeSessions||[];if(!ss.length)return j.technician===tech?num(j.hours||j.allowedHours):0;const total=ss.reduce((a,x)=>a+num(x.hours),0),mine=techHours(j);return total>0?num(j.hours||j.allowedHours)*(mine/total):0};
+    const sold=list.reduce((s,j)=>s+soldCredit(j),0);
+    const clocked=list.reduce((s,j)=>s+techHours(j),0);
     const available=availableHours(tech,start,end,period);
     const productivity=available>0?clocked/available*100:null;
     const efficiency=clocked>0?sold/clocked*100:null;
