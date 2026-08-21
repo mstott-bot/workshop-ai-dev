@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="inventory-stock.css?v=111.0">
   <link rel="stylesheet" href="fault-code-assistant.css?v=113.0">
   <link rel="stylesheet" href="company-settings.css?v=114.0">
-<link rel="stylesheet" href="workshop-diary.css?v=115.24">
+<link rel="stylesheet" href="workshop-diary.css?v=115.25">
 <link rel="stylesheet" href="message-centre.css?v=115.29">
 </head>
 
@@ -231,6 +231,8 @@
     <div class="card diary-capacity-card">
       <div class="diary-toolbar"><div><h2>Capacity Forecast</h2><p class="muted">Available hours − booked labour hours = remaining capacity.</p></div><label>Week starting<input id="diaryAnchorDate" type="date"></label></div>
       <div id="diaryCapacityStrip" class="diary-capacity-strip"></div>
+      <div class="diary-mix-heading"><div><span class="diary-eyebrow">SELECTED DAY · LABOUR MIX</span><h2 id="diaryMixTitle">Daily Work Type Split</h2><p class="muted">Booked hours split between Retail, Warranty and Internal work.</p></div><span class="diary-mix-total" id="diaryMixTotal"></span></div>
+      <div id="diaryLabourMix" class="diary-labour-mix"></div>
     </div>
     <div id="diaryBookingForm" class="diary-booking-form">
     <div class="card">
@@ -875,6 +877,12 @@
             <label>Warranty Hours Target<input id="targetWarrantyHours" type="number" step="0.25"></label>
             <label>Internal Cars Completed Target<input id="targetInternalCars" type="number" step="1"></label>
           </div>
+          <div class="targets-module-heading diary-target-heading"><span class="targets-icon">📊</span><div><h2>Daily Diary Work Mix</h2><p class="muted">Set the percentage of each day reserved for every work type. The three settings must total 100%.</p></div></div>
+          <div class="grid targets-form-grid">
+            <label>Retail % of Diary<input id="targetDailyRetailPct" type="number" step="1" min="0" max="100"></label>
+            <label>Warranty % of Diary<input id="targetDailyWarrantyPct" type="number" step="1" min="0" max="100"></label>
+            <label>Internal % of Diary<input id="targetDailyInternalPct" type="number" step="1" min="0" max="100"></label>
+          </div>
           <div id="labourProjectionPreview" class="target-projection-strip"></div>
         </div>
 
@@ -1436,7 +1444,7 @@
 <script src="wai095-workshop-intelligence.js?v=115.33"></script>
 <script src="wai1022-parts-fix.js"></script>
 <script src="staff-calendar.js?v=106.0"></script>
-<script src="workshop-diary.js?v=115.24"></script>
+<script src="workshop-diary.js?v=115.25"></script>
 <div id="financePrintSheet" class="print-sheet"></div>
   <script src="service-manager-pro.js?v=1070"></script>
 </body>

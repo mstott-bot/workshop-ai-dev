@@ -1,4 +1,4 @@
-/* WAI-115.24 Workshop Diary */
+/* WAI-115.25 Workshop Diary + Daily Labour Mix */
 (function(){
   const el=id=>document.getElementById(id);
   const iso=d=>d.toISOString().slice(0,10);
@@ -12,6 +12,26 @@
     const list=dayJobs(date); const booked=list.reduce((n,j)=>n+Number(j.hours||0),0); const remaining=Number(av.totalHours||0)-booked;
     const pct=av.totalHours>0?Math.round(booked/av.totalHours*100):0;
     return {av,list,booked,remaining,pct};
+  }
+  function workType(job){const type=String(job.type||job.jobType||'Retail').toLowerCase();return type.includes('warranty')?'Warranty':type.includes('internal')?'Internal':'Retail';}
+  function targetPct(type){
+    const saved=typeof targets!=='undefined'?targets:{};
+    if(type==='Retail')return Number(saved.dailyRetailPct??60);
+    if(type==='Warranty')return Number(saved.dailyWarrantyPct??30);
+    return Number(saved.dailyInternalPct??10);
+  }
+  function renderLabourMix(date){
+    const host=el('diaryLabourMix');if(!host)return;
+    const c=capacity(date),available=Number(c.av.totalHours||0),booked=Number(c.booked||0);
+    if(el('diaryMixTitle'))el('diaryMixTitle').textContent=`Work Type Split · ${fmt(date)}`;
+    if(el('diaryMixTotal'))el('diaryMixTotal').textContent=`${booked.toFixed(1)}h booked from ${available.toFixed(1)}h available`;
+    host.innerHTML=['Retail','Warranty','Internal'].map(type=>{
+      const hours=c.list.filter(j=>workType(j)===type).reduce((sum,j)=>sum+Number(j.hours||0),0);
+      const actualPct=booked>0?hours/booked*100:0;
+      const allocationPct=targetPct(type),allocatedHours=available*allocationPct/100;
+      const used=allocatedHours>0?hours/allocatedHours*100:0,over=hours>allocatedHours+0.001,near=!over&&used>=90;
+      return `<div class="diary-mix-card ${type.toLowerCase()} ${over?'over':near?'near':''}"><div class="diary-mix-label"><span>${type}</span><span>${over?'🔴 Over target':near?'🟠 Near target':'🟢 Within target'}</span></div><strong class="diary-mix-percent">${actualPct.toFixed(0)}%</strong><span class="diary-mix-hours">${hours.toFixed(1)} hours booked</span><small class="diary-mix-target">Target allocation: ${allocationPct.toFixed(0)}% · ${allocatedHours.toFixed(1)} hours</small>${over?`<small class="diary-mix-warning">${(hours-allocatedHours).toFixed(1)} hours over the ${type.toLowerCase()} allocation</small>`:''}<div class="diary-mix-meter"><i style="width:${Math.min(100,Math.max(0,used))}%"></i></div></div>`;
+    }).join('');
   }
   function renderStrip(){
     const host=el('diaryCapacityStrip'); if(!host)return;
@@ -29,12 +49,14 @@
     }
     host.innerHTML=html;
     host.querySelectorAll('[data-diary-date]').forEach(b=>b.onclick=()=>selectDate(b.dataset.diaryDate));
+    renderLabourMix(el('futureBookingDate')?.value||anchor);
   }
   function selectDate(date){
     if(el('futureBookingDate'))el('futureBookingDate').value=date;
     if(el('bookingDate'))el('bookingDate').value=date;
     if(el('futureQuickView'))el('futureQuickView').value='selected';
     renderDiaryBookings();
+    renderLabourMix(date);
     document.querySelectorAll('.diary-day').forEach(x=>x.classList.toggle('selected',x.dataset.diaryDate===date));
   }
   function bookingRow(j){
