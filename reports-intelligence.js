@@ -18,6 +18,7 @@
     {id:"vhc", category:"Performance", icon:"📋", title:"Vehicle Health Check Performance", description:"VHC completion by technician, retail-job coverage and amber/red work identified."},
     {id:"jobs", category:"Performance", icon:"✅", title:"Jobs Completed", description:"Daily, weekly and monthly jobs including and excluding MOTs."},
     {id:"labour", category:"Performance", icon:"⏱", title:"Completed Labour Hours", description:"Completed sold labour hours by technician and workshop."},
+    {id:"labourMixMonthEnd", category:"Performance", icon:"📊", title:"Month-End Labour Mix", description:"Actual clocked hours and percentage split across Retail, Internal and Warranty work."},
     {id:"productivity", category:"Performance", icon:"⚡", title:"Productivity & Efficiency", description:"Actual clocked productive time, available capacity and sold-hours efficiency."},
     {id:"revenue", category:"Financial", icon:"💷", title:"Revenue Watch", description:"Completed labour value by job type and technician."},
     {id:"lostGainedLabour", category:"Financial", icon:"⚖️", title:"Lost & Gained Labour", description:"Actual productive hours versus labour hours charged, showing hours and income lost or gained with month comparison."},
@@ -1349,6 +1350,41 @@
     });
   }
 
+  function labourMixType(job){
+    const type=String(job.type||job.jobType||"Retail").toLowerCase();
+    return type.includes("warranty")?"Warranty":type.includes("internal")?"Internal":"Retail";
+  }
+  function actualHoursInRange(job,selectedRange){
+    const sessions=Array.isArray(job.techTimeSessions)?job.techTimeSessions:[];
+    if(sessions.length){
+      return sessions.reduce((sum,session)=>{
+        const stamp=session.date||session.end||session.start;
+        return stamp&&inRange(stamp,selectedRange)?sum+safeNumber(session.hours):sum;
+      },0);
+    }
+    return inRange(jobDate(job),selectedRange)?safeNumber(job.actualHours):0;
+  }
+  function renderLabourMixMonthEnd(){
+    const selectedRange=range();
+    const types=["Retail","Internal","Warranty"];
+    const rows=types.map(type=>{
+      const matching=jobs.filter(job=>labourMixType(job)===type);
+      const actual=matching.reduce((sum,job)=>sum+actualHoursInRange(job,selectedRange),0);
+      const jobCount=matching.filter(job=>actualHoursInRange(job,selectedRange)>0).length;
+      const target=type==="Retail"?safeNumber(targets.dailyRetailPct??60):type==="Warranty"?safeNumber(targets.dailyWarrantyPct??30):safeNumber(targets.dailyInternalPct??10);
+      return {type,actual,jobCount,target};
+    });
+    const total=rows.reduce((sum,row)=>sum+row.actual,0);
+    rows.forEach(row=>{row.pct=total>0?row.actual/total*100:0;row.variance=row.pct-row.target;});
+    const leading=rows.slice().sort((a,b)=>b.actual-a.actual)[0];
+    setOutput({
+      title:`Month-End Labour Mix — ${selectedRange.label}`,
+      summary:rows.map(row=>reportCard(row.type,percent(row.pct),hours(row.actual),row.pct>row.target+0.5?"warn":"good")).join("")+reportCard("Total Actual Hours",hours(total),"Clocked productive time"),
+      insightHtml:insight("Monthly work-type balance",total?`${leading.type} represented the largest share at ${percent(leading.pct)} (${hours(leading.actual)}). The report uses actual technician time clocked during the selected month, including sessions on jobs that span more than one month.`:"No clocked hours recorded",""),
+      output:`<div class="repeat-report-section"><h3>Actual Hours by Work Type</h3><p class="muted">The percentage column shows each work type’s share of all productive hours clocked in the selected month.</p>${table(["Work Type","Jobs Worked On","Actual Hours","Percentage of Total","Target Mix","Variance to Target"],rows.map(row=>`<tr><td><strong>${row.type}</strong></td><td>${row.jobCount}</td><td>${hours(row.actual)}</td><td><strong>${percent(row.pct)}</strong></td><td>${percent(row.target)}</td><td>${row.variance>=0?"+":""}${row.variance.toFixed(1)} pts</td></tr>`).concat(`<tr><td><strong>Total</strong></td><td>${rows.reduce((sum,row)=>sum+row.jobCount,0)}</td><td><strong>${hours(total)}</strong></td><td><strong>${total>0?"100%":"0%"}</strong></td><td>100%</td><td>—</td></tr>`))}</div>`
+    });
+  }
+
   function renderActiveReport(){
     const renderers={
       workshop:renderWorkshopPerformance,
@@ -1357,6 +1393,7 @@
       vhc:renderVHCReport,
       jobs:renderJobsCompleted,
       labour:renderLabour,
+      labourMixMonthEnd:renderLabourMixMonthEnd,
       productivity:renderProductivity,
       downtime:renderDowntime,
       parts:renderParts,
